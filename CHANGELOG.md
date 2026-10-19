@@ -7,19 +7,23 @@ documented in this file.
 
 ### Added
 
-- Initial Django project structure
-- `core` application
-- `TimestampMixin`
-- `SingleRecordMixin`
-- `Specialty` model
-- `CompanySettings` model
-- `SystemSettings` model
-- HEX color validator
-- Phone number validator
-- Calendar period settings
-- Workday settings
-- Inspection warning settings
-- Inspection automation settings
+- Added reusable `CompanyMixin`.
+- Added reusable `PkShortNameSlugMixin`.
+- Added the `customers` application.
+- Added the `Customer` model.
+- Added the `CustomerSite` model.
+- Added the `CustomerContact` model.
+- Added automatic slug generation from primary key and short name.
+- Added customer-to-site and site-to-contact relationships.
+- Added validation for one active primary contact per customer site.
+- Added validation preventing inactive contacts from being primary.
+- protected deletion for customers and customer sites.
+
+### Changed
+
+- Moved shared company fields into `CompanyMixin`.
+- Renamed `base_models.py` to `model_mixins.py`.
+- Extended `CompanySettings` with shared company fields.
 
 ### Project decisions
 

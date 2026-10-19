@@ -23,11 +23,26 @@ The project is currently in an early development stage.
 - Workday configuration
 - Inspection warning settings
 - Inspection automation settings
+- Reusable company and slug model mixins
+- `customers` application
+- `Customer` model
+- `CustomerSite` model
+- `CustomerContact` model
+- Automatic slug generation from primary key and short name
+- Customer site and contact relationships
+- Primary customer contact validation
+- Protected customer and site relationships
 
-## Planned applications
+
+## Applications
+
+### Implemented
 
 - `core`
 - `customers`
+
+### Planned
+
 - `equipment`
 - `employees`
 - `inspections`

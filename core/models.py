@@ -1,12 +1,11 @@
 from django.core.exceptions import ValidationError
 from django.db import models
-from .base_models import TimestampMixin, SingleRecordMixin
+from .model_mixins import TimestampMixin, SingleRecordMixin, CompanyMixin
 from django.utils.translation import gettext_lazy as translate
-from .validators import hex_color_validator, phone_validator
+from .validators import hex_color_validator
 from datetime import time
 
 class Specialty(TimestampMixin):
-
     code = models.CharField(
         max_length = 20,
         unique=True,
@@ -56,38 +55,7 @@ class Specialty(TimestampMixin):
         verbose_name = translate("Speciality")
         verbose_name_plural = translate("Specialities")
 
-class CompanySettings(TimestampMixin, SingleRecordMixin):
-    company_name = models.CharField(
-        max_length = 100,
-        verbose_name = translate('Company name'),
-    )
-    short_name = models.CharField(
-        max_length = 50,
-        blank = True,
-        verbose_name = translate('Short name'),
-    )
-    city = models.CharField(
-        max_length = 50,
-        blank = True,
-        verbose_name = translate('City'),
-    )
-    country = models.CharField(
-        max_length = 50,
-        blank = True,
-        default = "Bulgaria",
-        verbose_name = translate('Country'),
-    )
-    phone = models.CharField(
-        max_length = 30,
-        blank = True,
-        validators = [phone_validator],
-        verbose_name = translate("Phone"),
-    )
-    email = models.EmailField(
-        blank = True,
-        verbose_name = translate('Email')
-    )
-
+class CompanySettings(CompanyMixin, TimestampMixin, SingleRecordMixin):
     def __str__(self):
         return self.company_name
 
