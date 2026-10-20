@@ -34,7 +34,16 @@ documented in this file.
 - Added atomic equipment status changes.
 - Added chronological equipment status history.
 - Added validation preventing zero inspection intervals and durations.
-
+- Added the `employees` application.
+- Added the `Employee` model.
+- Added the `EmployeeHistory` model.
+- Added Unicode employee slug generation from primary key and full name.
+- Added normalization of employee names and contact data.
+- Added the many-to-many relationship between employees and specialties.
+- Added chronological employee history.
+- Added employee activation and deactivation support.
+- Added protected deletion for employees with history.
+- Added duplicate specialty relationship prevention.
 ### Changed
 
 - Moved shared company fields into `CompanyMixin`.
@@ -44,7 +53,8 @@ documented in this file.
 - Generalized automatic slug generation for different model types.
 - Equipment active state is now managed automatically from its status.
 - The `DECOMMISSIONED` status also covers scrapped equipment.
-
+- Employee data is normalized before model field validation.
+- Employee specialties are managed through a direct many-to-many relationship.
 ### Project decisions
 
 - Django Admin will not be used as the main application interface.
