@@ -32,6 +32,18 @@ The project is currently in an early development stage.
 - Customer site and contact relationships
 - Primary customer contact validation
 - Protected customer and site relationships
+- `equipment` application
+- `EquipmentType` model
+- `Equipment` model
+- `EquipmentStatusHistory` model
+- Equipment classification by specialty
+- Individual inspection intervals and estimated durations
+- Automatic equipment identifier normalization
+- Automatic equipment slug generation
+- Equipment lifecycle statuses
+- Automatic active-state management
+- Atomic equipment status changes
+- Equipment status history
 
 
 ## Applications
@@ -40,13 +52,24 @@ The project is currently in an early development stage.
 
 - `core`
 - `customers`
+- `equipment`
 
 ### Planned
 
-- `equipment`
 - `employees`
 - `inspections`
 
+## Current data structure
+
+```text
+Customer
+└── CustomerSite
+    ├── CustomerContact
+    └── Equipment
+        ├── EquipmentType
+        │   └── Specialty
+        └── EquipmentStatusHistory
+```
 ## Development approach
 
 The project will initially use simple Django forms, views, URLs, and

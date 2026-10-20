@@ -77,7 +77,7 @@ class CompanyMixin(models.Model):
         abstract = True
 
 
-class PkShortNameSlugMixin(models.Model):
+class AutoSlugMixin(models.Model):
     slug = models.SlugField(
         max_length=150,
         unique=True,

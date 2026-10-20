@@ -1,11 +1,11 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as translate
-from core.model_mixins import CompanyMixin, TimestampMixin, PkShortNameSlugMixin
+from core.model_mixins import CompanyMixin, TimestampMixin, AutoSlugMixin
 from django.core.exceptions import ValidationError
 from core.validators import phone_validator
 
 
-class Customer(PkShortNameSlugMixin, CompanyMixin, TimestampMixin):
+class Customer(AutoSlugMixin, CompanyMixin, TimestampMixin):
     is_active = models.BooleanField(
         default=True,
         verbose_name=translate("Active")
@@ -19,7 +19,7 @@ class Customer(PkShortNameSlugMixin, CompanyMixin, TimestampMixin):
         verbose_name = translate("Customer")
         verbose_name_plural = translate("Customers")
 
-class CustomerSite(PkShortNameSlugMixin, TimestampMixin):
+class CustomerSite(AutoSlugMixin, TimestampMixin):
     customer=models.ForeignKey(
         'Customer',
         on_delete=models.PROTECT,
