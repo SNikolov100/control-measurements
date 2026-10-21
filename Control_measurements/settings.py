@@ -44,6 +44,7 @@ PROJECT_APPS = [
     'customers',
     'equipment',
     'employees',
+    'inspections',
 ]
 
 INSTALLED_APPS = [

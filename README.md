@@ -17,9 +17,6 @@ business rules, and relationships between the main project entities.
 - `customers`
 - `equipment`
 - `employees`
-
-### Planned applications
-
 - `inspections`
 
 ## Application details
@@ -169,20 +166,75 @@ Employee
 </details>
 
 <details>
+<summary><strong>inspections application</strong></summary>
+
+The `inspections` application manages equipment activities, assigned
+employees, scheduling, results, cancellation, and equipment status
+changes.
+
+### Models
+
+- `Inspection`
+
+### Inspection types
+
+- Calibration
+- Periodic inspection
+- Extraordinary inspection
+- Repair
+- Reinspection after repair
+
+### Relationships
+
+```text
+Equipment
+`-- many Inspections
+    |-- many assigned Employees
+    `-- optional CustomerContact
+```
+
+### Implemented functionality
+
+- Multiple employees per activity
+- Employee activity and specialty validation before starting
+- Prevention of simultaneous active activities for one equipment item
+- Planned, actual, and due dates
+- Estimated activity duration
+- Controlled inspection status transitions
+- Automatic start and end timestamps
+- Passed and failed inspection results
+- Separate repair workflow without an inspection result
+- Automatic equipment status synchronization
+- Successful inspections return equipment to service
+- Failed inspections move equipment to repair
+- Completed repairs move equipment to reinspection
+- Required cancellation reason
+- Cancellation behavior based on activity type and current status
+- Atomic start, completion, and cancellation operations
+</details>
+
+
+<details>
 <summary><strong>Current data structure</strong></summary>
 
 ```text
-Specialty
-|-- EquipmentType
-|   `-- Equipment
-|       `-- EquipmentStatusHistory
-`-- Employee
-    `-- EmployeeHistory
-
 Customer
 `-- CustomerSite
     |-- CustomerContact
     `-- Equipment
+        |-- EquipmentStatusHistory
+        `-- Inspection
+            `-- many Employees
+
+Specialty
+|-- many EquipmentTypes
+`-- many Employees
+
+EquipmentType
+`-- many Equipment items
+
+Employee
+`-- many EmployeeHistory records
 ```
 
 </details>
