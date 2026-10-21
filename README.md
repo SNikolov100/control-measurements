@@ -45,6 +45,14 @@ reusable model mixins, and common validators.
 - HEX color validator
 - Phone number validator
 
+### Functional interface
+
+- Specialty list
+- Specialty creation
+- Specialty editing
+- Specialty deletion
+- Protected deletion for specialties currently in use
+
 ### System settings
 
 - Default calendar period

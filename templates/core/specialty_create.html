@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create specialty</title>
+</head>
+<body>
+    <h1>Create specialty</h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">Save</button>
+    </form>
+
+    <p>
+        <a href={% url 'core:specialty-list' %}>
+            Back to specialties
+        </a>
+    </p>
+</body>
+</html>

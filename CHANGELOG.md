@@ -61,6 +61,11 @@ documented in this file.
 - Added automatic synchronization between inspections and equipment
   statuses.
 - Added mandatory cancellation reasons.
+- Added the first functional CRUD interface for specialties.
+- Added specialty list, create, edit, and delete views.
+- Added simple templates for validating rendered specialty data.
+- Added protected specialty deletion with related-record information.
+- Added user-friendly deletion error messages.
 
 ### Changed
 
@@ -79,6 +84,8 @@ documented in this file.
 - Cancelled active repairs move equipment to temporarily suspended.
 - Cancelled active reinspections return equipment to waiting for
   reinspection.
+- Specialty deletion now prevents removal of specialties used by
+  equipment types or employees.
 
 ### Project decisions
 
