@@ -1,20 +1,31 @@
 from django import forms
-from .models import Specialty
+from .models import Specialty, CompanySettings, SystemSettings
 
-class SpecialtyForm(forms.ModelForm):
+class SpecialtyBaseForm(forms.ModelForm):
     class Meta:
         model = Specialty
         fields = "__all__"
 
-class SpecialtyCreateForm(SpecialtyForm):
+class SpecialtyCreateForm(SpecialtyBaseForm):
     ...
 
-class SpecialtyEditForm(SpecialtyForm):
+class SpecialtyEditForm(SpecialtyBaseForm):
     ...
 
-class SpecialtyDeleteForm(SpecialtyForm):
+class SpecialtyDeleteForm(SpecialtyBaseForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         for field in self.fields.values():
             field.disabled = True
+
+class CompanySettingsForm(forms.ModelForm):
+    class Meta:
+        model = CompanySettings
+        fields = "__all__"
+
+
+class SystemSettingsForm(forms.ModelForm):
+    class Meta:
+        model = SystemSettings
+        fields = "__all__"

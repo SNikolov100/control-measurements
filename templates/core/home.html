@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Home | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Home</h2>
+
+    <p>
+        Welcome to the Control Measurements application.
+    </p>
+
+    <section>
+        <h3>Main sections</h3>
+
+        <ul>
+            <li>Calendar</li>
+            <li>Activities</li>
+            <li>Equipment</li>
+            <li>Customers</li>
+            <li>Employees</li>
+            <li>Reports</li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>Quick actions</h3>
+
+        <ul>
+            <li>New activity</li>
+            <li>New equipment</li>
+            <li>New customer</li>
+            <li>New employee</li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>Settings</h3>
+
+        <ul>
+            <li>
+                <a href= "{% url 'core:specialty-list' %}" >
+                    Manage specialties
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'core:company-settings' %}">
+                    Company settings
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'core:system-settings' %}">
+                    System settings
+                </a>
+            </li>
+        </ul>
+    </section>
+{% endblock %}

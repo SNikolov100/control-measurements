@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <title>
+        {% block title %}
+            Control Measurements
+        {% endblock %}
+    </title>
+</head>
+
+<body>
+    <header>
+        <h1>
+            <a href= "{% url 'core:home' %}" >
+                Control Measurements
+            </a>
+        </h1>
+
+        <nav>
+            <ul>
+                <li>
+                    <a href= "{% url 'core:home' %}" >
+                        Home
+                    </a>
+                </li>
+
+                <li>
+                    Calendar
+                </li>
+
+                <li>
+                    Activities
+                </li>
+
+                <li>
+                    <details>
+                        <summary>Equipment</summary>
+                        <ul>
+                            <li>
+                                <a href="{% url 'equipment:types-list' %}">
+                                    Equipment types
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{% url 'equipment:list' %}">
+                                    Equipment registry
+                                </a>
+                            </li>
+                        </ul>
+                    </details>
+                </li>
+
+                <li>
+                    <a href="{% url 'customers:list' %}">
+                        Customers
+                    </a>
+                </li>
+
+                <li>
+                    Employees
+                </li>
+
+                <li>
+                    Reports
+                </li>
+
+                <li>
+                    <details>
+                        <summary>Settings</summary>
+                        <ul>
+                            <li>
+                                <a href="{% url 'core:company-settings' %}">
+                                    Company settings
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'core:system-settings' %}">
+                                    System settings
+                                </a>
+                            </li>
+                            <li>
+                                <a href= "{% url 'core:specialty-list' %}" >
+                                    Specialties
+                                </a>
+                            </li>
+                        </ul>
+                    </details>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <hr>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>

@@ -2,10 +2,16 @@ from django.db.models import ProtectedError
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, UpdateView, DeleteView
-from .forms import SpecialtyCreateForm, SpecialtyEditForm, SpecialtyDeleteForm
+from django.views.generic import CreateView, UpdateView, DeleteView, FormView
+from .forms import (SpecialtyCreateForm, SpecialtyEditForm,
+                    SpecialtyDeleteForm, CompanySettingsForm,
+                    SystemSettingsForm)
 
-from .models import Specialty
+from .models import Specialty, CompanySettings, SystemSettings
+from .view_mixins import SingleRecordFormViewMixin
+
+def home(request: HttpRequest) -> HttpResponse:
+    return render(request,"core/home.html")
 
 def specialty_list(request: HttpRequest) ->HttpResponse:
     specialties = Specialty.objects.all()
@@ -56,3 +62,15 @@ class SpecialtyDeleteView(DeleteView):
             context["deletion_error"] = "This specialty cannot be deleted because protected related records exist."
             context["deletion_blocked"] = True
             return self.render_to_response(context)
+
+class CompanySettingsView(SingleRecordFormViewMixin, FormView):
+    model = CompanySettings
+    form_class = CompanySettingsForm
+    template_name = 'core/company_settings.html'
+    success_url = reverse_lazy('core:home')
+
+class SystemSettingsView(SingleRecordFormViewMixin, FormView):
+    model = SystemSettings
+    form_class = SystemSettingsForm
+    template_name = 'core/system_settings.html'
+    success_url = reverse_lazy('core:home')

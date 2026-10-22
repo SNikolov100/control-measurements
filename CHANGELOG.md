@@ -66,6 +66,20 @@ documented in this file.
 - Added simple templates for validating rendered specialty data.
 - Added protected specialty deletion with related-record information.
 - Added user-friendly deletion error messages.
+- Added the first shared `base.html` template.
+- Added the initial Home page and application navigation.
+- Added functional interfaces for company and system settings.
+- Added reusable single-record form view behavior for settings.
+- Added CRUD interfaces for equipment types.
+- Added equipment registry, creation, editing, and detail views.
+- Added automatic equipment defaults from the selected equipment type.
+- Added automatic initial equipment status history on registration.
+- Added equipment status change form and view.
+- Added equipment status history to the equipment detail page.
+- Added customer list, creation, editing, and detail views.
+- Added nested customer site creation, editing, and detail views.
+- Added customer site validation through nested customer URLs.
+- Added customer site equipment and contact sections.
 
 ### Changed
 
@@ -86,6 +100,13 @@ documented in this file.
   reinspection.
 - Specialty deletion now prevents removal of specialties used by
   equipment types or employees.
+- Existing specialty templates now inherit from the shared base template.
+- Company and system settings now use a shared single-record form view mixin.
+- Equipment status changes are performed through the model status method
+  instead of direct field editing.
+- Customer sites are now created and edited in the context of their parent
+  customer.
+- Customer site URLs now validate the customer-to-site relationship.
 
 ### Project decisions
 
@@ -95,3 +116,11 @@ documented in this file.
 - Simple templates will first be used to verify rendered data.
 - The final HTML and CSS design will be implemented after the main
   functionality is complete.
+- The calendar will be implemented after the main functional interfaces are
+  complete.
+- Repeated view logic will be reviewed and refactored into reusable mixins
+  after the functional workflows are complete.
+- Required fields, help text, widgets, and final form styling will be added
+  during the final interface design stage.
+- Phone number validation will be reviewed to prevent excessively long
+  numbers.

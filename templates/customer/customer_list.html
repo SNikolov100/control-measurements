@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Customers | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Customers</h2>
+
+    <p>
+        <a href="{% url 'customers:create' %}">
+            Add customer
+        </a>
+    </p>
+
+    {% if customers %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Company name</th>
+                    <th>Short name</th>
+                    <th>City</th>
+                    <th>Country</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Active</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for customer in customers %}
+                    <tr>
+                        <td>{{ customer.company_name }}</td>
+
+                        <td>{{ customer.short_name }}</td>
+
+                        <td>
+                            {% if customer.city %}
+                                {{ customer.city }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if customer.country %}
+                                {{ customer.country }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if customer.phone %}
+                                {{ customer.phone }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if customer.email %}
+                                {{ customer.email }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if customer.is_active %}
+                                Yes
+                            {% else %}
+                                No
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a href="{% url 'customers:details' customer.pk %}">
+                                Details
+                            </a>
+                            |
+                            <a href="{% url 'customers:edit' customer.pk %}">
+                                Edit
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No customers have been created.</p>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}
+    System settings | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>System settings</h2>
+
+    <p>
+        Configure the default calendar, workday, notification,
+        and inspection automation settings.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Save system settings
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'core:home' %}">
+            Back to home
+        </a>
+    </p>
+{% endblock %}

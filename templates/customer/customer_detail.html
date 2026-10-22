@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Customer details | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Customer details</h2>
+
+    <h3>{{ customer.company_name }}</h3>
+
+    <section>
+        <h4>Company information</h4>
+
+        <dl>
+            <dt><strong>Company name</strong></dt>
+            <dd>{{ customer.company_name }}</dd>
+
+            <dt><strong>Short name</strong></dt>
+            <dd>{{ customer.short_name }}</dd>
+
+            <dt><strong>City</strong></dt>
+            <dd>
+                {% if customer.city %}
+                    {{ customer.city }}
+                {% else %}
+                    -
+                {% endif %}
+            </dd>
+
+            <dt><strong>Country</strong></dt>
+            <dd>
+                {% if customer.country %}
+                    {{ customer.country }}
+                {% else %}
+                    -
+                {% endif %}
+            </dd>
+
+            <dt><strong>Address</strong></dt>
+            <dd>
+                {% if customer.address %}
+                    {{ customer.address }}
+                {% else %}
+                    -
+                {% endif %}
+            </dd>
+
+            <dt><strong>Phone</strong></dt>
+            <dd>
+                {% if customer.phone %}
+                    {{ customer.phone }}
+                {% else %}
+                    -
+                {% endif %}
+            </dd>
+
+            <dt><strong>Email</strong></dt>
+            <dd>
+                {% if customer.email %}
+                    {{ customer.email }}
+                {% else %}
+                    -
+                {% endif %}
+            </dd>
+
+            <dt><strong>Active</strong></dt>
+            <dd>
+                {% if customer.is_active %}
+                    Yes
+                {% else %}
+                    No
+                {% endif %}
+            </dd>
+
+            <dt><strong>Slug</strong></dt>
+            <dd>{{ customer.slug }}</dd>
+        </dl>
+    </section>
+
+    <section>
+        <h4>Notes</h4>
+
+        {% if customer.notes %}
+            <p>{{ customer.notes|linebreaksbr }}</p>
+        {% else %}
+            <p>No notes.</p>
+        {% endif %}
+    </section>
+
+    <section>
+        <p>
+            <a href="{% url 'customers:site-create' customer.pk %}">
+                Add customer site
+            </a>
+        </p>
+
+        {% if customer.sites.all %}
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>City</th>
+                        <th>Address</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for site in customer.sites.all %}
+                        <tr>
+                            <td>{{ site.name }}</td>
+
+                            <td>
+                                {% if site.city %}
+                                    {{ site.city }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if site.address %}
+                                    {{ site.address }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if site.is_active %}
+                                    Yes
+                                {% else %}
+                                    No
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <a href="{% url 'customers:site-details' customer.pk site.pk %}">
+                                    Details
+                                </a>
+                                |
+                                <a href="{% url 'customers:site-edit' customer.pk site.pk %}">
+                                    Edit
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>This customer has no registered sites.</p>
+        {% endif %}
+    </section>
+
+    <p>
+        <a href="{% url 'customers:edit' customer.pk %}">
+            Edit customer
+        </a>
+    </p>
+
+    <p>
+        <a href="{% url 'customers:list' %}">
+            Back to customers
+        </a>
+    </p>
+{% endblock %}

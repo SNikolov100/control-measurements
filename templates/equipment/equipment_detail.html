@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Equipment details | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Equipment details</h2>
+
+    <h3>
+        {{ equipment.equipment_type.short_name }}
+        -
+        {{ equipment.serial_number }}
+    </h3>
+
+    <section>
+        <h4>General information</h4>
+
+        <dl>
+            <dt><strong>Equipment type</strong></dt>
+            <dd>{{ equipment.equipment_type.name }}</dd>
+
+            <dt><strong>Specialty</strong></dt>
+            <dd>{{ equipment.equipment_type.specialty.name }}</dd>
+
+            <dt><strong>Model</strong></dt>
+            <dd>
+                {% if equipment.model_name %}
+                    {{ equipment.model_name }}
+                {% else %}
+                    -
+                {% endif %}
+            </dd>
+
+            <dt><strong>Serial number</strong></dt>
+            <dd>{{ equipment.serial_number }}</dd>
+
+            <dt><strong>Inventory number</strong></dt>
+            <dd>
+                {% if equipment.inventory_number %}
+                    {{ equipment.inventory_number }}
+                {% else %}
+                    -
+                {% endif %}
+            </dd>
+        </dl>
+    </section>
+
+    <section>
+        <h4>Customer information</h4>
+
+        <dl>
+            <dt><strong>Customer</strong></dt>
+            <dd>{{ equipment.customer_site.customer.company_name }}</dd>
+
+            <dt><strong>Customer site</strong></dt>
+            <dd>{{ equipment.customer_site.name }}</dd>
+        </dl>
+    </section>
+
+    <section>
+        <h4>Inspection settings</h4>
+
+        <dl>
+            <dt><strong>Inspection interval</strong></dt>
+            <dd>
+                {{ equipment.inspection_interval_value }}
+                {{ equipment.get_inspection_interval_unit_display }}
+            </dd>
+
+            <dt><strong>Estimated duration</strong></dt>
+            <dd>
+                {{ equipment.estimated_inspection_duration }}
+                minutes
+            </dd>
+        </dl>
+    </section>
+
+    <section>
+        <h4>Current state</h4>
+
+        <dl>
+            <dt><strong>Status</strong></dt>
+            <dd>{{ equipment.get_status_display }}</dd>
+
+            <dt><strong>Active</strong></dt>
+            <dd>
+                {% if equipment.is_active %}
+                    Yes
+                {% else %}
+                    No
+                {% endif %}
+            </dd>
+
+            <dt><strong>Slug</strong></dt>
+            <dd>{{ equipment.slug }}</dd>
+        </dl>
+    </section>
+
+    <section>
+        <h4>Notes</h4>
+
+        {% if equipment.notes %}
+            <p>{{ equipment.notes|linebreaksbr }}</p>
+        {% else %}
+            <p>No notes.</p>
+        {% endif %}
+    </section>
+
+    <section>
+        <h4>Status history</h4>
+
+        {% if equipment.status_history.all %}
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Changed at</th>
+                        <th>Previous status</th>
+                        <th>New status</th>
+                        <th>Reason</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for history in equipment.status_history.all %}
+                        <tr>
+                            <td>{{ history.changed_at }}</td>
+
+                            <td>
+                                {% if history.previous_status %}
+                                    {{ history.get_previous_status_display }}
+                                {% else %}
+                                    Initial registration
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ history.get_new_status_display }}
+                            </td>
+
+                            <td>
+                                {% if history.reason %}
+                                    {{ history.reason }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if history.notes %}
+                                    {{ history.notes }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No status history is available.</p>
+        {% endif %}
+    </section>
+    <p>
+        <a href="{% url 'equipment:status' equipment.pk %}">
+            Change status
+        </a>
+    </p>
+    <p>
+        <a href="{% url 'equipment:edit' equipment.pk %}">
+            Edit equipment
+        </a>
+    </p>
+
+    <p>
+        <a href="{% url 'equipment:list' %}">
+            Back to equipment registry
+        </a>
+    </p>
+{% endblock %}

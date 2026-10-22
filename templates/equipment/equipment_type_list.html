@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Equipment types | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Equipment types</h2>
+
+    <p>
+        <a href="{% url 'equipment:type-create' %}">
+            Add equipment type
+        </a>
+    </p>
+
+    {% if equipment_types %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Short name</th>
+                    <th>Specialty</th>
+                    <th>Default interval</th>
+                    <th>Default duration</th>
+                    <th>Active</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for equipment_type in equipment_types %}
+                    <tr>
+                        <td>{{ equipment_type.name }}</td>
+
+                        <td>{{ equipment_type.short_name }}</td>
+
+                        <td>
+                            {{ equipment_type.specialty.name }}
+                        </td>
+
+                        <td>
+                            {{ equipment_type.default_interval_value }}
+                            {{ equipment_type.get_default_interval_unit_display }}
+                        </td>
+
+                        <td>
+                            {{ equipment_type.default_inspection_duration }}
+                            minutes
+                        </td>
+
+                        <td>
+                            {% if equipment_type.is_active %}
+                                Yes
+                            {% else %}
+                                No
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a href="{% url 'equipment:type-edit' equipment_type.pk %}">
+                                Edit
+                            </a>
+                            |
+                            <a href="{% url 'equipment:type-delete' equipment_type.pk %}">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No equipment types have been created.</p>
+    {% endif %}
+{% endblock %}

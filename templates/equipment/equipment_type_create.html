@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Create equipment type | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Create equipment type</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Save equipment type
+        </button>
+    </form>
+
+    <p>
+        {<a href="{% url 'equipment:types-list' %}">
+            Back to equipment types
+        </a>
+    </p>
+{% endblock %}

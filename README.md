@@ -8,8 +8,10 @@ and upcoming control measurements.
 
 The project is currently in active development.
 
-The current development stage focuses on data models, validation,
-business rules, and relationships between the main project entities.
+The project has entered the functional interface development stage.
+Simple templates are currently used to verify forms, navigation,
+relationships, validation, and business workflows before the final
+HTML and CSS design is applied.
 
 ### Implemented applications
 
@@ -47,11 +49,14 @@ reusable model mixins, and common validators.
 
 ### Functional interface
 
-- Specialty list
-- Specialty creation
-- Specialty editing
 - Specialty deletion
 - Protected deletion for specialties currently in use
+- Shared base template
+- Initial Home page
+- Main application navigation
+- Company settings form
+- System settings form
+- Specialty list, creation, editing, and protected deletion
 
 ### System settings
 
@@ -96,6 +101,17 @@ Customer
 - Protected deletion of customers and customer sites
 - Phone and email validation
 
+### Functional interface
+
+- Customer list
+- Customer creation
+- Customer editing
+- Customer detail page
+- Nested customer site creation
+- Nested customer site editing
+- Customer site detail page
+- Customer-to-site URL relationship validation
+- Customer site sections for contacts and equipment
 </details>
 
 <details>
@@ -138,6 +154,18 @@ CustomerSite
 - Chronological equipment status history
 - Protected equipment relationships
 
+### Functional interface
+
+- Equipment type list
+- Equipment type creation and editing
+- Protected equipment type deletion
+- Equipment registry
+- Equipment creation and editing
+- Equipment detail page
+- Automatic default interval and duration values
+- Automatic initial equipment history
+- Controlled equipment status changes
+- Equipment status history display
 </details>
 
 <details>
@@ -266,6 +294,15 @@ Django Admin is not used as the primary application interface.
 
 The first version of the application is intended for a single user.
 User profiles, roles, and permissions are planned for a later stage.
+
+The current templates are intentionally simple. Their purpose is to
+validate the complete functional workflows before reusable components,
+required-field indicators, responsive layouts, and the final visual
+design are introduced.
+
+Repeated view logic will be reviewed after the functional screens are
+complete and, where appropriate, moved into reusable mixins or base
+view classes.
 
 ## Installation
 

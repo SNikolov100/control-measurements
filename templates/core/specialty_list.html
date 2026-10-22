@@ -1,11 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Specialties</title>
-</head>
-<body>
-    <h1>Specialties</h1>
+{% extends "base.html" %}
+
+{% block title %}
+    Specialties | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Specialties</h2>
+
+    <p>
+        <a href="{% url 'core:specialty-create' %}">
+            Add specialty
+        </a>
+    </p>
 
     {% if specialties %}
         <table border="1">
@@ -15,11 +21,9 @@
                     <th>Name</th>
                     <th>Short name</th>
                     <th>Color</th>
-                    <th>Order</th>
+                    <th>Sort order</th>
                     <th>Active</th>
                     <th>Actions</th>
-                    <th>Actions</th>
-
                 </tr>
             </thead>
 
@@ -29,16 +33,40 @@
                         <td>{{ specialty.code }}</td>
                         <td>{{ specialty.name }}</td>
                         <td>{{ specialty.short_name }}</td>
-                        <td>{{ specialty.color }}</td>
-                        <td>{{ specialty.sort_order }}</td>
-                        <td>{{ specialty.is_active }}</td>
+
                         <td>
-                            <a href={% url 'core:specialty-edit' specialty.pk %}>
+                            <span
+                                style="
+                                    display: inline-block;
+                                    width: 16px;
+                                    height: 16px;
+                                    background-color: {{ specialty.color }};
+                                    border: 1px solid #666;
+                                    vertical-align: middle;
+                                "
+                            ></span>
+
+                            {{ specialty.color }}
+                        </td>
+
+                        <td>{{ specialty.sort_order }}</td>
+
+                        <td>
+                            {% if specialty.is_active %}
+                                Yes
+                            {% else %}
+                                No
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a href="{% url 'core:specialty-edit' specialty.pk %}">
                                 Edit
                             </a>
-                        </td>
-                        <td>
-                            <a href={% url 'core:specialty-delete' specialty.pk %} >
+
+                            |
+
+                            <a href="{% url 'core:specialty-delete' specialty.pk %}">
                                 Delete
                             </a>
                         </td>
@@ -49,5 +77,4 @@
     {% else %}
         <p>No specialties have been created.</p>
     {% endif %}
-</body>
-</html>
+{% endblock %}

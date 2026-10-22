@@ -5,6 +5,11 @@ from . import views
 app_name = 'core'
 
 urlpatterns = [
+    path('', views.home, name='home'),
+    path('settings/', include([
+        path('company/', views.CompanySettingsView.as_view(), name='company-settings'),
+        path('system/', views.SystemSettingsView.as_view(), name='system-settings'),
+    ])),
     path('specialties/', include([
         path('', views.specialty_list, name='specialty-list'),
         path('create/', views.SpecialtyCreateView.as_view(), name='specialty-create'),

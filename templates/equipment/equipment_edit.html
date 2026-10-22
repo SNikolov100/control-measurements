@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Edit equipment | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Edit equipment</h2>
+
+    <p>
+        {{ equipment.equipment_type.short_name }}
+        -
+        {{ equipment.serial_number }}
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Save changes
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'equipment:list' %}">
+            Back to equipment registry
+        </a>
+    </p>
+{% endblock %}

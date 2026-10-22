@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Add equipment | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Add equipment</h2>
+
+    <p>
+        Select the customer site and equipment type, then enter the
+        identifiers and individual inspection settings.
+    </p>
+
+    <p>
+        If the inspection interval or duration is left empty, the
+        defaults from the selected equipment type will be used.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Save equipment
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'equipment:list' %}">
+            Back to equipment registry
+        </a>
+    </p>
+{% endblock %}

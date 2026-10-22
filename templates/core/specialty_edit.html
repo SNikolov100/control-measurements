@@ -1,24 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Edit specialty</title>
-</head>
-<body>
-    <h1>Edit specialty</h1>
+{% extends "base.html" %}
+
+{% block title %}
+    Edit specialty | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Edit specialty</h2>
 
     <form method="post">
         {% csrf_token %}
 
         {{ form.as_p }}
 
-        <button type="submit">Save changes</button>
+        <button type="submit">
+            Save changes
+        </button>
     </form>
 
     <p>
-        <a href={% url 'core:specialty-list' %}>
+        <a href="{% url 'core:specialty-list' %}" >
             Back to specialties
         </a>
     </p>
-</body>
-</html>
+{% endblock %}

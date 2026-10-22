@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Add customer site | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Add customer site</h2>
+
+    <p>
+        Customer:
+        <strong>{{ customer.company_name }}</strong>
+    </p>
+
+    <p>
+        Enter the information for the new customer site.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Save customer site
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'customers:details' customer.pk %}">
+            Cancel and return to customer details
+        </a>
+    </p>
+{% endblock %}

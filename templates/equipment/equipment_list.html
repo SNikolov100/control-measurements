@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Equipment | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Equipment registry</h2>
+
+    <p>
+        <a href="{% url 'equipment:create' %}">
+            Add equipment
+        </a>
+    </p>
+
+    {% if equipment_items %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Equipment</th>
+                    <th>Customer</th>
+                    <th>Customer site</th>
+                    <th>Specialty</th>
+                    <th>Model</th>
+                    <th>Serial number</th>
+                    <th>Inventory number</th>
+                    <th>Inspection interval</th>
+                    <th>Status</th>
+                    <th>Active</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for equipment in equipment_items %}
+                    <tr>
+                        <td>
+                            {{ equipment.equipment_type.name }}
+                        </td>
+
+                        <td>
+                            {{ equipment.customer_site.customer.short_name }}
+                        </td>
+
+                        <td>
+                            {{ equipment.customer_site.name }}
+                        </td>
+
+                        <td>
+                            {{ equipment.equipment_type.specialty.name }}
+                        </td>
+
+                        <td>
+                            {% if equipment.model_name %}
+                                {{ equipment.model_name }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ equipment.serial_number }}
+                        </td>
+
+                        <td>
+                            {% if equipment.inventory_number %}
+                                {{ equipment.inventory_number }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ equipment.inspection_interval_value }}
+                            {{ equipment.get_inspection_interval_unit_display }}
+                        </td>
+
+                        <td>
+                            {{ equipment.get_status_display }}
+                        </td>
+
+                        <td>
+                            {% if equipment.is_active %}
+                                Yes
+                            {% else %}
+                                No
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a href="{% url 'equipment:detail' equipment.pk %}">
+                                Details
+                            </a>
+
+                            |
+
+                            <a href="{% url 'equipment:edit' equipment.pk %}">
+                                Edit
+                            </a>
+
+                            |
+
+                            <a href="{% url 'equipment:status' equipment.pk %}">
+                                Status
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No equipment has been registered.</p>
+    {% endif %}
+{% endblock %}

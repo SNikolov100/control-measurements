@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Edit customer | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Edit customer</h2>
+
+    <h3>{{ customer.company_name }}</h3>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Save changes
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'customers:list' %}">
+            Back to customers
+        </a>
+    </p>
+{% endblock %}

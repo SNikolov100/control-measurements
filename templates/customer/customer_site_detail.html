@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Customer site details | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Customer site details</h2>
+
+    <h3>{{ site.name }}</h3>
+
+    <section>
+        <h4>Customer</h4>
+
+        <dl>
+            <dt><strong>Company</strong></dt>
+            <dd>{{ customer.company_name }}</dd>
+
+            <dt><strong>Short name</strong></dt>
+            <dd>{{ customer.short_name }}</dd>
+        </dl>
+    </section>
+
+    <section>
+        <h4>Site information</h4>
+
+        <dl>
+            <dt><strong>Name</strong></dt>
+            <dd>{{ site.name }}</dd>
+
+            <dt><strong>Short name</strong></dt>
+            <dd>{{ site.short_name }}</dd>
+
+            <dt><strong>Phone</strong></dt>
+            <dd>
+                {% if site.phone %}
+                    {{ site.phone }}
+                {% else %}
+                    -
+                {% endif %}
+            </dd>
+
+            <dt><strong>Email</strong></dt>
+            <dd>
+                {% if site.email %}
+                    {{ site.email }}
+                {% else %}
+                    -
+                {% endif %}
+            </dd>
+
+            <dt><strong>Active</strong></dt>
+            <dd>
+                {% if site.is_active %}
+                    Yes
+                {% else %}
+                    No
+                {% endif %}
+            </dd>
+        </dl>
+    </section>
+
+    <section>
+        <h4>Notes</h4>
+
+        {% if site.notes %}
+            <p>{{ site.notes|linebreaksbr }}</p>
+        {% else %}
+            <p>No notes.</p>
+        {% endif %}
+    </section>
+
+    <section>
+        <h4>Contacts</h4>
+
+        <p>
+            Add contact
+        </p>
+
+        {% if site.contacts.all %}
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Primary</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for contact in site.contacts.all %}
+                        <tr>
+                            <td>{{ contact.full_name }}</td>
+
+                            <td>
+                                {% if contact.position %}
+                                    {{ contact.position }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if contact.phone %}
+                                    {{ contact.phone }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if contact.email %}
+                                    {{ contact.email }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if contact.is_primary %}
+                                    Yes
+                                {% else %}
+                                    No
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if contact.is_active %}
+                                    Yes
+                                {% else %}
+                                    No
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                Details | Edit
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>This customer site has no contacts.</p>
+        {% endif %}
+    </section>
+
+    <section>
+        <h4>Equipment</h4>
+
+        <p>
+            Add equipment
+        </p>
+
+        {% if site.equipment_items.all %}
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Equipment type</th>
+                        <th>Model</th>
+                        <th>Serial number</th>
+                        <th>Inventory number</th>
+                        <th>Status</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for equipment in site.equipment_items.all %}
+                        <tr>
+                            <td>{{ equipment.equipment_type.name }}</td>
+
+                            <td>
+                                {% if equipment.model_name %}
+                                    {{ equipment.model_name }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>{{ equipment.serial_number }}</td>
+
+                            <td>
+                                {% if equipment.inventory_number %}
+                                    {{ equipment.inventory_number }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>{{ equipment.get_status_display }}</td>
+
+                            <td>
+                                {% if equipment.is_active %}
+                                    Yes
+                                {% else %}
+                                    No
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <a href="{% url 'equipment:details' equipment.pk %}">
+                                    Details
+                                </a>
+
+                                |
+
+                                <a href="{% url 'equipment:edit' equipment.pk %}">
+                                    Edit
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>This customer site has no registered equipment.</p>
+        {% endif %}
+    </section>
+
+    <p>
+        <a href="{% url 'customers:site-edit' customer.pk site.pk %}">
+            Edit customer site
+        </a>
+    </p>
+
+    <p>
+        <a href="{% url 'customers:details' customer.pk %}">
+            Back to customer details
+        </a>
+    </p>
+{% endblock %}
