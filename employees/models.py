@@ -40,6 +40,34 @@ class Employee(AutoSlugMixin, TimestampMixin):
         verbose_name=translate('Active'),
     )
 
+    def activate(self, description=""):
+        if self.is_active:
+            return False
+
+        self.is_active = True
+        self.save(update_fields={"is_active"})
+        EmployeeHistory.objects.create(
+            employee=self,
+            event_type=EmployeeHistory.EventType.ACTIVATED,
+            description=description,
+        )
+
+        return True
+
+    def deactivate(self, description=""):
+        if not self.is_active:
+            return False
+
+        self.is_active = False
+        self.save(update_fields={"is_active"})
+        EmployeeHistory.objects.create(
+            employee=self,
+            event_type=EmployeeHistory.EventType.DEACTIVATED,
+            description=description,
+        )
+
+        return True
+
     def normalize_fields(self):
         if self.full_name:
             self.full_name = " ".join(self.full_name.split()).title()

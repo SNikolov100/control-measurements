@@ -10,7 +10,6 @@ urlpatterns = [
     path('<int:pk>/', include([
         path('edit/', views.EquipmentEditView.as_view(), name='edit'),
         path('detail/', views.EquipmentDetailView.as_view(), name='detail'),
-        path('status/', views.EquipmentStatusChangeView.as_view(), name='status'),
     ])),
     path('types/', include([
         path('', views.EquipmentTypeListView.as_view(), name='types-list'),

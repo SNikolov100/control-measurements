@@ -8,7 +8,6 @@ from .forms import (EquipmentTypeEditForm,
                     EquipmentListForm,
                     EquipmentCreateForm,
                     EquipmentEditForm,
-                    EquipmentStatusChangeForm,
                     )
 from .models import Equipment, EquipmentType, EquipmentStatusHistory
 from django.urls import reverse_lazy, reverse
@@ -120,35 +119,3 @@ class EquipmentDetailView(DeleteView):
                 "status_history",
             )
         )
-
-
-class EquipmentStatusChangeView(FormView):
-    form_class = EquipmentStatusChangeForm
-    template_name = "equipment/equipment_status_change.html"
-
-    def dispatch(self, request, *args, **kwargs):
-        self.equipment = get_object_or_404(Equipment, pk=kwargs["pk"],)
-
-        return super().dispatch(request,*args,**kwargs,)
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["equipment"] = self.equipment
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["equipment"] = self.equipment
-        return context
-
-    def form_valid(self, form):
-        self.equipment.change_status(
-            new_status=form.cleaned_data["new_status"],
-            reason=form.cleaned_data["reason"],
-            notes=form.cleaned_data["notes"],
-        )
-
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse("equipment:detail", kwargs={"pk": self.equipment.pk},)

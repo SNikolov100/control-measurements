@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Cancel activity | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Cancel activity</h2>
+
+    <h3>
+        {{ inspection.equipment.equipment_type.short_name }}
+        -
+        {{ inspection.equipment.serial_number }}
+    </h3>
+
+    {% if form.non_field_errors %}
+        <div>
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <dl>
+        <dt><strong>Activity type</strong></dt>
+        <dd>{{ inspection.get_inspection_type_display }}</dd>
+
+        <dt><strong>Customer</strong></dt>
+        <dd>
+            {{ inspection.equipment.customer_site.customer.company_name }}
+        </dd>
+
+        <dt><strong>Customer site</strong></dt>
+        <dd>{{ inspection.equipment.customer_site.name }}</dd>
+
+        <dt><strong>Current status</strong></dt>
+        <dd>{{ inspection.get_status_display }}</dd>
+
+        <dt><strong>Actual start</strong></dt>
+        <dd>
+            {% if inspection.actual_start %}
+                {{ inspection.actual_start }}
+            {% else %}
+                Not started
+            {% endif %}
+        </dd>
+
+        <dt><strong>Assigned employees</strong></dt>
+        <dd>
+            {% for employee in inspection.assigned_employees.all %}
+                {{ employee.full_name }}
+
+                {% if not forloop.last %}
+                    ,
+                {% endif %}
+            {% empty %}
+                No assigned employees
+            {% endfor %}
+        </dd>
+    </dl>
+
+    <p>
+        Cancelling the activity will preserve the record and the
+        cancellation reason.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Cancel activity
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'inspections:details' inspection.pk %}">
+            Return to activity details without cancelling
+        </a>
+    </p>
+{% endblock %}

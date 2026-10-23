@@ -73,9 +73,9 @@
     <section>
         <h4>Contacts</h4>
 
-        <p>
+        <a href="{% url 'customers:contact-create' customer.pk site.pk %}">
             Add contact
-        </p>
+        </a>
 
         {% if site.contacts.all %}
             <table border="1">
@@ -137,7 +137,17 @@
                             </td>
 
                             <td>
-                                Details | Edit
+                                <a href="{% url 'customers:contact-details' customer.pk site.pk contact.pk %}">
+                                    Details
+                                </a>
+                                |
+                                <a href="{% url 'customers:contact-edit' customer.pk site.pk contact.pk %}">
+                                    Edit
+                                </a>
+                                |
+                                <a href="{% url 'customers:contact-delete' customer.pk site.pk contact.pk %}">
+                                    Delete
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -152,7 +162,9 @@
         <h4>Equipment</h4>
 
         <p>
-            Add equipment
+            <a href="{% url 'customers:site-equipment-create' customer.pk site.pk %}">
+                Add equipment
+            </a>
         </p>
 
         {% if site.equipment_items.all %}
@@ -172,6 +184,7 @@
                 <tbody>
                     {% for equipment in site.equipment_items.all %}
                         <tr>
+
                             <td>{{ equipment.equipment_type.name }}</td>
 
                             <td>
@@ -203,14 +216,16 @@
                             </td>
 
                             <td>
-                                <a href="{% url 'equipment:details' equipment.pk %}">
+                                <a href="{% url 'equipment:detail' equipment.pk %}">
                                     Details
                                 </a>
-
                                 |
-
                                 <a href="{% url 'equipment:edit' equipment.pk %}">
                                     Edit
+                                </a>
+                                |
+                                <a href="{% url 'inspections:create' equipment.pk %}">
+                                    New activity
                                 </a>
                             </td>
                         </tr>

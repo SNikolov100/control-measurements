@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Add employee | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Add employee</h2>
+
+    <p>
+        Enter the employee information and select one or more
+        specialties.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Save employee
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'employees:list' %}">
+            Back to employees
+        </a>
+    </p>
+{% endblock %}

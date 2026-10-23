@@ -80,6 +80,22 @@ documented in this file.
 - Added nested customer site creation, editing, and detail views.
 - Added customer site validation through nested customer URLs.
 - Added customer site equipment and contact sections.
+- Added customer contact creation, editing, details, duplicate
+  validation, and protected deletion.
+- Added equipment creation directly from a customer site.
+- Added employee list, creation, editing, details, specialties,
+  activation, deactivation, and history.
+- Added the activities list and activity detail page.
+- Added activity creation for specific equipment.
+- Added employee assignment to pending activities.
+- Added controlled activity start, completion, and cancellation
+  workflows.
+- Added passed and failed activity results.
+- Added repair and reinspection workflows.
+- Added automatic equipment status changes from activity operations.
+- Added validation preventing simultaneous activities in progress
+  for the same equipment.
+- Added cancellation reasons and actual activity timestamps.
 
 ### Changed
 
@@ -107,6 +123,17 @@ documented in this file.
 - Customer sites are now created and edited in the context of their parent
   customer.
 - Customer site URLs now validate the customer-to-site relationship.
+- Equipment statuses are now managed automatically through activity
+  start, completion, and cancellation operations.
+- Manual equipment status changes were removed from the interface.
+- New activities are registered before employees are assigned.
+- Employee assignment is now performed separately for pending
+  activities.
+- Customer contacts are no longer required when creating an activity.
+- Equipment activity creation is blocked while another activity for
+  the same equipment is in progress.
+- Employee activation and deactivation now create employee history
+  records.
 
 ### Project decisions
 
@@ -124,3 +151,13 @@ documented in this file.
   during the final interface design stage.
 - Phone number validation will be reviewed to prevent excessively long
   numbers.
+- The current feature set will be used as the first functional testing
+  version.
+- Further business features will be postponed until the existing code
+  is refactored and the main interface is redesigned.
+- Search, filters, and pagination will be added to the equipment and
+  activity lists.
+- Repeated view, form, and deletion logic will be reviewed for reusable
+  mixins and base classes.
+- CSS will be moved to dedicated static files during the interface
+  redesign.

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Employees | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Employees</h2>
+
+    <p>
+        <a href="{% url 'employees:create' %}">
+            Add employee
+        </a>
+    </p>
+
+    {% if employees %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Specialties</th>
+                    <th>Active</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for employee in employees %}
+                    <tr>
+                        <td>{{ employee.full_name }}</td>
+
+                        <td>
+                            {% if employee.phone %}
+                                {{ employee.phone }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if employee.email %}
+                                {{ employee.email }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% for specialty in employee.specialties.all %}
+                                {{ specialty.short_name }}
+
+                                {% if not forloop.last %}
+                                    ,
+                                {% endif %}
+                            {% empty %}
+                                No specialties
+                            {% endfor %}
+                        </td>
+
+                        <td>
+                            {% if employee.is_active %}
+                                Yes
+                            {% else %}
+                                No
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a href="{% url 'employees:details' employee.pk %}">
+                                Details
+                            </a>
+                            |
+                            <a href="{% url 'employees:edit' employee.pk %}">
+                                Edit
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No employees have been created.</p>
+    {% endif %}
+{% endblock %}

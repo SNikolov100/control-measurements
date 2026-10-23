@@ -162,11 +162,21 @@
             <p>No status history is available.</p>
         {% endif %}
     </section>
-    <p>
-        <a href="{% url 'equipment:status' equipment.pk %}">
-            Change status
-        </a>
-    </p>
+    {% if current_inspection %}
+        <p>
+            This equipment currently has an activity in progress:
+            <a href="{% url 'inspections:details' current_inspection.pk %}">
+                {{ current_inspection.get_inspection_type_display }}
+            </a>
+        </p>
+    {% else %}
+        <p>
+            <a href="{% url 'inspections:create' equipment.pk %}">
+                New activity
+            </a>
+        </p>
+    {% endif %}
+
     <p>
         <a href="{% url 'equipment:edit' equipment.pk %}">
             Edit equipment

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Edit employee | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Edit employee</h2>
+
+    <h3>{{ employee.full_name }}</h3>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Save changes
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'employees:details' employee.pk %}">
+            Cancel and return to employee details
+        </a>
+    </p>
+{% endblock %}

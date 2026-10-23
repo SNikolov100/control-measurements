@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Edit contact | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Edit contact</h2>
+
+    <p>
+        Customer:
+        <strong>{{ customer.company_name }}</strong>
+    </p>
+
+    <p>
+        Customer site:
+        <strong>{{ site.name }}</strong>
+    </p>
+
+    <p>
+        Contact:
+        <strong>{{ contact.full_name }}</strong>
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Save changes
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'customers:contact-details' customer.pk site.pk contact.pk %}">
+            Cancel and return to contact details
+        </a>
+    </p>
+{% endblock %}

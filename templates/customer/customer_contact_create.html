@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Add contact | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Add contact</h2>
+
+    <p>
+        Customer:
+        <strong>{{ customer.company_name }}</strong>
+    </p>
+
+    <p>
+        Customer site:
+        <strong>{{ site.name }}</strong>
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Save contact
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'customers:site-details' customer.pk site.pk %}">
+            Cancel and return to customer site
+        </a>
+    </p>
+{% endblock %}

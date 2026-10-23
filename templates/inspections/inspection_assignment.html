@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Assign employees | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Assign employees</h2>
+
+    <h3>
+        {{ inspection.equipment.equipment_type.short_name }}
+        -
+        {{ inspection.equipment.serial_number }}
+    </h3>
+
+    <dl>
+        <dt><strong>Activity type</strong></dt>
+        <dd>{{ inspection.get_inspection_type_display }}</dd>
+
+        <dt><strong>Specialty</strong></dt>
+        <dd>
+            {{ inspection.equipment.equipment_type.specialty.name }}
+        </dd>
+
+        <dt><strong>Status</strong></dt>
+        <dd>{{ inspection.get_status_display }}</dd>
+
+        <dt><strong>Received at</strong></dt>
+        <dd>{{ inspection.received_at }}</dd>
+    </dl>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Save assignment
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'inspections:list' %}">
+            Cancel and return to activities
+        </a>
+    </p>
+{% endblock %}

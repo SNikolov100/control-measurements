@@ -65,24 +65,13 @@ class EquipmentCreateForm(EquipmentBaseForm):
 class EquipmentEditForm(EquipmentBaseForm):
     ...
 
-class EquipmentStatusChangeForm(forms.Form):
-    new_status = forms.ChoiceField(
-        label="New status",
-    )
-    reason = forms.CharField(
-        max_length=255,
-        label="Reason",
-    )
-    notes = forms.CharField(
-        required=False,
-        widget=forms.Textarea,
-        label="Notes",
-    )
-    def __init__(self, *args, equipment: Equipment, **kwargs,):
+
+class CustomerSiteEquipmentCreateForm(EquipmentCreateForm):
+    class Meta(EquipmentCreateForm.Meta):
+        exclude = ["customer_site"]
+
+    def __init__(self, *args, **kwargs):
+        customer_site = kwargs.pop("customer_site", None)
         super().__init__(*args, **kwargs)
-        self.equipment = equipment
-        self.fields["new_status"].choices = [
-            (value, label)
-            for value, label in Equipment.Status.choices
-            if value != equipment.status
-        ]
+        if customer_site is not None:
+            self.instance.customer_site = customer_site

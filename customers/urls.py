@@ -16,7 +16,16 @@ urlpatterns = [
         path('<int:pk>/', include([
             path('edit/', views.CustomerSiteEditView.as_view(), name='site-edit'),
             path('details/', views.CustomerSiteDetailView.as_view(), name='site-details'),
-        ]))
+        ])),
+        path('<int:site_pk>/contacts/',include([
+            path('create/', views.CustomerContactCreateView.as_view(), name='contact-create'),
+            path('<int:pk>/', include([
+                path('edit/', views.CustomerContactEditView.as_view(), name='contact-edit'),
+                path('detail', views.CustomerContactDetailView.as_view(), name='contact-details'),
+                path('delete', views.CustomerContactDeleteView.as_view(), name='contact-delete'),
+            ])),
+        ])),
+    path('<int:site_pk>/equipment/create/', views.CustomerSiteEquipmentCreateView.as_view(), name='site-equipment-create'),
 
     ])),
 

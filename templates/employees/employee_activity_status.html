@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Change employee activity | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>
+        {% if employee.is_active %}
+            Deactivate employee
+        {% else %}
+            Activate employee
+        {% endif %}
+    </h2>
+
+    <h3>{{ employee.full_name }}</h3>
+
+    <dl>
+        <dt><strong>Position</strong></dt>
+        <dd>
+            {% if employee.position %}
+                {{ employee.position }}
+            {% else %}
+                -
+            {% endif %}
+        </dd>
+
+        <dt><strong>Current state</strong></dt>
+        <dd>
+            {% if employee.is_active %}
+                Active
+            {% else %}
+                Inactive
+            {% endif %}
+        </dd>
+
+        <dt><strong>Specialties</strong></dt>
+        <dd>
+            {% for specialty in employee.specialties.all %}
+                {{ specialty.short_name }}
+
+                {% if not forloop.last %}
+                    ,
+                {% endif %}
+            {% empty %}
+                No specialties
+            {% endfor %}
+        </dd>
+    </dl>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            {% if employee.is_active %}
+                Deactivate employee
+            {% else %}
+                Activate employee
+            {% endif %}
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'employees:details' employee.pk %}">
+            Cancel and return to employee details
+        </a>
+    </p>
+{% endblock %}

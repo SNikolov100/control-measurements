@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Contact details | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Contact details</h2>
+
+    <h3>{{ contact.full_name }}</h3>
+
+    <section>
+        <h4>Customer information</h4>
+
+        <dl>
+            <dt><strong>Customer</strong></dt>
+            <dd>{{ customer.company_name }}</dd>
+
+            <dt><strong>Customer site</strong></dt>
+            <dd>{{ site.name }}</dd>
+        </dl>
+    </section>
+
+    <section>
+        <h4>Contact information</h4>
+
+        <dl>
+            <dt><strong>Name</strong></dt>
+            <dd>{{ contact.full_name }}</dd>
+
+            <dt><strong>Position</strong></dt>
+            <dd>
+                {% if contact.position %}
+                    {{ contact.position }}
+                {% else %}
+                    -
+                {% endif %}
+            </dd>
+
+            <dt><strong>Phone</strong></dt>
+            <dd>
+                {% if contact.phone %}
+                    {{ contact.phone }}
+                {% else %}
+                    -
+                {% endif %}
+            </dd>
+
+            <dt><strong>Email</strong></dt>
+            <dd>
+                {% if contact.email %}
+                    {{ contact.email }}
+                {% else %}
+                    -
+                {% endif %}
+            </dd>
+
+            <dt><strong>Primary contact</strong></dt>
+            <dd>
+                {% if contact.is_primary %}
+                    Yes
+                {% else %}
+                    No
+                {% endif %}
+            </dd>
+
+            <dt><strong>Active</strong></dt>
+            <dd>
+                {% if contact.is_active %}
+                    Yes
+                {% else %}
+                    No
+                {% endif %}
+            </dd>
+        </dl>
+    </section>
+
+    <section>
+        <h4>Notes</h4>
+
+        {% if contact.notes %}
+            <p>{{ contact.notes|linebreaksbr }}</p>
+        {% else %}
+            <p>No notes.</p>
+        {% endif %}
+    </section>
+    <p>
+        <a href="{% url 'customers:contact-delete' customer.pk site.pk contact.pk %}">
+            Delete contact
+        </a>
+    </p>
+    <p>
+        <a href="{% url 'customers:contact-edit' customer.pk site.pk contact.pk %}">
+            Edit contact
+        </a>
+    </p>
+
+    <p>
+        <a href="{% url 'customers:site-details' customer.pk site.pk %}">
+            Back to customer site
+        </a>
+    </p>
+{% endblock %}

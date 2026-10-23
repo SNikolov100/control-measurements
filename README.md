@@ -6,12 +6,12 @@ and upcoming control measurements.
 
 ## Project status
 
-The project is currently in active development.
+The project now contains a complete initial workflow for registering
+equipment and managing its control activities.
 
-The project has entered the functional interface development stage.
-Simple templates are currently used to verify forms, navigation,
-relationships, validation, and business workflows before the final
-HTML and CSS design is applied.
+The current version is ready for functional testing before code
+refactoring, interface redesign, search, filters, and pagination are
+introduced.
 
 ### Implemented applications
 
@@ -199,6 +199,14 @@ Employee
 - Chronological employee history
 - Protected deletion of employees with history
 
+### Functional interface
+
+- Employee list
+- Employee creation and editing
+- Employee detail page
+- Multiple specialty assignment
+- Controlled employee activation and deactivation
+- Employee activity history
 </details>
 
 <details>
@@ -249,6 +257,22 @@ Equipment
 - Atomic start, completion, and cancellation operations
 </details>
 
+### Functional interface
+
+- Activity list
+- Activity creation for specific equipment
+- Separate employee assignment
+- Activity detail page
+- Controlled activity start
+- Controlled activity completion
+- Passed and failed results
+- Repair workflow
+- Reinspection after repair
+- Activity cancellation with a required reason
+- Automatic actual start and end timestamps
+- Automatic equipment status synchronization
+- Prevention of simultaneous activities in progress for the same
+  equipment
 
 <details>
 <summary><strong>Current data structure</strong></summary>
@@ -277,32 +301,16 @@ Employee
 
 ## Development approach
 
-The project will initially use simple Django forms, views, URLs, and
-templates to verify the application logic and rendered data.
+The next development stage will focus on:
 
-The first templates will focus on confirming that the required data is
-passed to the views and rendered correctly.
-
-The complete visual interface, reusable template structure, CSS,
-images, and responsive design will be implemented after the main
-functionality is complete.
-
-Repeated template structures will later be organized through a common
-base template and template inheritance.
-
-Django Admin is not used as the primary application interface.
-
-The first version of the application is intended for a single user.
-User profiles, roles, and permissions are planned for a later stage.
-
-The current templates are intentionally simple. Their purpose is to
-validate the complete functional workflows before reusable components,
-required-field indicators, responsive layouts, and the final visual
-design are introduced.
-
-Repeated view logic will be reviewed after the functional screens are
-complete and, where appropriate, moved into reusable mixins or base
-view classes.
+- refactoring repeated view and form logic;
+- reusable mixins and base classes;
+- shared template components;
+- dedicated CSS static files;
+- required-field indicators and improved form rendering;
+- search and filtering;
+- pagination for larger lists;
+- preparation of the first polished testing version.
 
 ## Installation
 

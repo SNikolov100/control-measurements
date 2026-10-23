@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Complete activity | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <h2>Complete activity</h2>
+
+    <h3>
+        {{ inspection.equipment.equipment_type.short_name }}
+        -
+        {{ inspection.equipment.serial_number }}
+    </h3>
+
+    {% if form.non_field_errors %}
+        <div>
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <dl>
+        <dt><strong>Activity type</strong></dt>
+        <dd>{{ inspection.get_inspection_type_display }}</dd>
+
+        <dt><strong>Status</strong></dt>
+        <dd>{{ inspection.get_status_display }}</dd>
+
+        <dt><strong>Actual start</strong></dt>
+        <dd>{{ inspection.actual_start }}</dd>
+
+        <dt><strong>Assigned employees</strong></dt>
+        <dd>
+            {% for employee in inspection.assigned_employees.all %}
+                {{ employee.full_name }}
+
+                {% if not forloop.last %}
+                    ,
+                {% endif %}
+            {% empty %}
+                No assigned employees
+            {% endfor %}
+        </dd>
+    </dl>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Complete activity
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'inspections:details' inspection.pk %}">
+            Cancel and return to activity details
+        </a>
+    </p>
+{% endblock %}

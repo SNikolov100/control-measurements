@@ -105,6 +105,21 @@ class CustomerContact(TimestampMixin):
     def clean(self):
         super().clean()
         errors = {}
+        duplicate_contacts = type(self).objects.none()
+
+        if self.site_id and self.full_name:
+            duplicate_contacts = (
+                type(self)
+                .objects.
+                filter(site_id=self.site_id,full_name__iexact=self.full_name.strip())
+                .exclude(pk=self.pk)
+            )
+
+        if self.phone and duplicate_contacts.filter(phone=self.phone.strip(),).exists():
+            errors["phone"] = translate("A contact with the same name and phone number already exists for this customer site.")
+
+        if self.email and duplicate_contacts.filter(email__iexact=self.email.strip(),).exists():
+            errors["email"] = translate("A contact with the same name and email address already exists for this customer site.")
 
         if self.is_primary and not self.is_active:
             errors["is_primary"] = translate("An inactive contact cannot be the primary contact.")
