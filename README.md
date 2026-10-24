@@ -6,12 +6,15 @@ and upcoming control measurements.
 
 ## Project status
 
-The project now contains a complete initial workflow for registering
-equipment and managing its control activities.
+The Python foundation has been refactored after completion of the
+first functional testing version.
 
-The current version is ready for functional testing before code
-refactoring, interface redesign, search, filters, and pagination are
-introduced.
+Repeated model normalization, nested parent loading, delete
+confirmation, equipment registration history, and activity action
+handling have been moved into reusable base classes and mixins.
+
+The main functional workflows remain operational after the
+refactoring and have been tested again.
 
 ### Implemented applications
 
@@ -112,6 +115,21 @@ Customer
 - Customer site detail page
 - Customer-to-site URL relationship validation
 - Customer site sections for contacts and equipment
+
+### Refactored behavior
+
+- Customer, customer-site, and customer-contact values use shared text
+  normalization.
+- Email addresses are stored in lowercase.
+- Employee and contact names use title-case normalization.
+- Customer sites may define their own city and address.
+- Empty customer-site city and address values fall back to the parent
+  customer values.
+- Nested URLs verify the complete customer-to-site-to-contact
+  relationship.
+- Contact deletion uses shared confirmation and protected-delete
+  behavior.
+
 </details>
 
 <details>
@@ -166,6 +184,18 @@ CustomerSite
 - Automatic initial equipment history
 - Controlled equipment status changes
 - Equipment status history display
+
+### Refactored behavior
+
+- Equipment types and concrete equipment use shared text
+  normalization.
+- Serial and inventory numbers are normalized to uppercase.
+- Initial equipment status history is created through shared
+  registration behavior.
+- Equipment detail pages use the correct generic DetailView.
+- Equipment type deletion uses the shared protected confirmation
+  workflow.
+
 </details>
 
 <details>
@@ -207,6 +237,18 @@ Employee
 - Multiple specialty assignment
 - Controlled employee activation and deactivation
 - Employee activity history
+
+### Refactored behavior
+
+- Employee information uses shared text normalization.
+- Employee names use title-case normalization.
+- Email addresses are stored in lowercase.
+- Activation and deactivation are atomic operations.
+- Every successful activity-status change creates an employee-history
+  record.
+- Active status is not directly editable through the ordinary employee
+  form.
+
 </details>
 
 <details>
@@ -255,6 +297,20 @@ Equipment
 - Required cancellation reason
 - Cancellation behavior based on activity type and current status
 - Atomic start, completion, and cancellation operations
+
+### Refactored behavior
+
+- Activity start, completion, and cancellation use shared action-view
+  behavior.
+- Business transitions remain implemented in service functions.
+- Service validation errors are displayed as form errors instead of
+  technical error pages.
+- Failed activities require result notes.
+- Repair creation requires a fault or repair reason.
+- Repair completion requires a description of the performed work.
+- Activity details display actual timestamps, result notes, equipment
+  status, assigned employees, and cancellation information.
+
 </details>
 
 ### Functional interface
@@ -299,18 +355,71 @@ Employee
 
 </details>
 
+<details>
+<summary><strong>Current operational workflow</strong></summary>
+
+The primary operational hierarchy is:
+
+Customer
+→ Customer site
+→ Customer contact
+→ Equipment
+→ Activity
+→ Assigned employees
+→ Result and history
+
+Equipment belongs to a customer site. A customer contact may be
+recorded as the person handing over equipment for a specific activity,
+but the equipment does not belong permanently to that contact.
+
+The planned customer-site intake workflow will allow an operator to:
+
+1. open a customer and one of its sites;
+2. select one active customer contact;
+3. mark one or more registered equipment items as received;
+4. register missing equipment directly for the current site;
+5. create an individual activity for every selected equipment item;
+6. automatically associate the customer, site, contact, and equipment
+   with the created activities.
+</details>
+
+<details>
+<summary><strong>Shared architecture</strong></summary>
+
+The current shared infrastructure includes:
+
+- configurable text normalization for strip, uppercase, lowercase,
+  title case, and default text values;
+- shared delete confirmation forms;
+- protected-delete handling;
+- shared delete confirmation templates;
+- customer and customer-site parent view mixins;
+- shared equipment registration history behavior;
+- shared inspection action handling;
+- atomic employee activation and deactivation;
+- service-based equipment activity status transitions.
+
+</details>
+
 ## Development approach
 
-The next development stage will focus on:
+The next stage will focus on the user interface and operational
+navigation:
 
-- refactoring repeated view and form logic;
-- reusable mixins and base classes;
-- shared template components;
-- dedicated CSS static files;
-- required-field indicators and improved form rendering;
-- search and filtering;
-- pagination for larger lists;
-- preparation of the first polished testing version.
+- a stable shared layout for all templates;
+- permanent navigation with an always-available Home link;
+- customer-site pages as the main operational workspace;
+- dedicated static CSS files;
+- reusable form and table components;
+- clear labels, placeholders, help text, and custom error messages;
+- required and optional field indicators;
+- breadcrumbs and contextual back navigation;
+- equipment and activity search;
+- combinable filters;
+- column sorting;
+- pagination that preserves active GET parameters;
+- responsive presentation of lists, forms, details, and status
+  histories.
 
 ## Installation
 

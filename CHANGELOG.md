@@ -96,6 +96,25 @@ documented in this file.
 - Added validation preventing simultaneous activities in progress
   for the same equipment.
 - Added cancellation reasons and actual activity timestamps.
+- Added a reusable text normalization mixin with configurable
+  strip, uppercase, lowercase, title-case, and default-value rules.
+- Added a shared delete confirmation form with an explicit
+  confirmation checkbox.
+- Added a reusable protected-delete view mixin.
+- Added a shared base template for delete confirmation pages.
+- Added reusable customer and customer-site parent view mixins.
+- Added a reusable equipment registration mixin for creating the
+  initial equipment status history.
+- Added a reusable inspection action mixin for starting, completing,
+  and cancelling activities.
+- Added optional city and address fields to customer sites.
+- Added fallback city and address values from the parent customer
+  when the customer site values are empty.
+- Added custom validation messages for specialty fields and activity
+  forms.
+- Added required fault descriptions when creating repair activities.
+- Added required repair-work descriptions when completing repairs.
+- Added required result notes for failed activities.
 
 ### Changed
 
@@ -111,8 +130,8 @@ documented in this file.
 - Inspection workflow operations are organized in `services.py`.
 - Pending activity cancellation now preserves the current equipment
   status.
-- Cancelled active repairs move equipment to temporarily suspended.
-- Cancelled active reinspections return equipment to waiting for
+- Canceled active repairs move equipment to temporarily suspended.
+- Canceled active reinspections return equipment to waiting for
   reinspection.
 - Specialty deletion now prevents removal of specialties used by
   equipment types or employees.
@@ -135,29 +154,70 @@ documented in this file.
 - Employee activation and deactivation now create employee history
   records.
 
+### Changed
+
+- Refactored repeated create, detail, update, delete, and nested-parent
+  view logic into reusable mixins.
+- Refactored repeated text normalization from individual models into
+  a shared configurable model mixin.
+- Refactored employee activation and deactivation into one atomic
+  internal status-change operation.
+- Refactored activity start, completion, and cancellation views to use
+  shared action handling.
+- Refactored equipment registration to create the initial status
+  history through shared view behavior.
+- Refactored specialty, customer contact, and equipment type deletion
+  to use the shared confirmation workflow.
+- Changed specialty listing from a function-based view to a
+  class-based ListView.
+- Changed equipment details to use the correct DetailView base class.
+- Changed employee forms so active status is managed only through the
+  controlled activation and deactivation workflow.
+- Changed activity completion details to display actual start, actual
+  end, result notes, and equipment status.
+- Changed names of employees and customer contacts to title case
+  during normalization.
+- Changed emails to lowercase during normalization.
+- Changed equipment serial and inventory numbers to uppercase during
+  normalization.
+- Changed an empty customer country to use Bulgaria as the default.
+- Disabled browser-side form validation on the updated forms so
+  Django validation messages are displayed consistently.
+
+### Fixed
+
+- Fixed tuple values caused by trailing commas in form fields,
+  success URLs, and model Meta options.
+- Fixed inconsistent form and view class naming in the customers
+  application.
+- Fixed activity completion views that could return None instead of
+  an HTTP response.
+- Fixed service ValidationError handling for confirmation forms
+  without matching model fields.
+- Fixed customer-site city and address display when values are
+  inherited from the customer.
+- Fixed duplicate-contact validation after text normalization.
+- Fixed equipment detail view inheritance.
+- Fixed technical activity-history values so human-readable labels
+  are displayed.
+- Fixed repair activities being created without a fault description.
+
+
+
 ### Project decisions
 
-- Django Admin will not be used as the main application interface.
-- The initial version will support a single user.
-- User profiles, roles, and permissions will be added at a later stage.
-- Simple templates will first be used to verify rendered data.
-- The final HTML and CSS design will be implemented after the main
-  functionality is complete.
-- The calendar will be implemented after the main functional interfaces are
-  complete.
-- Repeated view logic will be reviewed and refactored into reusable mixins
-  after the functional workflows are complete.
-- Required fields, help text, widgets, and final form styling will be added
-  during the final interface design stage.
-- Phone number validation will be reviewed to prevent excessively long
-  numbers.
-- The current feature set will be used as the first functional testing
-  version.
-- Further business features will be postponed until the existing code
-  is refactored and the main interface is redesigned.
-- Search, filters, and pagination will be added to the equipment and
-  activity lists.
-- Repeated view, form, and deletion logic will be reviewed for reusable
-  mixins and base classes.
-- CSS will be moved to dedicated static files during the interface
-  redesign.
+- Equipment belongs permanently to a customer site, not to a customer
+  contact.
+- A customer contact represents the person handing over equipment for
+  a specific activity or intake.
+- The customer-site page will become the main operational workspace.
+- The planned intake workflow will allow the operator to select one
+  active customer contact and multiple equipment items from the site.
+- Missing equipment can be registered directly for the current
+  customer site before activities are created.
+- Equipment statuses are managed through activity start, completion,
+  and cancellation operations rather than through a manual status
+  interface.
+- The next development stage will focus on the shared layout,
+  navigation, HTML/CSS design, form presentation, search, filters,
+  sorting, and pagination.
