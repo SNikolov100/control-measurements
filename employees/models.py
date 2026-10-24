@@ -1,11 +1,15 @@
-from django.db import models
+from django.db import models, transaction
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as translate
-
-from core.model_mixins import AutoSlugMixin, TimestampMixin
+from core.model_mixins import AutoSlugMixin, TimestampMixin, TextNormalizationMixin
 from core.validators import phone_validator
 
-class Employee(AutoSlugMixin, TimestampMixin):
+
+class Employee(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
+    strip_fields = ('full_name', 'position', 'phone', 'email', 'notes',)
+    lowercase_fields = ('email',)
+    titlecase_fields = ('full_name',)
+
     full_name = models.CharField(
         max_length=100,
         verbose_name=translate('Full name'),
@@ -40,54 +44,34 @@ class Employee(AutoSlugMixin, TimestampMixin):
         verbose_name=translate('Active'),
     )
 
-    def activate(self, description=""):
-        if self.is_active:
+    def _change_activity_status(self, *, is_active,event_type, description="",):
+        if self.is_active == is_active:
             return False
 
-        self.is_active = True
-        self.save(update_fields={"is_active"})
-        EmployeeHistory.objects.create(
-            employee=self,
+        with transaction.atomic():
+            self.is_active = is_active
+            self.save(update_fields={'is_active'})
+            EmployeeHistory.objects.create(
+                employee=self,
+                event_type=event_type,
+                description=description,
+            )
+
+        return True
+
+    def activate(self, description=""):
+        return self._change_activity_status(
+            is_active=True,
             event_type=EmployeeHistory.EventType.ACTIVATED,
             description=description,
         )
 
-        return True
-
     def deactivate(self, description=""):
-        if not self.is_active:
-            return False
-
-        self.is_active = False
-        self.save(update_fields={"is_active"})
-        EmployeeHistory.objects.create(
-            employee=self,
+        return self._change_activity_status(
+            is_active=False,
             event_type=EmployeeHistory.EventType.DEACTIVATED,
             description=description,
         )
-
-        return True
-
-    def normalize_fields(self):
-        if self.full_name:
-            self.full_name = " ".join(self.full_name.split()).title()
-
-        if self.position:
-            self.position = " ".join(self.position.split())
-
-        if self.phone:
-            self.phone = self.phone.strip()
-
-        if self.email:
-            self.email = self.email.strip()
-
-    def clean_fields(self, exclude=None):
-        self.normalize_fields()
-        super().clean_fields(exclude=exclude)
-
-    def save(self, *args, **kwargs):
-        self.normalize_fields()
-        super().save(*args, **kwargs)
 
     def build_slug(self):
         name_slug = slugify(self.full_name,allow_unicode=True,)

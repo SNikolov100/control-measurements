@@ -1,5 +1,6 @@
 from django import forms
 from .models import Specialty, CompanySettings, SystemSettings
+from .base_forms import DeleteConfirmationForm
 
 class SpecialtyBaseForm(forms.ModelForm):
     class Meta:
@@ -12,12 +13,8 @@ class SpecialtyCreateForm(SpecialtyBaseForm):
 class SpecialtyEditForm(SpecialtyBaseForm):
     ...
 
-class SpecialtyDeleteForm(SpecialtyBaseForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        for field in self.fields.values():
-            field.disabled = True
+class SpecialtyDeleteForm(DeleteConfirmationForm):
+    ...
 
 class CompanySettingsForm(forms.ModelForm):
     class Meta:

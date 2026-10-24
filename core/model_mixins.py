@@ -107,3 +107,46 @@ class AutoSlugMixin(models.Model):
 
     class Meta:
         abstract = True
+
+class TextNormalizationMixin:
+    strip_fields = ()
+    uppercase_fields = ()
+    lowercase_fields = ()
+    titlecase_fields = ()
+    default_text_values = {}
+
+    def normalize_text_fields(self):
+        field_names = set(
+            self.strip_fields +
+            self.uppercase_fields +
+            self.lowercase_fields +
+            self.titlecase_fields +
+            tuple(self.default_text_values))
+
+        for field_name in field_names:
+            value = getattr(self, field_name, None)
+
+            if isinstance(value, str):
+                value = value.strip()
+
+                if field_name in self.uppercase_fields:
+                    value = value.upper()
+
+                if field_name in self.lowercase_fields:
+                    value = value.lower()
+
+                if field_name in self.titlecase_fields:
+                    value = value.title()
+
+            if not value and field_name in self.default_text_values:
+                value = self.default_text_values[field_name]
+
+            setattr(self, field_name, value)
+
+    def clean_fields(self, exclude=None):
+        self.normalize_text_fields()
+        super().clean_fields(exclude=exclude)
+
+    def save(self, *args, **kwargs):
+        self.normalize_text_fields()
+        return super().save(*args, **kwargs)

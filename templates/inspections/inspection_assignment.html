@@ -29,7 +29,7 @@
         <dd>{{ inspection.received_at }}</dd>
     </dl>
 
-    <form method="post">
+    <form method="post" novalidate>
         {% csrf_token %}
 
         {{ form.as_p }}

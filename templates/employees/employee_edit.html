@@ -9,7 +9,7 @@
 
     <h3>{{ employee.full_name }}</h3>
 
-    <form method="post">
+    <form method="post" novalidate>
         {% csrf_token %}
 
         {{ form.as_p }}

@@ -1,5 +1,5 @@
 from django import forms
-from customers.models import CustomerContact
+from django.utils.translation import gettext_lazy as translate
 from employees.models import Employee
 from .models import Inspection
 
@@ -23,12 +23,8 @@ class InspectionCreateForm(InspectionBaseForm):
         super().__init__(*args, **kwargs)
         self.equipment = equipment
         self.fields['estimated_duration'].required = False
-
-        # if equipment is None:
-        #     self.fields['customer_contact'].queryset = CustomerContact.objects.none()
-        #     return
-
-        self.instance.equipment = equipment
+        if equipment is not None:
+            self.instance.equipment = equipment
 
     def clean_estimated_duration(self):
         estimated_duration = self.cleaned_data.get('estimated_duration')
@@ -36,7 +32,21 @@ class InspectionCreateForm(InspectionBaseForm):
         if estimated_duration:
             return estimated_duration
 
+        if self.equipment is None:
+            raise forms.ValidationError(translate('Equipment is required to determine the estimated duration.'))
+
         return self.equipment.estimated_inspection_duration
+
+    def clean(self):
+        cleaned_data = super().clean()
+        inspection_type = cleaned_data.get('inspection_type')
+        notes = cleaned_data.get('notes', '').strip()
+
+        if inspection_type == Inspection.InspectionType.REPAIR and not notes:
+            self.add_error('notes',translate('Describe the fault or the reason for opening the repair activity.'))
+
+        return cleaned_data
+
 
 class InspectionAssignmentForm(forms.ModelForm):
     class Meta:
@@ -59,15 +69,13 @@ class InspectionStartForm(forms.Form):
 
 class InspectionCompleteForm(forms.Form):
     result = forms.ChoiceField(
-        required=False,
         choices=Inspection.Result.choices,
-        label='Result',
+        label=translate('Result'),
     )
-
     result_notes = forms.CharField(
         required=False,
         widget=forms.Textarea,
-        label='Result notes',
+        label=translate('Result notes'),
     )
 
     def __init__(self, *args, inspection=None, **kwargs):
@@ -87,10 +95,10 @@ class InspectionCompleteForm(forms.Form):
         result_notes = cleaned_data.get('result_notes', '').strip()
 
         if result == Inspection.Result.FAILED and not result_notes:
-            self.add_error('result_notes','Result notes are required for a failed activity.',)
+            self.add_error('result_notes',translate('Describe why the activity failed.'),)
 
         if self.inspection.inspection_type == Inspection.InspectionType.REPAIR and not result_notes:
-            self.add_error('result_notes','Describe the work performed during the repair.',)
+            self.add_error('result_notes',translate('Describe the work performed during the repair.'),)
 
         return cleaned_data
 
@@ -98,4 +106,6 @@ class InspectionCancelForm(forms.Form):
     reason = forms.CharField(
         widget=forms.Textarea,
         label='Cancellation reason',
+        help_text=translate('Explain why the activity is being cancelled.'),
+        error_messages={'required': translate('Enter a reason for cancelling the activity.'),},
     )

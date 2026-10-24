@@ -23,7 +23,7 @@
         will be used.
     </p>
 
-    <form method="post">
+    <form method="post" novalidate>
         {% csrf_token %}
 
         {{ form.as_p }}

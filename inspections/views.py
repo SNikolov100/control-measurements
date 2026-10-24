@@ -1,12 +1,11 @@
-from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, FormView
 from equipment.models import Equipment
-from .forms import InspectionCreateForm, InspectionAssignmentForm, InspectionStartForm, InspectionCompleteForm, \
-    InspectionCancelForm
+from .forms import InspectionCreateForm, InspectionAssignmentForm, InspectionStartForm, InspectionCompleteForm, InspectionCancelForm
 from .models import Inspection
 from django.urls import reverse, reverse_lazy
 from .services import complete_inspection, start_inspection, cancel_inspection
+from .view_mixins import InspectionActionMixin
 
 
 class InspectionListView(ListView):
@@ -106,131 +105,31 @@ class InspectionDetailView(DetailView):
         )
 
 
-class InspectionStartView(FormView):
+class InspectionStartView(InspectionActionMixin, FormView):
     form_class = InspectionStartForm
     template_name = 'inspections/inspection_start.html'
 
-    def dispatch(self, request, *args, **kwargs):
-        self.inspection = get_object_or_404(Inspection.objects
-            .select_related(
-                'equipment',
-                'equipment__equipment_type',
-                'equipment__equipment_type__specialty',
-                'equipment__customer_site',
-                'equipment__customer_site__customer',
-            )
-            .prefetch_related(
-                'assigned_employees',
-                'assigned_employees__specialties',
-            ),
-            pk=kwargs["pk"],
-        )
+    def execute_action(self, form):
+        start_inspection(self.inspection)
 
-        return super().dispatch(request,*args,**kwargs,)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["inspection"] = self.inspection
-        return context
-
-    def form_valid(self, form):
-        try:
-            start_inspection(self.inspection)
-
-        except ValidationError as error:
-            for message in error.messages:
-                form.add_error(None, message)
-            return self.form_invalid(form)
-
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse('inspections:details',kwargs={'pk': self.inspection.pk},)
-
-class InspectionCompleteView(FormView):
+class InspectionCompleteView(InspectionActionMixin, FormView):
     form_class = InspectionCompleteForm
     template_name = 'inspections/inspection_complete.html'
-
-    def dispatch(self, request, *args, **kwargs):
-        self.inspection = get_object_or_404(
-            Inspection.objects
-            .select_related(
-                'equipment',
-                'equipment__equipment_type',
-                'equipment__customer_site',
-                'equipment__customer_site__customer',
-            )
-            .prefetch_related(
-                'assigned_employees',
-            ),
-            pk=kwargs['pk'],
-        )
-
-        return super().dispatch(request,*args,**kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['inspection'] = self.inspection
         return kwargs
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['inspection'] = self.inspection
-        return context
+    def execute_action(self, form):
+        result = form.cleaned_data.get('result','')
+        result_notes = form.cleaned_data['result_notes']
+        complete_inspection(self.inspection, result= result, result_notes= result_notes,)
 
-    def form_valid(self, form):
-        try:
-            complete_inspection(
-                self.inspection,
-                result=form.cleaned_data.get('result', ''),
-                result_notes=form.cleaned_data['result_notes'],
-            )
-
-        except ValidationError as error:
-            form.add_error(None, error)
-            return self.form_invalid(form)
-
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse('inspections:details',kwargs={'pk': self.inspection.pk})
-
-class InspectionCancelView(FormView):
+class InspectionCancelView(InspectionActionMixin, FormView):
     form_class = InspectionCancelForm
     template_name = 'inspections/inspection_cancel.html'
 
-    def dispatch(self, request, *args, **kwargs):
-        self.inspection = get_object_or_404(Inspection.objects
-            .select_related(
-                'equipment',
-                'equipment__equipment_type',
-                'equipment__customer_site',
-                'equipment__customer_site__customer',
-            )
-            .prefetch_related(
-                'assigned_employees',
-            ),
-            pk=kwargs['pk'],
-        )
-
-        return super().dispatch(request,*args,**kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['inspection'] = self.inspection
-        return context
-
-    def form_valid(self, form):
-        try:
-            cancel_inspection(self.inspection, reason=form.cleaned_data['reason'])
-
-        except ValidationError as error:
-            for message in error.messages:
-                form.add_error(None, message)
-
-            return self.form_invalid(form)
-
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse("inspections:details",kwargs={"pk": self.inspection.pk})
+    def execute_action(self, form):
+        reason = form.cleaned_data['reason']
+        cancel_inspection(self.inspection, reason=reason,)

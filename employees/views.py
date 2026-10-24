@@ -1,10 +1,8 @@
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, ListView, UpdateView, DetailView, FormView
-
-from inspections.models import Inspection
 from .forms import EmployeeCreateForm, EmployeeEditForm, EmployeeActivityStatusForm
-from .models import Employee, EmployeeHistory
+from .models import Employee
 
 class EmployeeListView(ListView):
     model = Employee
@@ -28,7 +26,7 @@ class EmployeeEditView(UpdateView):
     context_object_name = 'employee'
     success_url = reverse_lazy('employees:list')
 
-class EmployeeDitailView(DetailView):
+class EmployeeDеtailView(DetailView):
     model = Employee
     template_name = 'employees/employee_detail.html'
     context_object_name = 'employee'
@@ -36,17 +34,6 @@ class EmployeeDitailView(DetailView):
     def get_queryset(self):
         queryset_result = super().get_queryset().prefetch_related('specialties', 'history')
         return queryset_result
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['current_inspection'] = (
-            self.object.inspections
-            .filter(status=Inspection.Status.IN_PROGRESS)
-            .first()
-        )
-
-        return context
 
 class EmployeeActivityStatusView(FormView):
     form_class = EmployeeActivityStatusForm

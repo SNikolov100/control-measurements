@@ -1,5 +1,6 @@
 from django import forms
 
+from core.base_forms import DeleteConfirmationForm
 from .models import Customer, CustomerSite, CustomerContact
 
 class CustomerBaseForm(forms.ModelForm):
@@ -7,10 +8,10 @@ class CustomerBaseForm(forms.ModelForm):
         model = Customer
         fields = "__all__"
 
-class CustomerCreateView(CustomerBaseForm):
+class CustomerCreateForm(CustomerBaseForm):
     ...
 
-class CustomerEditView(CustomerBaseForm):
+class CustomerEditForm(CustomerBaseForm):
     ...
 
 class CustomerSiteBaseForm(forms.ModelForm):
@@ -40,5 +41,5 @@ class CustomerContactCreateForm(CustomerContactBaseForm):
 
 class CustomerContactEditForm(CustomerContactBaseForm):
     ...
-class CustomerContactDeleteForm(forms.Form):
+class CustomerContactDeleteForm(DeleteConfirmationForm):
     ...

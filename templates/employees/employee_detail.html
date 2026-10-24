@@ -83,8 +83,8 @@
                 <thead>
                     <tr>
                         <th>Changed at</th>
-                        <th>Action</th>
-                        <th>Notes</th>
+                        <th>Event</th>
+                        <th>Description</th>
                     </tr>
                 </thead>
 
@@ -94,7 +94,7 @@
                             <td>{{ history.changed_at }}</td>
 
                             <td>
-                                {{ history.event_type }}
+                                {{ history.get_event_type_display }}
                             </td>
 
                             <td>

@@ -112,21 +112,9 @@
                         <tr>
                             <td>{{ site.name }}</td>
 
-                            <td>
-                                {% if site.city %}
-                                    {{ site.city }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
+                            <td>{{ site.effective_city|default:"-" }}</td>
 
-                            <td>
-                                {% if site.address %}
-                                    {{ site.address }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
+                            <td>{{ site.effective_address|default:"-" }}</td>
 
                             <td>
                                 {% if site.is_active %}

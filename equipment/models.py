@@ -1,15 +1,15 @@
 from django.db import models, transaction
 from django.utils.text import slugify
-
-from core.model_mixins import TimestampMixin, AutoSlugMixin
+from core.model_mixins import TimestampMixin, AutoSlugMixin, TextNormalizationMixin
 from django.utils.translation import gettext_lazy as translate
 from django.core.validators import MinValueValidator
 
-class EquipmentType(TimestampMixin):
+class EquipmentType(TextNormalizationMixin, TimestampMixin):
+    strip_fields = ('name', 'short_name', 'description',)
     class IntervalUnit(models.TextChoices):
-        DAYS = "days", translate("Days")
-        MONTHS = "months", translate("Months")
-        YEARS = "years", translate("Years")
+        DAYS = 'days', translate('Days')
+        MONTHS = 'months', translate('Months')
+        YEARS = 'years', translate('Years')
 
     name = models.CharField(
         max_length=150,
@@ -44,32 +44,35 @@ class EquipmentType(TimestampMixin):
         max_length=10,
         choices=IntervalUnit.choices,
         default=IntervalUnit.MONTHS,
-        verbose_name=translate("Default interval unit"),
+        verbose_name=translate('Default interval unit'),
     )
     default_inspection_duration = models.PositiveSmallIntegerField(
         default=60,
         validators=[MinValueValidator(1)],
-        verbose_name=translate("Default inspection duration in minutes"),
+        verbose_name=translate('Default inspection duration in minutes'),
     )
 
     def __str__(self):
         return self.name
 
     class Meta:
-        ordering = ("name",)
-        verbose_name = translate("Equipment type")
-        verbose_name_plural = translate("Equipment types")
+        ordering = ('name',)
+        verbose_name = translate('Equipment type')
+        verbose_name_plural = translate('Equipment types')
 
 
-class Equipment(AutoSlugMixin, TimestampMixin):
+class Equipment(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
+    strip_fields = ('model_name', 'serial_number', 'inventory_number', 'notes',)
+    uppercase_fields = ('serial_number', 'inventory_number',)
+
     class Status(models.TextChoices):
-        IN_SERVICE = "in_service", translate("In service")
-        WAITING_INSPECTION = "waiting_inspection", translate("Waiting for inspection")
-        UNDER_INSPECTION = "under_inspection", translate("Under inspection")
-        UNDER_REPAIR = "under_repair", translate("Under repair")
-        WAITING_REINSPECTION = "waiting_reinspection", translate("Waiting for reinspection")
-        TEMPORARILY_SUSPENDED = "temporarily_suspended", translate("Temporarily suspended")
-        DECOMMISSIONED = "decommissioned", translate("Decommissioned")
+        IN_SERVICE = 'in_service', translate('In service')
+        WAITING_INSPECTION = 'waiting_inspection', translate('Waiting for inspection')
+        UNDER_INSPECTION = 'under_inspection', translate('Under inspection')
+        UNDER_REPAIR = 'under_repair', translate('Under repair')
+        WAITING_REINSPECTION = 'waiting_reinspection', translate('Waiting for reinspection')
+        TEMPORARILY_SUSPENDED = 'temporarily_suspended', translate('Temporarily suspended')
+        DECOMMISSIONED = 'decommissioned', translate('Decommissioned')
 
     customer_site = models.ForeignKey(
         'customers.CustomerSite',
@@ -127,19 +130,7 @@ class Equipment(AutoSlugMixin, TimestampMixin):
         verbose_name=translate("Notes"),
     )
 
-    def normalize_identifiers(self):
-        if self.serial_number:
-            self.serial_number = self.serial_number.strip().upper()
-
-        if self.inventory_number:
-            self.inventory_number = self.inventory_number.strip().upper()
-
-    def clean(self):
-        super().clean()
-        self.normalize_identifiers()
-
     def save(self, *args, **kwargs):
-        self.normalize_identifiers()
         self.is_active = (self.status != self.Status.DECOMMISSIONED)
         update_fields = kwargs.get("update_fields")
 
@@ -184,13 +175,13 @@ class Equipment(AutoSlugMixin, TimestampMixin):
 
     class Meta:
         ordering = (
-            "customer_site__customer__company_name",
-            "customer_site__name",
-            "equipment_type__name",
-            "serial_number",
+            'customer_site__customer__company_name',
+            'customer_site__name',
+            'equipment_type__name',
+            'serial_number',
         )
-        verbose_name = translate("Equipment")
-        verbose_name_plural = translate("Equipment")
+        verbose_name = translate('Equipment')
+        verbose_name_plural = translate('Equipment')
 
 class EquipmentStatusHistory(models.Model):
     equipment = models.ForeignKey(

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% block delete_page_title %}
+        Delete record
+    {% endblock %}
+    | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <section class="delete-card">
+        <h2>
+            {% block delete_heading %}
+                Delete record
+            {% endblock %}
+        </h2>
+
+        <div class="warning">
+            {% block delete_warning %}
+                This action cannot be undone.
+            {% endblock %}
+        </div>
+
+        {% if deletion_error %}
+            <div class="error">
+                {{ deletion_error }}
+            </div>
+        {% endif %}
+
+        {% block delete_object_details %}
+        {% endblock %}
+
+        <div class="actions">
+            {% if not deletion_blocked %}
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="delete-confirmation">
+                        {{ form.confirm.errors }}
+
+                        <label
+                            for="{{ form.confirm.id_for_label }}"
+                        >
+                            {{ form.confirm }}
+                            {{ form.confirm.label }}
+                        </label>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="delete-button"
+                    >
+                        {% block delete_button_text %}
+                            Delete permanently
+                        {% endblock %}
+                    </button>
+                </form>
+            {% endif %}
+
+            {% block delete_cancel_action %}
+            {% endblock %}
+        </div>
+    </section>
+{% endblock %}

@@ -12,6 +12,5 @@ urlpatterns = [
         path('start/', views.InspectionStartView.as_view(), name='start'),
         path('complete/', views.InspectionCompleteView.as_view(), name='complete'),
         path('cancel/', views.InspectionCancelView.as_view(), name='cancel'),
-    ]))
-
+    ])),
 ]

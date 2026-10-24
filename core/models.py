@@ -1,25 +1,41 @@
 from django.core.exceptions import ValidationError
 from django.db import models
-from .model_mixins import TimestampMixin, SingleRecordMixin, CompanyMixin
+from .model_mixins import TimestampMixin, SingleRecordMixin, CompanyMixin, TextNormalizationMixin
 from django.utils.translation import gettext_lazy as translate
 from .validators import hex_color_validator
 from datetime import time
 
-class Specialty(TimestampMixin):
+class Specialty(TextNormalizationMixin, TimestampMixin):
+    strip_fields = ('code', 'name', 'short_name', 'description', 'color',)
+
+    uppercase_fields = ('code', 'color',)
     code = models.CharField(
         max_length = 20,
         unique=True,
         verbose_name = translate('Code'),
+        error_messages={
+            "blank": translate("Enter a code for the specialty."),
+            "unique": translate("A specialty with this code already exists."),
+            "max_length": translate("The specialty code cannot contain more than 20 characters."),
+        },
     )
     name = models.CharField(
         max_length = 150,
         unique = True,
         verbose_name = translate('Name'),
+        error_messages={
+            "blank": translate("Enter the specialty name."),
+            "unique": translate("A specialty with this name already exists."),
+            "max_length": translate("The specialty name cannot contain more than 150 characters."),
+        },
     )
     short_name = models.CharField(
         max_length = 50,
         blank = True,
         verbose_name = translate('Short name'),
+        error_messages={
+            "max_length": translate("The short name cannot contain more than 50 characters."),
+        },
     )
     description = models.TextField(
         blank = True,
@@ -30,6 +46,10 @@ class Specialty(TimestampMixin):
         default = '#2878C8',
         validators = [hex_color_validator],
         verbose_name = translate('Color'),
+        error_messages={
+            "blank": translate("Enter a color in the format #RRGGBB."),
+            "max_length": translate("Enter a valid HEX color in the format #RRGGBB."),
+        },
     )
     sort_order = models.PositiveIntegerField(
         default = 0,
@@ -40,20 +60,13 @@ class Specialty(TimestampMixin):
         verbose_name = translate("Active"),
     )
 
-    def save(self, *args, **kwargs):
-        if self.code:
-            self.code = self.code.strip().upper()
-        if self.color:
-            self.color = self.color.strip().upper()
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return self.name
 
     class Meta:
         ordering = ("sort_order", "name")
-        verbose_name = translate("Speciality")
-        verbose_name_plural = translate("Specialities")
+        verbose_name = translate("Specialty")
+        verbose_name_plural = translate("Specialties")
 
 class CompanySettings(CompanyMixin, TimestampMixin, SingleRecordMixin):
     def __str__(self):

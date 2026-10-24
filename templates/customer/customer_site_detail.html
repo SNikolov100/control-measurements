@@ -30,7 +30,11 @@
 
             <dt><strong>Short name</strong></dt>
             <dd>{{ site.short_name }}</dd>
+            <dt><strong>City</strong></dt>
+            <dd>{{ site.effective_city|default:"-" }}</dd>
 
+            <dt><strong>Address</strong></dt>
+            <dd>{{ site.effective_address|default:"-" }}</dd>
             <dt><strong>Phone</strong></dt>
             <dd>
                 {% if site.phone %}

@@ -11,7 +11,7 @@ urlpatterns = [
         path('system/', views.SystemSettingsView.as_view(), name='system-settings'),
     ])),
     path('specialties/', include([
-        path('', views.specialty_list, name='specialty-list'),
+        path('', views.SpecialtyListView.as_view(), name='specialty-list'),
         path('create/', views.SpecialtyCreateView.as_view(), name='specialty-create'),
         path('<int:pk>/', include([
             path('edit/', views.SpecialtyEditView.as_view(), name='specialty-edit'),

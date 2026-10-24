@@ -1,161 +1,80 @@
-{% extends "base.html" %}
+{% extends "shared/delete_confirm_base.html" %}
 
-{% block title %}
-    Delete equipment type | Control Measurements
+{% block delete_page_title %}
+    Delete equipment type
 {% endblock %}
 
-{% block content %}
-    <style>
-        .delete-card {
-            max-width: 760px;
-            padding: 28px;
-            background: white;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-        }
+{% block delete_heading %}
+    Delete equipment type
+{% endblock %}
 
-        .warning {
-            padding: 12px;
-            margin-bottom: 20px;
-            color: #92400e;
-            background: #fef3c7;
-            border: 1px solid #f59e0b;
-            border-radius: 5px;
-        }
+{% block delete_warning %}
+    Are you sure you want to delete this equipment type?
+    This action cannot be undone.
+{% endblock %}
 
-        .error {
-            padding: 12px;
-            margin-bottom: 20px;
-            color: #991b1b;
-            background: #fee2e2;
-            border: 1px solid #ef4444;
-            border-radius: 5px;
-        }
+{% block delete_object_details %}
+    <h3>{{ equipment_type.name }}</h3>
 
-        .equipment-type-data {
-            display: grid;
-            grid-template-columns: 190px 1fr;
-            margin: 24px 0;
-            border-top: 1px solid #e5e7eb;
-        }
+    <dl class="record-details">
+        <dt>Name</dt>
+        <dd>{{ equipment_type.name }}</dd>
 
-        .equipment-type-data dt,
-        .equipment-type-data dd {
-            box-sizing: border-box;
-            min-height: 46px;
-            padding: 13px 10px;
-            margin: 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
+        <dt>Short name</dt>
+        <dd>{{ equipment_type.short_name }}</dd>
 
-        .equipment-type-data dt {
-            font-weight: bold;
-            background: #f9fafb;
-        }
+        <dt>Specialty</dt>
+        <dd>{{ equipment_type.specialty.name }}</dd>
 
-        .actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 24px;
-        }
-
-        .delete-button {
-            padding: 9px 16px;
-            color: white;
-            background: #b91c1c;
-            border: 0;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    </style>
-
-    <section class="delete-card">
-        <h2>Delete equipment type</h2>
-
-        <div class="warning">
-            Are you sure you want to delete this equipment type?
-            This action cannot be undone.
-        </div>
-
-        {% if deletion_error %}
-            <div class="error">
-                {{ deletion_error }}
-            </div>
-        {% endif %}
-
-        <h3>{{ equipment_type.name }}</h3>
-
-        <dl class="equipment-type-data">
-            <dt>Name</dt>
-            <dd>{{ equipment_type.name }}</dd>
-
-            <dt>Short name</dt>
-            <dd>{{ equipment_type.short_name }}</dd>
-
-            <dt>Specialty</dt>
-            <dd>{{ equipment_type.specialty.name }}</dd>
-
-            <dt>Description</dt>
-            <dd>
-                {% if equipment_type.description %}
-                    {{ equipment_type.description }}
-                {% else %}
-                    No description
-                {% endif %}
-            </dd>
-
-            <dt>Default interval</dt>
-            <dd>
-                {{ equipment_type.default_interval_value }}
-                {{ equipment_type.get_default_interval_unit_display }}
-            </dd>
-
-            <dt>Default duration</dt>
-            <dd>
-                {{ equipment_type.default_inspection_duration }}
-                minutes
-            </dd>
-
-            <dt>Active</dt>
-            <dd>
-                {% if equipment_type.is_active %}
-                    Yes
-                {% else %}
-                    No
-                {% endif %}
-            </dd>
-
-            <dt>Concrete equipment</dt>
-            <dd>
-                {% if equipment_type.equipment_items.exists %}
-                    {% for equipment in equipment_type.equipment_items.all %}
-                        {{ equipment }}
-
-                        {% if not forloop.last %}
-                            ,
-                        {% endif %}
-                    {% endfor %}
-                {% else %}
-                    None
-                {% endif %}
-            </dd>
-        </dl>
-
-        <div class="actions">
-            {% if not deletion_blocked %}
-                <form method="post">
-                    {% csrf_token %}
-
-                    <button type="submit" class="delete-button">
-                        Delete equipment type
-                    </button>
-                </form>
+        <dt>Description</dt>
+        <dd>
+            {% if equipment_type.description %}
+                {{ equipment_type.description }}
+            {% else %}
+                No description
             {% endif %}
+        </dd>
 
-            <a href="{% url 'equipment:types-list' %}">
-                Cancel and return to equipment types
-            </a>
-        </div>
-    </section>
+        <dt>Default interval</dt>
+        <dd>
+            {{ equipment_type.default_interval_value }}
+            {{ equipment_type.get_default_interval_unit_display }}
+        </dd>
+
+        <dt>Default duration</dt>
+        <dd>
+            {{ equipment_type.default_inspection_duration }}
+            minutes
+        </dd>
+
+        <dt>Active</dt>
+        <dd>
+            {% if equipment_type.is_active %}
+                Yes
+            {% else %}
+                No
+            {% endif %}
+        </dd>
+
+        <dt>Registered equipment</dt>
+        <dd>
+            {% for equipment in equipment_type.equipment_items.all %}
+                {{ equipment }}
+
+                {% if not forloop.last %}, {% endif %}
+            {% empty %}
+                None
+            {% endfor %}
+        </dd>
+    </dl>
+{% endblock %}
+
+{% block delete_button_text %}
+    Delete equipment type permanently
+{% endblock %}
+
+{% block delete_cancel_action %}
+    <a href="{% url 'equipment:types-list' %}">
+        Cancel and return to equipment types
+    </a>
 {% endblock %}

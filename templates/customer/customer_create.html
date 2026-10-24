@@ -11,7 +11,7 @@
         Enter the company information for the new customer.
     </p>
 
-    <form method="post">
+    <form method="post" novalidate>
         {% csrf_token %}
 
         {{ form.as_p }}

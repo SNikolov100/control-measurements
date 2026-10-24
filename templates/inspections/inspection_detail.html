@@ -72,6 +72,14 @@
                 -
             {% endif %}
         </dd>
+        <dt><strong>Result notes</strong></dt>
+        <dd>
+            {% if inspection.result_notes %}
+                {{ inspection.result_notes|linebreaksbr }}
+            {% else %}
+                -
+            {% endif %}
+        </dd>
         {% if inspection.status == inspection.Status.CANCELLED %}
             <dt><strong>Cancellation reason</strong></dt>
                 <dd>
@@ -82,6 +90,14 @@
                     {% endif %}
                 </dd>
         {% endif %}
+        <dt><strong>Actual start</strong></dt>
+        <dd>
+            {% if inspection.actual_start %}
+                {{ inspection.actual_start }}
+            {% else %}
+                -
+            {% endif %}
+        </dd>
         <dt><strong>Actual end</strong></dt>
         <dd>
             {% if inspection.actual_end %}

@@ -30,7 +30,7 @@
         <dd>{{ equipment.get_status_display }}</dd>
     </dl>
 
-    <form method="post">
+    <form method="post" novalidate>
         {% csrf_token %}
 
         {{ form.as_p }}
