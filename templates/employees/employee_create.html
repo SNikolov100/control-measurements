@@ -1,30 +1,226 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Add employee | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
+    <link rel="stylesheet" href="{% static 'css/employees.css' %}" >
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'employees:list' %}">
+                    Employees
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Add employee
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>Add employee</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Add employee
+            </h1>
 
-    <p>
-        Enter the employee information and select one or more
-        specialties.
-    </p>
+            <p class="page-description">
+                Enter the employee's contact information and select
+                the specialties in which the employee is qualified.
+            </p>
+        </div>
+    </header>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+    <div class="form-layout employee-form-context">
+        <section class="form-card">
+            <div class="form-card-header">
+                <h2 class="form-card-title">
+                    Employee information
+                </h2>
 
-        {{ form.as_p }}
+                <p class="form-card-description">
+                    New employees are created as active. Their active
+                    status can later be changed through the controlled
+                    activation and deactivation workflow.
+                </p>
+            </div>
 
-        <button type="submit">
-            Save employee
-        </button>
-    </form>
+            {% if form.non_field_errors %}
+                <div class="form-non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
 
-    <p>
-        <a href="{% url 'employees:list' %}">
-            Back to employees
-        </a>
-    </p>
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="form-fields">
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.full_name.id_for_label }}"
+                        >
+                            Full name
+
+                            <span class="required-indicator">
+                                *
+                            </span>
+                        </label>
+
+                        {{ form.full_name.errors }}
+                        {{ form.full_name }}
+
+                        {% if form.full_name.help_text %}
+                            <p class="form-help">
+                                {{ form.full_name.help_text }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.position.id_for_label }}"
+                        >
+                            Position
+
+                            <span class="optional-indicator">
+                                Optional
+                            </span>
+                        </label>
+
+                        {{ form.position.errors }}
+                        {{ form.position }}
+
+                        {% if form.position.help_text %}
+                            <p class="form-help">
+                                {{ form.position.help_text }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.phone.id_for_label }}"
+                        >
+                            Phone
+
+                            <span class="optional-indicator">
+                                Optional
+                            </span>
+                        </label>
+
+                        {{ form.phone.errors }}
+                        {{ form.phone }}
+
+                        {% if form.phone.help_text %}
+                            <p class="form-help">
+                                {{ form.phone.help_text }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.email.id_for_label }}"
+                        >
+                            Email
+
+                            <span class="optional-indicator">
+                                Optional
+                            </span>
+                        </label>
+
+                        {{ form.email.errors }}
+                        {{ form.email }}
+
+                        {% if form.email.help_text %}
+                            <p class="form-help">
+                                {{ form.email.help_text }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.notes.id_for_label }}"
+                        >
+                            Notes
+
+                            <span class="optional-indicator">
+                                Optional
+                            </span>
+                        </label>
+
+                        {{ form.notes.errors }}
+                        {{ form.notes }}
+
+                        {% if form.notes.help_text %}
+                            <p class="form-help">
+                                {{ form.notes.help_text }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field employee-specialty-grid">
+                        <span class="form-label">
+                            Specialties
+
+                            <span class="required-indicator">
+                                *
+                            </span>
+                        </span>
+
+                        {{ form.specialties.errors }}
+
+                        {% if form.specialties.help_text %}
+                            <p class="employee-specialty-help">
+                                {{ form.specialties.help_text }}
+                            </p>
+                        {% endif %}
+
+                        {{ form.specialties }}
+                    </div>
+                </div>
+
+                <div class="confirmation-panel">
+                    The employee will be created as
+                    <strong>Active</strong> and will be available
+                    for assignment to activities matching the selected
+                    specialties.
+                </div>
+
+                <div class="form-actions">
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        Save employee
+                    </button>
+
+                    <a class="button" href="{% url 'employees:list' %}" >
+                        Back to employees
+                    </a>
+                </div>
+            </form>
+        </section>
+    </div>
 {% endblock %}

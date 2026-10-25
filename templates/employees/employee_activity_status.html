@@ -1,70 +1,260 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
-    Change employee activity | Control Measurements
+    {% if employee.is_active %}
+        Deactivate employee
+    {% else %}
+        Activate employee
+    {% endif %}
+    | Control Measurements
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/details.css' %}" >
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
+    <link rel="stylesheet" href="{% static 'css/employees.css' %}" >
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'employees:list' %}">
+                    Employees
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'employees:details' employee.pk %}">
+                    {{ employee.full_name }}
+                </a>
+            </li>
+
+            <li aria-current="page">
+                {% if employee.is_active %}
+                    Deactivate
+                {% else %}
+                    Activate
+                {% endif %}
+            </li>
+        </ol>
+    </nav>
 {% endblock %}
 
 {% block content %}
-    <h2>
-        {% if employee.is_active %}
-            Deactivate employee
-        {% else %}
-            Activate employee
-        {% endif %}
-    </h2>
-
-    <h3>{{ employee.full_name }}</h3>
-
-    <dl>
-        <dt><strong>Position</strong></dt>
-        <dd>
-            {% if employee.position %}
-                {{ employee.position }}
-            {% else %}
-                -
-            {% endif %}
-        </dd>
-
-        <dt><strong>Current state</strong></dt>
-        <dd>
-            {% if employee.is_active %}
-                Active
-            {% else %}
-                Inactive
-            {% endif %}
-        </dd>
-
-        <dt><strong>Specialties</strong></dt>
-        <dd>
-            {% for specialty in employee.specialties.all %}
-                {{ specialty.short_name }}
-
-                {% if not forloop.last %}
-                    ,
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                {% if employee.is_active %}
+                    Deactivate employee
+                {% else %}
+                    Activate employee
                 {% endif %}
-            {% empty %}
-                No specialties
-            {% endfor %}
-        </dd>
-    </dl>
+            </h1>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+            <p class="page-description">
+                {% if employee.is_active %}
+                    Deactivate the employee and record the reason
+                    for the status change.
+                {% else %}
+                    Activate the employee and record the reason
+                    for the status change.
+                {% endif %}
+            </p>
+        </div>
+    </header>
 
-        {{ form.as_p }}
+    <div class="form-layout">
+        <div class="employee-detail-grid">
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Employee information
+                        </h2>
 
-        <button type="submit">
-            {% if employee.is_active %}
-                Deactivate employee
-            {% else %}
-                Activate employee
+                        <p class="detail-card-description">
+                            Review the employee before changing
+                            the active status.
+                        </p>
+                    </div>
+
+                    {% if employee.is_active %}
+                        <span class="status-badge status-active">
+                            Active
+                        </span>
+                    {% else %}
+                        <span class="status-badge status-inactive">
+                            Inactive
+                        </span>
+                    {% endif %}
+                </div>
+
+                <dl class="detail-list">
+                    <dt>Full name</dt>
+                    <dd>{{ employee.full_name }}</dd>
+
+                    <dt>Position</dt>
+                    <dd>
+                        {% if employee.position %}
+                            {{ employee.position }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Phone</dt>
+                    <dd>
+                        {% if employee.phone %}
+                            {{ employee.phone }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Email</dt>
+                    <dd>
+                        {% if employee.email %}
+                            {{ employee.email }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </section>
+
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Specialties
+                        </h2>
+
+                        <p class="detail-card-description">
+                            Professional areas assigned to the
+                            employee.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="employee-specialties">
+                    {% for specialty in employee.specialties.all %}
+                        <span class="specialty-badge">
+                            {% if specialty.short_name %}
+                                {{ specialty.short_name }}
+                            {% else %}
+                                {{ specialty.name }}
+                            {% endif %}
+                        </span>
+                    {% empty %}
+                        <span class="detail-value-muted">
+                            No specialties have been assigned.
+                            The employee may still be in training.
+                        </span>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+
+        <section class="form-card form-container">
+            <div class="form-card-header">
+                <h2 class="form-card-title">
+                    {% if employee.is_active %}
+                        Deactivation reason
+                    {% else %}
+                        Activation reason
+                    {% endif %}
+                </h2>
+
+                <p class="form-card-description">
+                    The reason will be stored in the employee
+                    history.
+                </p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="form-non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
             {% endif %}
-        </button>
-    </form>
 
-    <p>
-        <a href="{% url 'employees:details' employee.pk %}">
-            Cancel and return to employee details
-        </a>
-    </p>
+            {% if employee.is_active %}
+                <div class="confirmation-panel confirmation-danger">
+                    The employee will become
+                    <strong>Inactive</strong> and will no longer
+                    be available for assignment to new activities.
+                </div>
+            {% else %}
+                <div class="confirmation-panel">
+                    The employee will become
+                    <strong>Active</strong> and may be offered for
+                    activities matching the assigned specialties.
+                </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="form-fields">
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.description.id_for_label }}"
+                        >
+                            Reason
+
+                            <span class="required-indicator">
+                                *
+                            </span>
+                        </label>
+
+                        {{ form.description.errors }}
+
+                        {{ form.description }}
+
+                        {% if form.description.help_text %}
+                            <p class="form-help">
+                                {{ form.description.help_text }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    {% if employee.is_active %}
+                        <button
+                            class="button button-danger"
+                            type="submit"
+                        >
+                            Deactivate employee
+                        </button>
+                    {% else %}
+                        <button
+                            class="button button-success"
+                            type="submit"
+                        >
+                            Activate employee
+                        </button>
+                    {% endif %}
+
+                    <a class="button" href="{% url 'employees:list' %}" >
+                        Return without changing status
+                    </a>
+                </div>
+            </form>
+        </section>
+    </div>
 {% endblock %}

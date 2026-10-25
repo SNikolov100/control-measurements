@@ -1,0 +1,156 @@
+<div class="form-fields">
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.company_name.id_for_label }}"
+        >
+            Company name
+            <span class="required-indicator">*</span>
+        </label>
+
+        {{ form.company_name.errors }}
+        {{ form.company_name }}
+
+        {% if form.company_name.help_text %}
+            <p class="form-help">
+                {{ form.company_name.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.short_name.id_for_label }}"
+        >
+            Short name
+            <span class="required-indicator">*</span>
+        </label>
+
+        {{ form.short_name.errors }}
+        {{ form.short_name }}
+
+        {% if form.short_name.help_text %}
+            <p class="form-help">
+                {{ form.short_name.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.country.id_for_label }}"
+        >
+            Country
+
+            <span class="optional-indicator">
+                Defaults to Bulgaria
+            </span>
+        </label>
+
+        {{ form.country.errors }}
+        {{ form.country }}
+
+        {% if form.country.help_text %}
+            <p class="form-help">
+                {{ form.country.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.city.id_for_label }}"
+        >
+            City
+            <span class="optional-indicator">Optional</span>
+        </label>
+
+        {{ form.city.errors }}
+        {{ form.city }}
+
+        {% if form.city.help_text %}
+            <p class="form-help">
+                {{ form.city.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.address.id_for_label }}"
+        >
+            Address
+            <span class="optional-indicator">Optional</span>
+        </label>
+
+        {{ form.address.errors }}
+        {{ form.address }}
+
+        {% if form.address.help_text %}
+            <p class="form-help">
+                {{ form.address.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.phone.id_for_label }}"
+        >
+            Phone
+            <span class="optional-indicator">Optional</span>
+        </label>
+
+        {{ form.phone.errors }}
+        {{ form.phone }}
+
+        {% if form.phone.help_text %}
+            <p class="form-help">
+                {{ form.phone.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.email.id_for_label }}"
+        >
+            Email
+            <span class="optional-indicator">Optional</span>
+        </label>
+
+        {{ form.email.errors }}
+        {{ form.email }}
+
+        {% if form.email.help_text %}
+            <p class="form-help">
+                {{ form.email.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.notes.id_for_label }}"
+        >
+            Notes
+            <span class="optional-indicator">Optional</span>
+        </label>
+
+        {{ form.notes.errors }}
+        {{ form.notes }}
+
+        {% if form.notes.help_text %}
+            <p class="form-help">
+                {{ form.notes.help_text }}
+            </p>
+        {% endif %}
+    </div>
+</div>

@@ -1,0 +1,247 @@
+<div class="form-fields">
+    <section class="settings-group">
+        <div class="settings-group-header">
+            <h3>Calendar</h3>
+
+            <p>
+                Configure the default calendar view.
+            </p>
+        </div>
+
+        <div class="form-field">
+            <label
+                class="form-label"
+                for="{{ form.default_calendar_period.id_for_label }}"
+            >
+                Default calendar period
+                <span class="required-indicator">*</span>
+            </label>
+
+            {{ form.default_calendar_period.errors }}
+            {{ form.default_calendar_period }}
+
+            {% if form.default_calendar_period.help_text %}
+                <p class="form-help">
+                    {{ form.default_calendar_period.help_text }}
+                </p>
+            {% endif %}
+        </div>
+
+        <div class="form-field">
+            {{ form.show_weekends.errors }}
+
+            <label
+                class="form-checkbox-field"
+                for="{{ form.show_weekends.id_for_label }}"
+            >
+                {{ form.show_weekends }}
+
+                <span class="form-checkbox-content">
+                    <span class="form-checkbox-label">
+                        Show weekends
+                    </span>
+
+                    <span class="form-help">
+                        {{ form.show_weekends.help_text }}
+                    </span>
+                </span>
+            </label>
+        </div>
+    </section>
+
+    <section class="settings-group">
+        <div class="settings-group-header">
+            <h3>Working time</h3>
+
+            <p>
+                Define the normal start and end of the working day.
+            </p>
+        </div>
+
+        <div class="settings-inline-grid">
+            <div class="form-field">
+                <label
+                    class="form-label"
+                    for="{{ form.workday_start.id_for_label }}"
+                >
+                    Workday start
+                    <span class="required-indicator">*</span>
+                </label>
+
+                {{ form.workday_start.errors }}
+                {{ form.workday_start }}
+
+                {% if form.workday_start.help_text %}
+                    <p class="form-help">
+                        {{ form.workday_start.help_text }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <div class="form-field">
+                <label
+                    class="form-label"
+                    for="{{ form.workday_end.id_for_label }}"
+                >
+                    Workday end
+                    <span class="required-indicator">*</span>
+                </label>
+
+                {{ form.workday_end.errors }}
+                {{ form.workday_end }}
+
+                {% if form.workday_end.help_text %}
+                    <p class="form-help">
+                        {{ form.workday_end.help_text }}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section class="settings-group">
+        <div class="settings-group-header">
+            <h3>Deadline warnings</h3>
+
+            <p>
+                Configure warning and critical periods before
+                activity due dates.
+            </p>
+        </div>
+
+        <div class="settings-inline-grid">
+            <div class="form-field">
+                <label
+                    class="form-label"
+                    for="{{ form.warning_days_before_due.id_for_label }}"
+                >
+                    Warning days
+                    <span class="required-indicator">*</span>
+                </label>
+
+                {{ form.warning_days_before_due.errors }}
+                {{ form.warning_days_before_due }}
+
+                {% if form.warning_days_before_due.help_text %}
+                    <p class="form-help">
+                        {{ form.warning_days_before_due.help_text }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <div class="form-field">
+                <label
+                    class="form-label"
+                    for="{{ form.critical_days_before_due.id_for_label }}"
+                >
+                    Critical days
+                    <span class="required-indicator">*</span>
+                </label>
+
+                {{ form.critical_days_before_due.errors }}
+                {{ form.critical_days_before_due }}
+
+                {% if form.critical_days_before_due.help_text %}
+                    <p class="form-help">
+                        {{ form.critical_days_before_due.help_text }}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-field">
+            {{ form.show_overdue_alerts.errors }}
+
+            <label
+                class="form-checkbox-field"
+                for="{{ form.show_overdue_alerts.id_for_label }}"
+            >
+                {{ form.show_overdue_alerts }}
+
+                <span class="form-checkbox-content">
+                    <span class="form-checkbox-label">
+                        Show overdue alerts
+                    </span>
+
+                    <span class="form-help">
+                        {{ form.show_overdue_alerts.help_text }}
+                    </span>
+                </span>
+            </label>
+        </div>
+    </section>
+
+    <section class="settings-group">
+        <div class="settings-group-header">
+            <h3>Activity automation</h3>
+
+            <p>
+                Configure automatic activity creation and required
+                workflow conditions.
+            </p>
+        </div>
+
+        <div class="form-field">
+            {{ form.auto_create_next_inspection.errors }}
+
+            <label
+                class="form-checkbox-field"
+                for="{{ form.auto_create_next_inspection.id_for_label }}"
+            >
+                {{ form.auto_create_next_inspection }}
+
+                <span class="form-checkbox-content">
+                    <span class="form-checkbox-label">
+                        Automatically create next inspection
+                    </span>
+
+                    <span class="form-help">
+                        {{ form.auto_create_next_inspection.help_text }}
+                    </span>
+                </span>
+            </label>
+        </div>
+
+        <div class="form-field">
+            {{ form.require_assigned_employee_before_start.errors }}
+
+            <label
+                class="form-checkbox-field"
+                for="{{ form.require_assigned_employee_before_start.id_for_label }}"
+            >
+                {{ form.require_assigned_employee_before_start }}
+
+                <span class="form-checkbox-content">
+                    <span class="form-checkbox-label">
+                        Require an assigned employee before start
+                    </span>
+
+                    <span class="form-help">
+                        {{ form.require_assigned_employee_before_start.help_text }}
+                    </span>
+                </span>
+            </label>
+        </div>
+
+        <div class="form-field">
+            {{ form.require_result_before_completion.errors }}
+
+            <label
+                class="form-checkbox-field"
+                for="{{ form.require_result_before_completion.id_for_label }}"
+            >
+                {{ form.require_result_before_completion }}
+
+                <span class="form-checkbox-content">
+                    <span class="form-checkbox-label">
+                        Require a result before completion
+                    </span>
+
+                    <span class="form-help">
+                        {{ form.require_result_before_completion.help_text }}
+                    </span>
+                </span>
+            </label>
+        </div>
+    </section>
+</div>

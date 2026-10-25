@@ -1,255 +1,539 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
-    Customer site details | Control Measurements
+    {{ site.name }} | Control Measurements
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/details.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/customers.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:list' %}">
+                    Customers
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:details' customer.slug %}">
+                    {{ customer.short_name|default:customer.company_name }}
+                </a>
+            </li>
+
+            <li aria-current="page">
+                {{ site.short_name|default:site.name }}
+            </li>
+        </ol>
+    </nav>
 {% endblock %}
 
 {% block content %}
-    <h2>Customer site details</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                {{ site.name }}
+            </h1>
 
-    <h3>{{ site.name }}</h3>
+            <p class="page-description">
+                Customer-site information, responsible contacts,
+                registered equipment, and related activities.
+            </p>
+        </div>
 
-    <section>
-        <h4>Customer</h4>
+        <div class="page-actions">
+            <a
+                class="button"
+                href="{% url 'customers:site-edit' customer.slug site.slug %}"
+            >
+                Edit site
+            </a>
 
-        <dl>
-            <dt><strong>Company</strong></dt>
-            <dd>{{ customer.company_name }}</dd>
+            <a
+                class="button button-primary"
+                href="{% url 'customers:contact-create' customer.slug site.slug %}"
+            >
+                Add responsible contact
+            </a>
+        </div>
+    </header>
 
-            <dt><strong>Short name</strong></dt>
-            <dd>{{ customer.short_name }}</dd>
-        </dl>
-    </section>
+    <div class="site-workspace">
+        <div class="site-context-grid">
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Customer
+                        </h2>
 
-    <section>
-        <h4>Site information</h4>
+                        <p class="detail-card-description">
+                            Parent customer information.
+                        </p>
+                    </div>
 
-        <dl>
-            <dt><strong>Name</strong></dt>
-            <dd>{{ site.name }}</dd>
+                    {% if customer.is_active %}
+                        <span class="status-badge status-active">
+                            Active
+                        </span>
+                    {% else %}
+                        <span class="status-badge status-inactive">
+                            Inactive
+                        </span>
+                    {% endif %}
+                </div>
 
-            <dt><strong>Short name</strong></dt>
-            <dd>{{ site.short_name }}</dd>
-            <dt><strong>City</strong></dt>
-            <dd>{{ site.effective_city|default:"-" }}</dd>
+                <dl class="detail-list">
+                    <dt>Company</dt>
+                    <dd>{{ customer.company_name }}</dd>
 
-            <dt><strong>Address</strong></dt>
-            <dd>{{ site.effective_address|default:"-" }}</dd>
-            <dt><strong>Phone</strong></dt>
-            <dd>
-                {% if site.phone %}
-                    {{ site.phone }}
-                {% else %}
-                    -
-                {% endif %}
-            </dd>
+                    <dt>Short name</dt>
+                    <dd>
+                        {% if customer.short_name %}
+                            {{ customer.short_name }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
 
-            <dt><strong>Email</strong></dt>
-            <dd>
-                {% if site.email %}
-                    {{ site.email }}
-                {% else %}
-                    -
-                {% endif %}
-            </dd>
+                    <dt>City</dt>
+                    <dd>
+                        {{ customer.city|default:"Not provided" }}
+                    </dd>
 
-            <dt><strong>Active</strong></dt>
-            <dd>
-                {% if site.is_active %}
-                    Yes
-                {% else %}
-                    No
-                {% endif %}
-            </dd>
-        </dl>
-    </section>
+                    <dt>Address</dt>
+                    <dd>
+                        {{ customer.address|default:"Not provided" }}
+                    </dd>
 
-    <section>
-        <h4>Notes</h4>
+                    <dt>Phone</dt>
+                    <dd>
+                        {{ customer.phone|default:"Not provided" }}
+                    </dd>
 
-        {% if site.notes %}
-            <p>{{ site.notes|linebreaksbr }}</p>
-        {% else %}
-            <p>No notes.</p>
-        {% endif %}
-    </section>
+                    <dt>Email</dt>
+                    <dd>
+                        {% if customer.email %}
+                            <a href="mailto:{{ customer.email }}">
+                                {{ customer.email }}
+                            </a>
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+                </dl>
 
-    <section>
-        <h4>Contacts</h4>
+                <div class="context-navigation">
+                    <a
+                        class="button button-small"
+                        href="{% url 'customers:details' customer.slug %}"
+                    >
+                        Customer details
+                    </a>
+                </div>
+            </section>
 
-        <a href="{% url 'customers:contact-create' customer.pk site.pk %}">
-            Add contact
-        </a>
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Site information
+                        </h2>
 
-        {% if site.contacts.all %}
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Position</th>
-                        <th>Phone</th>
-                        <th>Email</th>
-                        <th>Primary</th>
-                        <th>Active</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+                        <p class="detail-card-description">
+                            Operational location and site contact data.
+                        </p>
+                    </div>
 
-                <tbody>
+                    {% if site.is_active %}
+                        <span class="status-badge status-active">
+                            Active
+                        </span>
+                    {% else %}
+                        <span class="status-badge status-inactive">
+                            Inactive
+                        </span>
+                    {% endif %}
+                </div>
+
+                <dl class="detail-list">
+                    <dt>Name</dt>
+                    <dd>{{ site.name }}</dd>
+
+                    <dt>Short name</dt>
+                    <dd>
+                        {% if site.short_name %}
+                            {{ site.short_name }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>City</dt>
+                    <dd>
+                        {{ site.effective_city|default:"Not provided" }}
+                    </dd>
+
+                    <dt>Address</dt>
+                    <dd>
+                        {{ site.effective_address|default:"Not provided" }}
+                    </dd>
+
+                    <dt>Phone</dt>
+                    <dd>
+                        {{ site.phone|default:"Not provided" }}
+                    </dd>
+
+                    <dt>Email</dt>
+                    <dd>
+                        {% if site.email %}
+                            <a href="mailto:{{ site.email }}">
+                                {{ site.email }}
+                            </a>
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </section>
+        </div>
+
+        <section class="workspace-section">
+            <div class="workspace-section-header">
+                <div>
+                    <h2 class="workspace-section-title">
+                        Responsible contacts
+                    </h2>
+
+                    <p class="workspace-section-description">
+                        Contacts associated with this customer site.
+                        One active contact may be marked as primary.
+                    </p>
+                </div>
+
+                <a
+                    class="button button-primary"
+                    href="{% url 'customers:contact-create' customer.slug site.slug %}"
+                >
+                    Add responsible contact
+                </a>
+            </div>
+
+            {% if site.contacts.all %}
+                <div class="contact-card-grid">
                     {% for contact in site.contacts.all %}
-                        <tr>
-                            <td>{{ contact.full_name }}</td>
-
-                            <td>
-                                {% if contact.position %}
-                                    {{ contact.position }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                {% if contact.phone %}
-                                    {{ contact.phone }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                {% if contact.email %}
-                                    {{ contact.email }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-
-                            <td>
+                        <article
+                            class="
+                                contact-card
                                 {% if contact.is_primary %}
-                                    Yes
-                                {% else %}
-                                    No
+                                    contact-card-primary
                                 {% endif %}
-                            </td>
+                            "
+                        >
+                            <div>
+                                <div class="action-group">
+                                    <h3 class="contact-card-title">
+                                        {{ contact.full_name }}
+                                    </h3>
 
-                            <td>
-                                {% if contact.is_active %}
-                                    Yes
-                                {% else %}
-                                    No
-                                {% endif %}
-                            </td>
+                                    {% if contact.is_primary %}
+                                        <span
+                                                         </span>
+                                    {% endif %}
 
-                            <td>
-                                <a href="{% url 'customers:contact-details' customer.pk site.pk contact.pk %}">
+                                    {% if contact.is_active %}
+                                        <span
+                                            class="status-badge status-active"
+                                        >
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span
+                                            class="status-badge status-inactive"
+                                        >
+                                            Inactive
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="contact-card-meta">
+                                    <span>
+                                        {{ contact.position|default:"No position" }}
+                                    </span>
+
+                                    <span>
+                                        {{ contact.phone|default:"No phone" }}
+                                    </span>
+
+                                    {% if contact.email %}
+                                        <a href="mailto:{{ contact.email }}">
+                                            {{ contact.email }}
+                                        </a>
+                                    {% else %}
+                                        <span>No email</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="contact-card-actions">
+                                <a
+                                    class="button button-small"
+                                    href="{% url 'customers:contact-details' customer.slug site.slug contact.pk %}"
+                                >
                                     Details
                                 </a>
-                                |
-                                <a href="{% url 'customers:contact-edit' customer.pk site.pk contact.pk %}">
+
+                                <a
+                                    class="button button-small"
+                                    href="{% url 'customers:contact-edit' customer.slug site.slug contact.pk %}"
+                                >
                                     Edit
                                 </a>
-                                |
-                                <a href="{% url 'customers:contact-delete' customer.pk site.pk contact.pk %}">
+
+                                <a
+                                    class="button button-small button-danger"
+                                    href="{% url 'customers:contact-delete' customer.slug site.slug contact.pk %}"
+                                >
                                     Delete
                                 </a>
-                            </td>
-                        </tr>
+                            </div>
+                        </article>
                     {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>This customer site has no contacts.</p>
-        {% endif %}
-    </section>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>No responsible contacts</h3>
 
-    <section>
-        <h4>Equipment</h4>
+                    <p>
+                        Add a contact before recording who hands
+                        over equipment for an activity.
+                    </p>
 
-        <p>
-            <a href="{% url 'customers:site-equipment-create' customer.pk site.pk %}">
-                Add equipment
+                    <a
+                        class="button button-primary"
+                        href="{% url 'customers:contact-create' customer.slug site.slug %}"
+                    >
+                        Add responsible contact
+                    </a>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="workspace-section">
+            <div class="workspace-section-header">
+                <div>
+                    <h2 class="workspace-section-title">
+                        Registered equipment
+                    </h2>
+
+                    <p class="workspace-section-description">
+                        Equipment registered for this customer site.
+                    </p>
+                </div>
+
+                <a
+                    class="button button-primary"
+                    href="{% url 'customers:site-equipment-create' customer.slug site.slug %}"
+                >
+                    Add equipment
+                </a>
+            </div>
+
+            {% if site.equipment_items.all %}
+                <div class="table-card">
+                    <div class="table-scroll">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Equipment</th>
+                                    <th>Model</th>
+                                    <th>Serial number</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for equipment in site.equipment_items.all %}
+                                    <tr>
+                                        <td>
+                                            <div class="equipment-identity">
+                                                <span class="table-primary-text">
+                                                    {{ equipment.equipment_type.name }}
+                                                </span>
+
+                                                <span class="equipment-number">
+                                                    {{ equipment.equipment_type.specialty.short_name }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            {% if equipment.model_name %}
+                                                {{ equipment.model_name }}
+                                            {% else %}
+                                                <span class="table-empty-cell">
+                                                    -
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            <span class="table-primary-text">
+                                                {{ equipment.serial_number }}
+                                            </span>
+
+                                            {% if equipment.inventory_number %}
+                                                <span class="table-secondary-text">
+                                                    Inventory:
+                                                    {{ equipment.inventory_number }}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            {% if equipment.status == equipment.Status.IN_SERVICE %}
+                                                <span
+                                                    class="status-badge status-active"
+                                                >
+                                                    {{ equipment.get_status_display }}
+                                                </span>
+                                            {% elif equipment.status == equipment.Status.UNDER_INSPECTION or equipment.status == equipment.Status.UNDER_REPAIR %}
+                                                <span
+                                                    class="status-badge status-in-progress"
+                                                >
+                                                    {{ equipment.get_status_display }}
+                                                </span>
+                                            {% elif equipment.status == equipment.Status.DECOMMISSIONED %}
+                                                <span
+                                                    class="status-badge status-inactive"
+                                                >
+                                                    {{ equipment.get_status_display }}
+                                                </span>
+                                            {% else %}
+                                                <span
+                                                    class="status-badge status-warning"
+                                                >
+                                                    {{ equipment.get_status_display }}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td class="table-actions">
+                                            <div class="action-group">
+                                                <a href="{% url 'equipment:detail' equipment.slug %}">
+                                                    Details
+                                                </a>
+
+                                                <a
+                                                    class="button button-small"
+                                                    href="{% url 'equipment:edit' equipment.slug %}"
+                                                >
+                                                    Edit
+                                                </a>
+
+                                                <a
+                                                    class="button button-small button-primary"
+                                                    href="{% url 'inspections:create' equipment.slug %}"
+                                                >
+                                                    New activity
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>No registered equipment</h3>
+
+                    <p>
+                        Register the first equipment item for this
+                        customer site.
+                    </p>
+
+                    <a
+                        class="button button-primary"
+                        href="{% url 'customers:site-equipment-create' customer.slug site.slug %}"
+                    >
+                        Add equipment
+                    </a>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="workspace-section">
+            <div class="workspace-section-header">
+                <div>
+                    <h2 class="workspace-section-title">
+                        Equipment intake
+                    </h2>
+
+                    <p class="workspace-section-description">
+                        Future workspace for receiving several
+                        equipment items from one responsible contact.
+                    </p>
+                </div>
+            </div>
+
+            <div class="intake-placeholder">
+                <strong>
+                    Group intake will be added in a later stage.
+                </strong>
+
+                The operator will select one active responsible
+                contact, mark the delivered equipment items,
+                register missing equipment, and create activities
+                for the selected equipment.
+            </div>
+        </section>
+
+        <nav
+            class="context-navigation"
+            aria-label="Customer site navigation"
+        >
+            <a
+                class="button"
+                href="{% url 'customers:details' customer.slug %}"
+            >
+                Back to customer
             </a>
-        </p>
 
-        {% if site.equipment_items.all %}
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Equipment type</th>
-                        <th>Model</th>
-                        <th>Serial number</th>
-                        <th>Inventory number</th>
-                        <th>Status</th>
-                        <th>Active</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+            <a
+                class="button"
+                href="{% url 'customers:list' %}"
+            >
+                All customers
+            </a>
 
-                <tbody>
-                    {% for equipment in site.equipment_items.all %}
-                        <tr>
-
-                            <td>{{ equipment.equipment_type.name }}</td>
-
-                            <td>
-                                {% if equipment.model_name %}
-                                    {{ equipment.model_name }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-
-                            <td>{{ equipment.serial_number }}</td>
-
-                            <td>
-                                {% if equipment.inventory_number %}
-                                    {{ equipment.inventory_number }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-
-                            <td>{{ equipment.get_status_display }}</td>
-
-                            <td>
-                                {% if equipment.is_active %}
-                                    Yes
-                                {% else %}
-                                    No
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                <a href="{% url 'equipment:detail' equipment.pk %}">
-                                    Details
-                                </a>
-                                |
-                                <a href="{% url 'equipment:edit' equipment.pk %}">
-                                    Edit
-                                </a>
-                                |
-                                <a href="{% url 'inspections:create' equipment.pk %}">
-                                    New activity
-                                </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>This customer site has no registered equipment.</p>
-        {% endif %}
-    </section>
-
-    <p>
-        <a href="{% url 'customers:site-edit' customer.pk site.pk %}">
-            Edit customer site
-        </a>
-    </p>
-
-    <p>
-        <a href="{% url 'customers:details' customer.pk %}">
-            Back to customer details
-        </a>
-    </p>
+            <a
+                class="button"
+                href="{% url 'core:home' %}"
+            >
+                Home
+            </a>
+        </nav>
+    </div>
 {% endblock %}

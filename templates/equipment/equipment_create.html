@@ -1,35 +1,88 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Add equipment | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+     <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
+     <link rel="stylesheet" href="{% static 'css/equipment.css' %}" >
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'equipment:list' %}">
+                    Equipment
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Add equipment
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>Add equipment</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">Add equipment</h1>
 
-    <p>
-        Select the customer site and equipment type, then enter the
-        identifiers and individual inspection settings.
-    </p>
+            <p class="page-description">
+                Register equipment by selecting its customer site
+                and equipment type.
+            </p>
+        </div>
+    </header>
 
-    <p>
-        If the inspection interval or duration is left empty, the
-        defaults from the selected equipment type will be used.
-    </p>
+    <div class="form-layout">
+        <div class="form-container">
+            <section class="form-card">
+                <div class="form-card-header">
+                    <h2 class="form-card-title">
+                        Equipment information
+                    </h2>
 
-    <form method="post">
-        {% csrf_token %}
+                    <p class="form-card-description">
+                        The preferred workflow is to register
+                        equipment from a specific customer-site page.
+                    </p>
+                </div>
 
-        {{ form.as_p }}
+                {% if form.non_field_errors %}
+                    <div class="form-non-field-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
 
-        <button type="submit">
-            Save equipment
-        </button>
-    </form>
+                <form method="post" novalidate>
+                    {% csrf_token %}
 
-    <p>
-        <a href="{% url 'equipment:list' %}">
-            Back to equipment registry
-        </a>
-    </p>
+                    {% include "equipment/includes/equipment_form_fields.html" %}
+
+                    <div class="form-actions">
+                        <button
+                            class="button button-primary"
+                            type="submit"
+                        >
+                            Save equipment
+                        </button>
+
+                        <a class="button" href="{% url 'equipment:list' %}">
+                            Return without saving
+                        </a>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
 {% endblock %}

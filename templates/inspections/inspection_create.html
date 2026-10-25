@@ -1,48 +1,374 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     New activity | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link
+        rel="stylesheet"
+        href="{% static 'css/details.css' %}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/forms.css' %}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/inspections.css' %}"
+    >
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:list' %}">
+                    Customers
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:details' equipment.customer_site.customer.slug %}" >
+                    {% if equipment.customer_site.customer.short_name %}
+                        {{ equipment.customer_site.customer.short_name }}
+                    {% else %}
+                        {{ equipment.customer_site.customer.company_name }}
+                    {% endif %}
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:site-details' equipment.customer_site.customer.slug equipment.customer_site.slug %}" >
+                    {% if equipment.customer_site.short_name %}
+                        {{ equipment.customer_site.short_name }}
+                    {% else %}
+                        {{ equipment.customer_site.name }}
+                    {% endif %}
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'equipment:detail' equipment.slug %}">
+                    {{ equipment.serial_number }}
+                </a>
+            </li>
+
+            <li aria-current="page">
+                New activity
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>New activity</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                New activity
+            </h1>
 
-    <h3>
-        {{ equipment.equipment_type.short_name }}
-        -
-        {{ equipment.serial_number }}
-    </h3>
+            <p class="page-description">
+                Register a new inspection, calibration, repair,
+                or reinspection for the selected equipment.
+            </p>
+        </div>
+    </header>
 
-    <dl>
-        <dt><strong>Customer</strong></dt>
-        <dd>{{ equipment.customer_site.customer.company_name }}</dd>
+    <div class="form-layout">
+        <div class="activity-detail-grid">
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Equipment
+                        </h2>
 
-        <dt><strong>Customer site</strong></dt>
-        <dd>{{ equipment.customer_site.name }}</dd>
+                        <p class="detail-card-description">
+                            Identification of the equipment for which
+                            the activity will be created.
+                        </p>
+                    </div>
 
-        <dt><strong>Equipment type</strong></dt>
-        <dd>{{ equipment.equipment_type.name }}</dd>
+                    {% if equipment.status == equipment.Status.IN_SERVICE %}
+                        <span class="status-badge status-active">
+                            {{ equipment.get_status_display }}
+                        </span>
+                    {% elif equipment.status == equipment.Status.UNDER_INSPECTION or equipment.status == equipment.Status.UNDER_REPAIR %}
+                        <span class="status-badge status-in-progress">
+                            {{ equipment.get_status_display }}
+                        </span>
+                    {% elif equipment.status == equipment.Status.DECOMMISSIONED %}
+                        <span class="status-badge status-inactive">
+                            {{ equipment.get_status_display }}
+                        </span>
+                    {% else %}
+                        <span class="status-badge status-warning">
+                            {{ equipment.get_status_display }}
+                        </span>
+                    {% endif %}
+                </div>
 
-        <dt><strong>Specialty</strong></dt>
-        <dd>{{ equipment.equipment_type.specialty.name }}</dd>
+                <dl class="detail-list">
+                    <dt>Equipment type</dt>
+                    <dd>{{ equipment.equipment_type.name }}</dd>
 
-        <dt><strong>Current status</strong></dt>
-        <dd>{{ equipment.get_status_display }}</dd>
-    </dl>
+                    <dt>Model</dt>
+                    <dd>
+                        {% if equipment.model_name %}
+                            {{ equipment.model_name }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+                    <dt>Serial number</dt>
+                    <dd>{{ equipment.serial_number }}</dd>
 
-        {{ form.as_p }}
+                    <dt>Inventory number</dt>
+                    <dd>
+                        {% if equipment.inventory_number %}
+                            {{ equipment.inventory_number }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
 
-        <button type="submit">
-            Save activity
-        </button>
-    </form>
+                    <dt>Specialty</dt>
+                    <dd>
+                        {{ equipment.equipment_type.specialty.name }}
+                    </dd>
+                </dl>
+            </section>
 
-    <p>
-        <a href="{% url 'equipment:detail' equipment.pk %}">
-            Cancel and return to equipment details
-        </a>
-    </p>
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Customer location
+                        </h2>
+
+                        <p class="detail-card-description">
+                            The customer and site are determined
+                            automatically from the equipment.
+                        </p>
+                    </div>
+                </div>
+
+                <dl class="detail-list">
+                    <dt>Customer</dt>
+                    <dd>
+                        {{ equipment.customer_site.customer.company_name }}
+                    </dd>
+
+                    <dt>Customer site</dt>
+                    <dd>
+                        {{ equipment.customer_site.name }}
+                    </dd>
+
+                    <dt>City</dt>
+                    <dd>
+                        {{ equipment.customer_site.effective_city|default:"Not provided" }}
+                    </dd>
+
+                    <dt>Address</dt>
+                    <dd>
+                        {{ equipment.customer_site.effective_address|default:"Not provided" }}
+                    </dd>
+                </dl>
+
+                <div class="context-navigation">
+                    <a
+                        class="button button-small"
+                        href="{% url 'customers:site-details' equipment.customer_site.customer.slug equipment.customer_site.slug %}"
+                    >
+                        Customer-site details
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <section class="form-card form-container">
+            <div class="form-card-header">
+                <h2 class="form-card-title">
+                    Activity information
+                </h2>
+
+                <p class="form-card-description">
+                    Enter the activity type, schedule, expected
+                    duration, and initial description.
+                </p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="form-non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="form-fields">
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.inspection_type.id_for_label }}"
+                        >
+                            Activity type
+
+                            <span class="required-indicator">*</span>
+                        </label>
+
+                        {{ form.inspection_type.errors }}
+                        {{ form.inspection_type }}
+
+                        <p class="form-help">
+                            Select the work that must be performed
+                            for this equipment.
+                        </p>
+                    </div>
+
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.received_at.id_for_label }}"
+                        >
+                            Received at
+
+                            <span class="required-indicator">*</span>
+                        </label>
+
+                        {{ form.received_at.errors }}
+                        {{ form.received_at }}
+
+                        <p class="form-help">
+                            Date and time when the equipment was
+                            received for processing.
+                        </p>
+                    </div>
+
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.due_date.id_for_label }}"
+                        >
+                            Due date
+
+                            <span class="optional-indicator">
+                                Optional
+                            </span>
+                        </label>
+
+                        {{ form.due_date.errors }}
+                        {{ form.due_date }}
+
+                        <p class="form-help">
+                            Planned deadline for completing the
+                            activity.
+                        </p>
+                    </div>
+
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.planned_start.id_for_label }}"
+                        >
+                            Planned start
+
+                            <span class="optional-indicator">
+                                Optional
+                            </span>
+                        </label>
+
+                        {{ form.planned_start.errors }}
+                        {{ form.planned_start }}
+
+                        <p class="form-help">
+                            Planned date and time for starting the
+                            activity.
+                        </p>
+                    </div>
+
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.estimated_duration.id_for_label }}"
+                        >
+                            Estimated duration in minutes
+
+                            <span class="optional-indicator">
+                                Uses the equipment default when empty
+                            </span>
+                        </label>
+
+                        {{ form.estimated_duration.errors }}
+                        {{ form.estimated_duration }}
+
+                        <p class="form-help">
+                            Leave empty to use the estimated duration
+                            configured for this equipment.
+                        </p>
+                    </div>
+
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.notes.id_for_label }}"
+                        >
+                            Notes
+
+                            <span class="optional-indicator">
+                                Required when opening a repair
+                            </span>
+                        </label>
+
+                        {{ form.notes.errors }}
+                        {{ form.notes }}
+
+                        <p class="form-help">
+                            Describe the reported issue, requested
+                            work, or other useful initial information.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="confirmation-panel">
+                    After saving, the activity will be created with
+                    status <strong>Pending</strong>. Employees can
+                    then be assigned from the Activities list.
+                </div>
+
+                <div class="form-actions">
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        Save activity
+                    </button>
+
+                    <a class="button" href="{% url 'equipment:list' %}" >
+                        Cancel
+                    </a>
+
+                    <a href="{% url 'customers:site-details' equipment.customer_site.customer.slug equipment.customer_site.slug %}">
+                        Back to customer site
+                    </a>
+                </div>
+            </form>
+        </section>
+    </div>
 {% endblock %}

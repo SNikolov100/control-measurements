@@ -1,0 +1,405 @@
+.form-layout {
+    display: grid;
+    gap: 24px;
+}
+
+.form-container {
+    width: min(100%, 920px);
+}
+
+.form-card {
+    padding: 24px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-large);
+    box-shadow: var(--shadow-small);
+}
+
+.form-card-header {
+    margin-bottom: 22px;
+}
+
+.form-card-title {
+    margin: 0;
+    color: var(--color-primary-900);
+    font-size: 21px;
+}
+
+.form-card-description {
+    margin: 6px 0 0;
+    color: var(--color-neutral-600);
+}
+
+.form-summary {
+    margin-bottom: 24px;
+}
+
+.form-fields {
+    display: grid;
+    gap: 20px;
+}
+
+.form-field {
+    display: grid;
+    gap: 7px;
+}
+
+.form-label {
+    color: var(--color-neutral-800);
+    font-weight: 700;
+}
+
+.required-indicator {
+    color: var(--color-danger-700);
+}
+
+.optional-indicator {
+    margin-left: 6px;
+    color: var(--color-neutral-600);
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.form-help {
+    margin: 0;
+    color: var(--color-neutral-600);
+    font-size: 13px;
+}
+
+.form-field input:not([type="checkbox"]):not([type="radio"]),
+.form-field select,
+.form-field textarea {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 11px;
+    color: var(--color-neutral-950);
+    background: var(--color-surface);
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--radius-small);
+    outline: none;
+    transition:
+        border-color 150ms ease,
+        box-shadow 150ms ease;
+}
+
+.form-field textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+    border-color: var(--color-primary-600);
+    box-shadow:
+        0 0 0 3px rgba(47, 104, 160, 0.14);
+}
+
+.form-field input[disabled],
+.form-field select[disabled],
+.form-field textarea[disabled] {
+    color: var(--color-neutral-600);
+    background: var(--color-neutral-100);
+    cursor: not-allowed;
+}
+
+.form-errors,
+.errorlist {
+    padding: 0;
+    margin: 0;
+    color: var(--color-danger-700);
+    font-size: 13px;
+    list-style: none;
+}
+
+.form-non-field-errors {
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    color: var(--color-danger-700);
+    background: var(--color-danger-100);
+    border: 1px solid #e4b1b1;
+    border-radius: var(--radius-small);
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 22px;
+    margin-top: 24px;
+    border-top: 1px solid var(--color-neutral-200);
+}
+
+
+/* Checkbox and radio groups */
+
+.choice-group {
+    display: grid;
+    gap: 10px;
+}
+
+.choice-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 13px 14px;
+    background: #fbfcfd;
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+}
+
+.choice-item:hover {
+    border-color: #a9c7e3;
+    background: var(--color-primary-100);
+}
+
+.choice-item input {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin: 2px 0 0;
+}
+
+.choice-item-label {
+    display: grid;
+    gap: 3px;
+}
+
+.choice-item-title {
+    color: var(--color-neutral-950);
+    font-weight: 700;
+}
+
+.choice-item-description {
+    color: var(--color-neutral-600);
+    font-size: 13px;
+}
+
+
+/* Standard Django multiple select */
+
+.form-field select[multiple] {
+    min-height: 170px;
+}
+
+
+/* Confirmation panels */
+
+.confirmation-panel {
+    padding: 18px;
+    color: var(--color-neutral-800);
+    background: #f8fafc;
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-medium);
+}
+
+.confirmation-warning {
+    color: var(--color-warning-700);
+    background: var(--color-warning-100);
+    border-color: #ebcb86;
+}
+
+.confirmation-danger {
+    color: var(--color-danger-700);
+    background: var(--color-danger-100);
+    border-color: #e4b1b1;
+}
+
+@media (max-width: 760px) {
+    .form-card {
+        padding: 18px;
+    }
+
+    .form-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .form-actions .button {
+        width: 100%;
+    }
+}
+.form-field ul {
+    display: grid;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.form-field ul li label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 14px;
+    background: #fbfcfd;
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+}
+
+.form-field ul li label:hover {
+    background: var(--color-primary-100);
+    border-color: #a9c7e3;
+}
+
+.form-field ul li input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+.form-checkbox-field {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px;
+    background: #fbfcfd;
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-small);
+}
+
+.form-checkbox-field input {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin: 2px 0 0;
+}
+
+.form-checkbox-content {
+    display: grid;
+    gap: 4px;
+}
+
+.form-checkbox-label {
+    color: var(--color-neutral-800);
+    font-weight: 700;
+}
+.delete-confirmation-card {
+    max-width: 920px;
+}
+
+.delete-warning {
+    margin-bottom: 24px;
+}
+
+.delete-warning strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 16px;
+}
+
+.delete-warning p {
+    margin: 0;
+}
+
+.delete-record-details {
+    margin-bottom: 24px;
+}
+
+.delete-record-details > h3 {
+    margin: 0 0 18px;
+    color: var(--color-primary-900);
+    font-size: 20px;
+}
+
+.record-details {
+    display: grid;
+    grid-template-columns: minmax(150px, 210px) 1fr;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid var(--color-neutral-200);
+}
+
+.record-details dt,
+.record-details dd {
+    min-width: 0;
+    padding: 13px 12px;
+    margin: 0;
+    border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.record-details dt {
+    color: var(--color-neutral-600);
+    font-weight: 700;
+    background: #f8fafc;
+}
+
+.record-details dd {
+    color: var(--color-neutral-950);
+    overflow-wrap: anywhere;
+}
+
+.delete-confirmation-field {
+    margin-top: 24px;
+}
+
+.delete-confirmation-field .errorlist {
+    margin-bottom: 10px;
+}
+
+.form-non-field-errors strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-non-field-errors p {
+    margin: 0;
+}
+
+@media (max-width: 760px) {
+    .record-details {
+        grid-template-columns: 1fr;
+    }
+
+    .record-details dt {
+        padding-bottom: 4px;
+        border-bottom: 0;
+    }
+
+    .record-details dd {
+        padding-top: 4px;
+    }
+}
+.settings-group {
+    display: grid;
+    gap: 18px;
+    padding: 20px;
+    background: #fbfcfd;
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-medium);
+}
+
+.settings-group-header {
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.settings-group-header h3 {
+    margin: 0;
+    color: var(--color-primary-900);
+    font-size: 18px;
+}
+
+.settings-group-header p {
+    margin: 5px 0 0;
+    color: var(--color-neutral-600);
+}
+
+.settings-inline-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+@media (max-width: 700px) {
+    .settings-inline-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-group {
+        padding: 16px;
+    }
+}

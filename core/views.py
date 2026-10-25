@@ -7,15 +7,21 @@ from .forms import (SpecialtyCreateForm, SpecialtyEditForm,
                     SystemSettingsForm)
 
 from .models import Specialty, CompanySettings, SystemSettings
-from .view_mixins import SingleRecordFormViewMixin, ConfirmedDeleteMixin
+from .view_mixins import SingleRecordFormViewMixin, ConfirmedDeleteMixin, PaginationMixin, SearchMixin
 
 def home(request: HttpRequest) -> HttpResponse:
     return render(request,"core/home.html")
 
-class SpecialtyListView(ListView):
+class SpecialtyListView(SearchMixin, PaginationMixin, ListView):
     model = Specialty
     template_name = 'core/specialty_list.html'
     context_object_name = 'specialties'
+
+    search_fields = (
+        'code__icontains',
+        'name__icontains',
+        'short_name__icontains',
+    )
 
 
 class SpecialtyCreateView(CreateView):
@@ -28,6 +34,7 @@ class SpecialtyEditView(UpdateView):
     model = Specialty
     form_class = SpecialtyEditForm
     template_name = 'core/specialty_edit.html'
+    context_object_name = "specialty"
     success_url = reverse_lazy('core:specialty-list')
 
 class SpecialtyDeleteView(ConfirmedDeleteMixin, DeleteView):

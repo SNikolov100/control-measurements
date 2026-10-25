@@ -15,6 +15,38 @@ class InspectionBaseForm(forms.ModelForm):
             'estimated_duration',
             'notes',
         )
+        widgets = {
+            "received_at": forms.DateTimeInput(
+                attrs={'type': 'datetime-local',},
+                format='%Y-%m-%dT%H:%M',
+            ),
+            'due_date': forms.DateInput(
+                attrs={'type': 'date',},
+                format="%Y-%m-%d",
+            ),
+            'planned_start': forms.DateTimeInput(
+                attrs={'type': 'datetime-local'},
+                format='%Y-%m-%dT%H:%M',
+            ),
+            'estimated_duration': forms.NumberInput(
+                attrs={
+                    'min': 1,
+                    'placeholder': 'Leave empty to use the equipment default',
+                },
+            ),
+            'notes': forms.Textarea(
+                attrs={
+                    'rows': 5,
+                    'placeholder': 'Describe the requested activity, reported fault, or other relevant information.',
+                },
+            )
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["received_at"].input_formats = ["%Y-%m-%dT%H:%M"]
+        self.fields["due_date"].input_formats = ["%Y-%m-%d"]
+        self.fields["planned_start"].input_formats = ["%Y-%m-%dT%H:%M"]
 
 
 class InspectionCreateForm(InspectionBaseForm):
@@ -52,6 +84,7 @@ class InspectionAssignmentForm(forms.ModelForm):
     class Meta:
         model = Inspection
         fields = ['assigned_employees']
+        widgets = {'assigned_employees': forms.CheckboxSelectMultiple()}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -84,6 +117,13 @@ class InspectionCompleteForm(forms.Form):
 
         if inspection and inspection.inspection_type == Inspection.InspectionType.REPAIR:
             self.fields.pop('result')
+            self.fields['result_notes'].widget.attrs.update(
+                {'placeholder': 'Describe the repair work performed, replaced components, and adjustments.'}
+            )
+        else:
+            self.fields["result_notes"].widget.attrs.update(
+                {'placeholder': 'Add final findings or describe the reason for a failed result.'}
+            )
 
     def clean(self):
         cleaned_data = super().clean()
@@ -104,8 +144,13 @@ class InspectionCompleteForm(forms.Form):
 
 class InspectionCancelForm(forms.Form):
     reason = forms.CharField(
-        widget=forms.Textarea,
+        widget=forms.Textarea(
+            attrs={
+                'rows': 5,
+                'placeholder': 'Describe why the activity is being cancelled.',
+            }
+        ),
         label='Cancellation reason',
-        help_text=translate('Explain why the activity is being cancelled.'),
+        help_text=translate('The reason will be stored with the cancelled activity.'),
         error_messages={'required': translate('Enter a reason for cancelling the activity.'),},
     )

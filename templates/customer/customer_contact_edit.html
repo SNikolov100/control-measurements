@@ -1,40 +1,136 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
-    Edit contact | Control Measurements
+    Edit responsible contact | Control Measurements
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/details.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:list' %}">
+                    Customers
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:details' customer.slug %}">
+                    {{ customer.short_name|default:customer.company_name }}
+                </a>
+            </li>
+
+            <li>
+                <a
+                    href="{% url 'customers:site-details' customer.slug site.slug %}"
+                >
+                    {{ site.short_name|default:site.name }}
+                </a>
+            </li>
+
+            <li>
+                <a
+                    href="{% url 'customers:contact-details' customer.slug site.slug contact.pk %}"
+                >
+                    {{ contact.full_name }}
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Edit
+            </li>
+        </ol>
+    </nav>
 {% endblock %}
 
 {% block content %}
-    <h2>Edit contact</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Edit responsible contact
+            </h1>
 
-    <p>
-        Customer:
-        <strong>{{ customer.company_name }}</strong>
-    </p>
+            <p class="page-description">
+                Update the person's contact information, role,
+                primary status, and active status.
+            </p>
+        </div>
+    </header>
 
-    <p>
-        Customer site:
-        <strong>{{ site.name }}</strong>
-    </p>
+    <div class="form-layout">
+        <section class="detail-card form-container">
+            <div class="detail-card-header">
+                <div>
+                    <h2 class="detail-card-title">
+                        Customer and site
+                    </h2>
 
-    <p>
-        Contact:
-        <strong>{{ contact.full_name }}</strong>
-    </p>
+                    <p class="detail-card-description">
+                        The customer-site association cannot be
+                        changed from this form.
+                    </p>
+                </div>
+            </div>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+            <dl class="detail-list">
+                <dt>Customer</dt>
+                <dd>{{ customer.company_name }}</dd>
 
-        {{ form.as_p }}
+                <dt>Customer site</dt>
+                <dd>{{ site.name }}</dd>
 
-        <button type="submit">
-            Save changes
-        </button>
-    </form>
+                <dt>Contact</dt>
+                <dd>{{ contact.full_name }}</dd>
+            </dl>
+        </section>
 
-    <p>
-        <a href="{% url 'customers:contact-details' customer.pk site.pk contact.pk %}">
-            Cancel and return to contact details
-        </a>
-    </p>
+        <section class="form-card form-container">
+            <div class="form-card-header">
+                <h2 class="form-card-title">
+                    {{ contact.full_name }}
+                </h2>
+
+                <p class="form-card-description">
+                    A contact cannot remain primary when marked
+                    as inactive.
+                </p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="form-non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% include "customer/includes/customer_contact_form_fields.html" %}
+
+                <div class="form-actions">
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        Save changes
+                    </button>
+
+                    <a class="button" href="{% url 'customers:site-details' customer.slug site.slug %}" >
+                        Return without saving
+                    </a>
+                </div>
+            </form>
+        </section>
+    </div>
 {% endblock %}

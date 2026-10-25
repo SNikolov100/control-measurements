@@ -73,8 +73,16 @@
     Delete equipment type permanently
 {% endblock %}
 
+{% block delete_blocked_action %}
+    <a
+        class="button"
+        href="{% url 'equipment:types-list' %}"
+    >
+        Return to equipment types
+    </a>
+{% endblock %}
 {% block delete_cancel_action %}
-    <a href="{% url 'equipment:types-list' %}">
-        Cancel and return to equipment types
+    <a class="button" href="{% url 'equipment:types-list' %}">
+        Return without deleting
     </a>
 {% endblock %}

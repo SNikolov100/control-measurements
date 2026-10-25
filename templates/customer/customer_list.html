@@ -1,94 +1,219 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Customers | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/tables.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Customers
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>Customers</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">Customers</h1>
 
-    <p>
-        <a href="{% url 'customers:create' %}">
-            Add customer
-        </a>
-    </p>
+            <p class="page-description">
+                Manage customer companies, their sites,
+                responsible contacts, and registered equipment.
+            </p>
+        </div>
 
-    {% if customers %}
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Company name</th>
-                    <th>Short name</th>
-                    <th>City</th>
-                    <th>Country</th>
-                    <th>Phone</th>
-                    <th>Email</th>
-                    <th>Active</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
+        <div class="page-actions">
+            <a
+                class="button button-primary"
+                href="{% url 'customers:create' %}"
+            >
+                Add customer
+            </a>
+        </div>
+    </header>
+    <section class="list-tools">
+        <div class="list-tools-header">
+            <div>
+                <h2 class="list-tools-title">
+                    Customer search
+                </h2>
 
-            <tbody>
-                {% for customer in customers %}
-                    <tr>
-                        <td>{{ customer.company_name }}</td>
+                <p class="list-tools-description">
+                    Search by company name, short name, location,
+                    contact information, or customer site.
+                </p>
+            </div>
+        </div>
 
-                        <td>{{ customer.short_name }}</td>
+        {% include "shared/search_form.html" with search_placeholder="Search customers" %}
+    </section>
 
-                        <td>
-                            {% if customer.city %}
-                                {{ customer.city }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
+    {% if search_query %}
+        <p class="search-result-summary">
+            Search results for:
+            <strong>{{ search_query }}</strong>
 
-                        <td>
-                            {% if customer.country %}
-                                {{ customer.country }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
+            {% if paginator %}
+                · {{ paginator.count }} matching records
+            {% endif %}
+        </p>
+    {% endif %}
+        {% if customers %}
+        <section
+            class="table-card"
+            aria-label="Customer register"
+        >
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Location</th>
+                            <th>Contact information</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
 
-                        <td>
-                            {% if customer.phone %}
-                                {{ customer.phone }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
+                    <tbody>
+                        {% for customer in customers %}
+                            <tr>
+                                <td>
+                                    <span class="table-primary-text">
+                                        {{ customer.company_name }}
+                                    </span>
 
-                        <td>
-                            {% if customer.email %}
-                                {{ customer.email }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
+                                    {% if customer.short_name %}
+                                        <span class="table-secondary-text">
+                                            {{ customer.short_name }}
+                                        </span>
+                                    {% endif %}
+                                </td>
 
-                        <td>
-                            {% if customer.is_active %}
-                                Yes
-                            {% else %}
-                                No
-                            {% endif %}
-                        </td>
+                                <td>
+                                    <span class="table-primary-text">
+                                        {% if customer.city %}
+                                            {{ customer.city }}
+                                        {% else %}
+                                            No city
+                                        {% endif %}
+                                    </span>
 
-                        <td>
-                            <a href="{% url 'customers:details' customer.pk %}">
-                                Details
-                            </a>
-                            |
-                            <a href="{% url 'customers:edit' customer.pk %}">
-                                Edit
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                                    <span class="table-secondary-text">
+                                        {% if customer.country %}
+                                            {{ customer.country }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% if customer.phone %}
+                                        <span class="table-primary-text">
+                                            {{ customer.phone }}
+                                        </span>
+                                    {% else %}
+                                        <span class="table-primary-text">
+                                            No phone
+                                        </span>
+                                    {% endif %}
+
+                                    <span class="table-secondary-text">
+                                        {% if customer.email %}
+                                            {{ customer.email }}
+                                        {% else %}
+                                            No email
+                                        {% endif %}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% if customer.is_active %}
+                                        <span
+                                            class="status-badge status-active"
+                                        >
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span
+                                            class="status-badge status-inactive"
+                                        >
+                                            Inactive
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="table-actions">
+                                    <div class="action-group">
+                                        <a
+                                            class="button button-small"
+                                            href="{% url 'customers:details' customer.slug %}"
+                                        >
+                                            Details
+                                        </a>
+
+                                        <a
+                                            class="button button-small"
+                                            href="{% url 'customers:edit' customer.slug %}"
+                                        >
+                                            Edit
+                                        </a>
+
+                                        <a
+                                            class="button button-small button-primary"
+                                            href="{% url 'customers:site-create' customer.slug %}"
+                                        >
+                                            Add site
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% include "shared/pagination.html" %}
     {% else %}
-        <p>No customers have been created.</p>
+        <section class="empty-state">
+            {% if search_query %}
+                <h2>No matching customers</h2>
+
+                <p>
+                    No customers match
+                    <strong>{{ search_query }}</strong>.
+                </p>
+
+                <a class="button" href="{% url 'customers:list' %}?page_size={{ current_page_size }}">
+                    Clear search
+                </a>
+            {% else %}
+                <h2>No customers</h2>
+
+                <p>
+                    Add the first customer before registering customer
+                    sites, contacts, and equipment.
+                </p>
+
+                <a class="button button-primary" href="{% url 'customers:create' %}">
+                    Add customer
+                </a>
+            {% endif %}
+        </section>
     {% endif %}
 {% endblock %}

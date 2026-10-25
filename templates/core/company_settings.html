@@ -1,30 +1,89 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
-    Company settings | Control Measurements
+    Our company | Control Measurements
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Our company
+            </li>
+        </ol>
+    </nav>
 {% endblock %}
 
 {% block content %}
-    <h2>Company settings</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Our company
+            </h1>
 
-    <p>
-        Enter the details of the company operating the measurement
-        control system.
-    </p>
+            <p class="page-description">
+                Maintain the identification, address, and contact
+                information of the company operating the system.
+            </p>
+        </div>
+    </header>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+    <div class="form-layout">
+        <div class="form-container">
+            <section class="form-card">
+                <div class="form-card-header">
+                    <h2 class="form-card-title">
+                        Company information
+                    </h2>
 
-        {{ form.as_p }}
+                    <p class="form-card-description">
+                        These details may later be used in generated
+                        documents, reports, and contact information.
+                    </p>
+                </div>
 
-        <button type="submit">
-            Save company settings
-        </button>
-    </form>
+                {% if form.non_field_errors %}
+                    <div class="form-non-field-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
 
-    <p>
-        <a href="{% url 'core:home' %}">
-            Back to home
-        </a>
-    </p>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% include "core/includes/company_settings_fields.html" %}
+
+                    <div class="confirmation-panel">
+                        Only one company-settings record is allowed.
+                        Saving this form updates the existing record
+                        when one already exists.
+                    </div>
+
+                    <div class="form-actions">
+                        <button
+                            class="button button-primary"
+                            type="submit"
+                        >
+                            Save company settings
+                        </button>
+
+                        <a class="button" href="{% url 'core:home' %}">
+                            Return without saving
+                        </a>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
 {% endblock %}

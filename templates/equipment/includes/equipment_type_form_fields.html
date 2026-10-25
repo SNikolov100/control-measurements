@@ -1,0 +1,168 @@
+<div class="form-fields">
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.name.id_for_label }}"
+        >
+            Equipment-type name
+
+            <span class="required-indicator">*</span>
+        </label>
+
+        {{ form.name.errors }}
+        {{ form.name }}
+
+        {% if form.name.help_text %}
+            <p class="form-help">
+                {{ form.name.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.short_name.id_for_label }}"
+        >
+            Short name
+
+            <span class="optional-indicator">
+                Optional
+            </span>
+        </label>
+
+        {{ form.short_name.errors }}
+        {{ form.short_name }}
+
+        {% if form.short_name.help_text %}
+            <p class="form-help">
+                {{ form.short_name.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.specialty.id_for_label }}"
+        >
+            Required specialty
+
+            <span class="required-indicator">*</span>
+        </label>
+
+        {{ form.specialty.errors }}
+        {{ form.specialty }}
+
+        {% if form.specialty.help_text %}
+            <p class="form-help">
+                {{ form.specialty.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.description.id_for_label }}"
+        >
+            Description
+
+            <span class="optional-indicator">
+                Optional
+            </span>
+        </label>
+
+        {{ form.description.errors }}
+        {{ form.description }}
+
+        {% if form.description.help_text %}
+            <p class="form-help">
+                {{ form.description.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.default_interval_value.id_for_label }}"
+        >
+            Default inspection interval
+
+            <span class="required-indicator">*</span>
+        </label>
+
+        {{ form.default_interval_value.errors }}
+        {{ form.default_interval_value }}
+
+        {% if form.default_interval_value.help_text %}
+            <p class="form-help">
+                {{ form.default_interval_value.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.default_interval_unit.id_for_label }}"
+        >
+            Default interval unit
+
+            <span class="required-indicator">*</span>
+        </label>
+
+        {{ form.default_interval_unit.errors }}
+        {{ form.default_interval_unit }}
+
+        {% if form.default_interval_unit.help_text %}
+            <p class="form-help">
+                {{ form.default_interval_unit.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.default_inspection_duration.id_for_label }}"
+        >
+            Default activity duration in minutes
+
+            <span class="required-indicator">*</span>
+        </label>
+
+        {{ form.default_inspection_duration.errors }}
+        {{ form.default_inspection_duration }}
+
+        {% if form.default_inspection_duration.help_text %}
+            <p class="form-help">
+                {{ form.default_inspection_duration.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        {{ form.is_active.errors }}
+
+        <label
+            class="form-checkbox-field"
+            for="{{ form.is_active.id_for_label }}"
+        >
+            {{ form.is_active }}
+
+            <span class="form-checkbox-content">
+                <span class="form-checkbox-label">
+                    Active equipment type
+                </span>
+
+                {% if form.is_active.help_text %}
+                    <span class="form-help">
+                        {{ form.is_active.help_text }}
+                    </span>
+                {% endif %}
+            </span>
+        </label>
+    </div>
+</div>

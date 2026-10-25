@@ -1,35 +1,138 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Edit customer site | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/details.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:list' %}">
+                    Customers
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:details' customer.slug %}">
+                    {{ customer.short_name|default:customer.company_name }}
+                </a>
+            </li>
+
+            <li>
+                <a
+                    href="{% url 'customers:site-details' customer.slug site.slug %}"
+                >
+                    {{ site.short_name|default:site.name }}
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Edit
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>Edit customer site</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Edit customer site
+            </h1>
 
-    <p>
-        Customer:
-        <strong>{{ customer.company_name }}</strong>
-    </p>
+            <p class="page-description">
+                Update the operational location, contact details,
+                and active status of the customer site.
+            </p>
+        </div>
+    </header>
 
-    <p>
-        Customer site:
-        <strong>{{ site.name }}</strong>
-    </p>
+    <div class="form-layout">
+        <section class="detail-card form-container">
+            <div class="detail-card-header">
+                <div>
+                    <h2 class="detail-card-title">
+                        Parent customer
+                    </h2>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+                    <p class="detail-card-description">
+                        The customer association cannot be changed
+                        from this form.
+                    </p>
+                </div>
+            </div>
 
-        {{ form.as_p }}
+            <dl class="detail-list">
+                <dt>Customer</dt>
+                <dd>{{ customer.company_name }}</dd>
 
-        <button type="submit">
-            Save changes
-        </button>
-    </form>
+                <dt>Customer city</dt>
+                <dd>
+                    {{ customer.city|default:"Not provided" }}
+                </dd>
 
-    <p>
-        <a href="{% url 'customers:details' customer.pk %}">
-            Cancel and return to customer details
-        </a>
-    </p>
+                <dt>Customer address</dt>
+                <dd>
+                    {{ customer.address|default:"Not provided" }}
+                </dd>
+            </dl>
+        </section>
+
+        <section class="form-card form-container">
+            <div class="form-card-header">
+                <h2 class="form-card-title">
+                    {{ site.name }}
+                </h2>
+
+                <p class="form-card-description">
+                    Empty city and address fields continue to use
+                    the current values from the customer.
+                </p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="form-non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% include "customer/includes/customer_site_form_fields.html" %}
+
+                <div class="confirmation-panel">
+                    Clearing a site city or address does not erase
+                    the customer data. The displayed location will
+                    fall back to the parent customer.
+                </div>
+
+                <div class="form-actions">
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        Save changes
+                    </button>
+
+                    <a class="button" href="{% url 'customers:details' customer.slug %}" >
+                        Return without saving
+                    </a>
+                </div>
+            </form>
+        </section>
+    </div>
 {% endblock %}

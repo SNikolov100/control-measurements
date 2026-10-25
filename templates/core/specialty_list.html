@@ -1,80 +1,197 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Specialties | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+     <link rel="stylesheet" href="{% static 'css/tables.css' %}" >
+     <link rel="stylesheet" href="{% static 'css/specialties.css' %}" >
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Specialties
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>Specialties</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Specialties
+            </h1>
 
-    <p>
-        <a href="{% url 'core:specialty-create' %}">
-            Add specialty
-        </a>
-    </p>
+            <p class="page-description">
+                Configure the professional specialties used by
+                equipment types and qualified employees.
+            </p>
+        </div>
 
-    {% if specialties %}
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Short name</th>
-                    <th>Color</th>
-                    <th>Sort order</th>
-                    <th>Active</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
+        <div class="page-actions">
+            <a class="button button-primary" href="{% url 'core:specialty-create' %}">
+                Add specialty
+            </a>
+        </div>
+    </header>
+    <section class="list-tools">
+        <div class="list-tools-header">
+            <div>
+                <h2 class="list-tools-title">
+                    Specialty search
+                </h2>
 
-            <tbody>
-                {% for specialty in specialties %}
-                    <tr>
-                        <td>{{ specialty.code }}</td>
-                        <td>{{ specialty.name }}</td>
-                        <td>{{ specialty.short_name }}</td>
+                <p class="list-tools-description">
+                    Search by code, name, short name,
+                    description, or color value.
+                </p>
+            </div>
+        </div>
 
-                        <td>
-                            <span
-                                style="
-                                    display: inline-block;
-                                    width: 16px;
-                                    height: 16px;
-                                    background-color: {{ specialty.color }};
-                                    border: 1px solid #666;
-                                    vertical-align: middle;
-                                "
-                            ></span>
+        {% include "shared/search_form.html" with search_placeholder="Search specialties" %}
+    </section>
 
-                            {{ specialty.color }}
-                        </td>
+    {% if search_query %}
+        <p class="search-result-summary">
+            Search results for:
+            <strong>{{ search_query }}</strong>
 
-                        <td>{{ specialty.sort_order }}</td>
-
-                        <td>
-                            {% if specialty.is_active %}
-                                Yes
-                            {% else %}
-                                No
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            <a href="{% url 'core:specialty-edit' specialty.pk %}">
-                                Edit
-                            </a>
-
-                            |
-
-                            <a href="{% url 'core:specialty-delete' specialty.pk %}">
-                                Delete
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No specialties have been created.</p>
+            {% if paginator %}
+                · {{ paginator.count }} matching records
+            {% endif %}
+        </p>
     {% endif %}
+    {% if specialties %}
+        <section
+            class="table-card"
+            aria-label="Specialty register"
+        >
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Specialty</th>
+                            <th>Color</th>
+                            <th>Sort order</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for specialty in specialties %}
+                            <tr>
+                                <td>
+                                    <div class="specialty-identity">
+                                        <span class="table-primary-text">
+                                            {{ specialty.name }}
+                                        </span>
+
+                                        <span class="table-secondary-text">
+                                            {% if specialty.short_name %}
+                                                {{ specialty.short_name }}
+                                                ·
+                                            {% endif %}
+
+                                            <span class="specialty-code">
+                                                {{ specialty.code }}
+                                            </span>
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="specialty-color">
+                                        <span
+                                            class="specialty-color-swatch"
+                                            style="--specialty-color: {{ specialty.color }};"
+                                            aria-hidden="true"
+                                        ></span>
+
+                                        <span class="specialty-color-code">
+                                            {{ specialty.color }}
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    {{ specialty.sort_order }}
+                                </td>
+
+                                <td>
+                                    {% if specialty.is_active %}
+                                        <span class="status-badge status-active">
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge status-inactive">
+                                            Inactive
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="table-actions">
+                                    <div class="action-group">
+                                        <a class="button button-small" href="{% url 'core:specialty-edit' specialty.pk %}">
+                                            Edit
+                                        </a>
+
+                                        <a class="button button-small button-danger" href="{% url 'core:specialty-delete' specialty.pk %}">
+                                            Delete
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% include "shared/pagination.html" %}
+        {% else %}
+            <section class="empty-state">
+                {% if search_query %}
+                    <h2>No matching specialties</h2>
+
+                    <p>
+                        No specialties match
+                        <strong>{{ search_query }}</strong>.
+                        Try another code, name, description,
+                        or color value.
+                    </p>
+
+                    <a
+                        class="button"
+                        href="{% url 'core:specialty-list' %}?page_size={{ current_page_size }}"
+                    >
+                        Clear search
+                    </a>
+                {% else %}
+                    <h2>No specialties</h2>
+
+                    <p>
+                        Add the first specialty before configuring
+                        equipment types and employee qualifications.
+                    </p>
+
+                    <a
+                        class="button button-primary"
+                        href="{% url 'core:specialty-create' %}"
+                    >
+                        Add specialty
+                    </a>
+                {% endif %}
+            </section>
+        {% endif %}
 {% endblock %}

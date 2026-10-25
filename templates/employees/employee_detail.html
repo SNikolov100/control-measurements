@@ -1,135 +1,317 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
-    Employee details | Control Measurements
+    {{ employee.full_name }} | Control Measurements
+{% endblock %}
+
+{% block extra_css %}
+    <link
+        rel="stylesheet"
+        href="{% static 'css/details.css' %}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/employees.css' %}"
+    >
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'employees:list' %}">
+                    Employees
+                </a>
+            </li>
+
+            <li aria-current="page">
+                {{ employee.full_name }}
+            </li>
+        </ol>
+    </nav>
 {% endblock %}
 
 {% block content %}
-    <h2>Employee details</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                {{ employee.full_name }}
+            </h1>
 
-    <h3>{{ employee.full_name }}</h3>
+            <p class="page-description">
+                Employee information, qualifications, active
+                status, notes, and history.
+            </p>
 
-    <section>
-        <h4>Contact information</h4>
-
-        <dl>
-            <dt><strong>Full name</strong></dt>
-            <dd>{{ employee.full_name }}</dd>
-
-            <dt><strong>Phone</strong></dt>
-            <dd>
-                {% if employee.phone %}
-                    {{ employee.phone }}
-                {% else %}
-                    -
+            <div class="employee-header-summary">
+                {% if employee.position %}
+                    <span class="employee-header-meta">
+                        {{ employee.position }}
+                    </span>
                 {% endif %}
-            </dd>
 
-            <dt><strong>Email</strong></dt>
-            <dd>
-                {% if employee.email %}
-                    {{ employee.email }}
-                {% else %}
-                    -
-                {% endif %}
-            </dd>
-
-            <dt><strong>Active</strong></dt>
-            <dd>
                 {% if employee.is_active %}
-                    Yes
+                    <span class="status-badge status-active">
+                        Active
+                    </span>
                 {% else %}
-                    No
+                    <span class="status-badge status-inactive">
+                        Inactive
+                    </span>
                 {% endif %}
-            </dd>
+            </div>
+        </div>
 
-            <dt><strong>Slug</strong></dt>
-            <dd>{{ employee.slug }}</dd>
-        </dl>
-    </section>
+        <div class="page-actions">
+            <a
+                class="button"
+                href="{% url 'employees:edit' employee.pk %}"
+            >
+                Edit employee
+            </a>
 
-    <section>
-        <h4>Specialties</h4>
-
-        {% if employee.specialties.all %}
-            <ul>
-                {% for specialty in employee.specialties.all %}
-                    <li>
-                        {{ specialty.name }}
-                        ({{ specialty.code }})
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No specialties assigned.</p>
-        {% endif %}
-    </section>
-
-    <section>
-        <h4>Notes</h4>
-
-        {% if employee.notes %}
-            <p>{{ employee.notes|linebreaksbr }}</p>
-        {% else %}
-            <p>No notes.</p>
-        {% endif %}
-    </section>
-
-    <section>
-        <h4>Employee history</h4>
-
-        {% if employee.history.all %}
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Changed at</th>
-                        <th>Event</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for history in employee.history.all %}
-                        <tr>
-                            <td>{{ history.changed_at }}</td>
-
-                            <td>
-                                {{ history.get_event_type_display }}
-                            </td>
-
-                            <td>
-                                {% if history.description %}
-                                    {{ history.description }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No employee history is available.</p>
-        {% endif %}
-    </section>
-
-    <p>
-        <a href="{% url 'employees:edit' employee.pk %}">
-            Edit employee
-        </a>
-    </p>
-    <p>
-        <a href="{% url 'employees:activity-status' employee.pk %}">
             {% if employee.is_active %}
-                Deactivate employee
+                <a
+                    class="button button-danger"
+                    href="{% url 'employees:activity-status' employee.pk %}"
+                >
+                    Deactivate employee
+                </a>
             {% else %}
-                Activate employee
+                <a
+                    class="button button-success"
+                    href="{% url 'employees:activity-status' employee.pk %}"
+                >
+                    Activate employee
+                </a>
             {% endif %}
-        </a>
-    </p>
-    <p>
-        <a href="{% url 'employees:list' %}">
-            Back to employees
-        </a>
-    </p>
+        </div>
+    </header>
+
+    <div class="detail-layout">
+        <div class="employee-detail-grid">
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Employee information
+                        </h2>
+
+                        <p class="detail-card-description">
+                            Main identification and work information.
+                        </p>
+                    </div>
+                </div>
+
+                <dl class="detail-list">
+                    <dt>Full name</dt>
+                    <dd>{{ employee.full_name }}</dd>
+
+                    <dt>Position</dt>
+                    <dd>
+                        {% if employee.position %}
+                            {{ employee.position }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Status</dt>
+                    <dd>
+                        {% if employee.is_active %}
+                            <span class="status-badge status-active">
+                                Active
+                            </span>
+                        {% else %}
+                            <span class="status-badge status-inactive">
+                                Inactive
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Created</dt>
+                    <dd>{{ employee.created_at }}</dd>
+
+                    <dt>Last updated</dt>
+                    <dd>{{ employee.updated_at }}</dd>
+                </dl>
+            </section>
+
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Contact information
+                        </h2>
+
+                        <p class="detail-card-description">
+                            Phone and email details for the employee.
+                        </p>
+                    </div>
+                </div>
+
+                <dl class="detail-list">
+                    <dt>Phone</dt>
+                    <dd>
+                        {% if employee.phone %}
+                            {{ employee.phone }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Email</dt>
+                    <dd>
+                        {% if employee.email %}
+                            <a href="mailto:{{ employee.email }}">
+                                {{ employee.email }}
+                            </a>
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </section>
+        </div>
+
+        <section class="detail-card">
+            <div class="detail-card-header">
+                <div>
+                    <h2 class="detail-card-title">
+                        Specialties
+                    </h2>
+
+                    <p class="detail-card-description">
+                        Professional areas in which the employee
+                        may be assigned to activities.
+                    </p>
+                </div>
+            </div>
+
+            <div class="employee-specialties">
+                {% for specialty in employee.specialties.all %}
+                    <span class="specialty-badge">
+                        {% if specialty.short_name %}
+                            {{ specialty.short_name }}
+                        {% else %}
+                            {{ specialty.name }}
+                        {% endif %}
+                    </span>
+                {% empty %}
+                    <span class="detail-value-muted">
+                        No specialties have been assigned. The
+                        employee may still be in training.
+                    </span>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="detail-card">
+            <div class="detail-card-header">
+                <div>
+                    <h2 class="detail-card-title">
+                        Notes
+                    </h2>
+
+                    <p class="detail-card-description">
+                        Additional information about the employee.
+                    </p>
+                </div>
+            </div>
+
+            {% if employee.notes %}
+                <p class="detail-notes">
+                    {{ employee.notes|linebreaksbr }}
+                </p>
+            {% else %}
+                <p class="detail-value-muted">
+                    No notes have been added.
+                </p>
+            {% endif %}
+        </section>
+
+        <section class="section-card">
+            <div class="section-card-header">
+                <div>
+                    <h2 class="section-card-title">
+                        Employee history
+                    </h2>
+
+                    <p class="section-card-description">
+                        Recorded activation and deactivation events.
+                    </p>
+                </div>
+            </div>
+
+            {% if employee.history.all %}
+                <div class="employee-history-list">
+                    {% for history in employee.history.all %}
+                        <article class="employee-history-entry">
+                            <div class="employee-history-date">
+                                {{ history.changed_at }}
+                            </div>
+
+                            <div>
+                                <p class="employee-history-event">
+                                    {{ history.get_event_type_display }}
+                                </p>
+
+                                {% if history.description %}
+                                    <p class="employee-history-description">
+                                        {{ history.description|linebreaksbr }}
+                                    </p>
+                                {% else %}
+                                    <p class="employee-history-description">
+                                        No description was provided.
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>No employee history</h3>
+
+                    <p>
+                        Activation and deactivation events will
+                        appear here.
+                    </p>
+                </div>
+            {% endif %}
+        </section>
+
+        <nav
+            class="context-navigation"
+            aria-label="Employee navigation"
+        >
+            <a
+                class="button"
+                href="{% url 'employees:list' %}"
+            >
+                Back to employees
+            </a>
+
+            <a
+                class="button"
+                href="{% url 'core:home' %}"
+            >
+                Home
+            </a>
+        </nav>
+    </div>
 {% endblock %}

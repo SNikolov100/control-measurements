@@ -1,173 +1,468 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Activity details | Control Measurements
 {% endblock %}
 
-{% block content %}
-    <h2>Activity details</h2>
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/details.css' %}" >
 
-    <h3>
-        {{ inspection.equipment.equipment_type.short_name }}
-        -
-        {{ inspection.equipment.serial_number }}
-    </h3>
+    <link rel="stylesheet" href="{% static 'css/inspections.css' %}" >
+{% endblock %}
 
-    <dl>
-        <dt><strong>Activity type</strong></dt>
-        <dd>{{ inspection.get_inspection_type_display }}</dd>
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
 
-        <dt><strong>Customer</strong></dt>
-        <dd>
-            {{ inspection.equipment.customer_site.customer.company_name }}
-        </dd>
+            <li>
+                <a href="{% url 'customers:list' %}">
+                    Customers
+                </a>
+            </li>
 
-        <dt><strong>Customer site</strong></dt>
-        <dd>{{ inspection.equipment.customer_site.name }}</dd>
-
-        <dt><strong>Customer contact</strong></dt>
-        <dd>
-            {% if inspection.customer_contact %}
-                {{ inspection.customer_contact.full_name }}
-            {% else %}
-                -
-            {% endif %}
-        </dd>
-
-        <dt><strong>Received at</strong></dt>
-        <dd>{{ inspection.received_at }}</dd>
-
-        <dt><strong>Due date</strong></dt>
-        <dd>
-            {% if inspection.due_date %}
-                {{ inspection.due_date }}
-            {% else %}
-                -
-            {% endif %}
-        </dd>
-
-        <dt><strong>Planned start</strong></dt>
-        <dd>
-            {% if inspection.planned_start %}
-                {{ inspection.planned_start }}
-            {% else %}
-                -
-            {% endif %}
-        </dd>
-
-        <dt><strong>Estimated duration</strong></dt>
-        <dd>{{ inspection.estimated_duration }} minutes</dd>
-
-        <dt><strong>Activity status</strong></dt>
-        <dd>{{ inspection.get_status_display }}</dd>
-
-        <dt><strong>Equipment status</strong></dt>
-        <dd>{{ inspection.equipment.get_status_display }}</dd>
-
-        <dt><strong>Result</strong></dt>
-        <dd>
-            {% if inspection.result %}
-                {{ inspection.get_result_display }}
-            {% else %}
-                -
-            {% endif %}
-        </dd>
-        <dt><strong>Result notes</strong></dt>
-        <dd>
-            {% if inspection.result_notes %}
-                {{ inspection.result_notes|linebreaksbr }}
-            {% else %}
-                -
-            {% endif %}
-        </dd>
-        {% if inspection.status == inspection.Status.CANCELLED %}
-            <dt><strong>Cancellation reason</strong></dt>
-                <dd>
-                    {% if inspection.cancellation_reason %}
-                        {{ inspection.cancellation_reason }}
+            <li>
+                <a href="{% url 'customers:details' inspection.equipment.customer_site.customer.slug %}" >
+                    {% if inspection.equipment.customer_site.customer.short_name %}
+                        {{ inspection.equipment.customer_site.customer.short_name }}
                     {% else %}
-                        -
+                        {{ inspection.equipment.customer_site.customer.company_name }}
                     {% endif %}
-                </dd>
-        {% endif %}
-        <dt><strong>Actual start</strong></dt>
-        <dd>
-            {% if inspection.actual_start %}
-                {{ inspection.actual_start }}
-            {% else %}
-                -
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:site-details' inspection.equipment.customer_site.customer.slug inspection.equipment.customer_site.slug %}">
+                    {% if inspection.equipment.customer_site.short_name %}
+                        {{ inspection.equipment.customer_site.short_name }}
+                    {% else %}
+                        {{ inspection.equipment.customer_site.name }}
+                    {% endif %}
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'equipment:detail' inspection.equipment.slug %}" >
+                    {{ inspection.equipment.serial_number }}
+                </a>
+            </li>
+
+            <li aria-current="page">
+                {{ inspection.get_inspection_type_display }}
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                {{ inspection.get_inspection_type_display }}
+            </h1>
+
+            <p class="page-description">
+                Activity information, assigned employees,
+                scheduling, result, and related equipment state.
+            </p>
+
+            <div class="activity-header-summary">
+                <span class="activity-header-meta">
+                    {{ inspection.equipment.equipment_type.short_name }}
+                </span>
+
+                <span class="activity-header-meta">
+                    Serial number:
+                    {{ inspection.equipment.serial_number }}
+                </span>
+
+                {% if inspection.status == inspection.Status.PENDING %}
+                    <span class="status-badge status-pending">
+                        {{ inspection.get_status_display }}
+                    </span>
+
+                {% elif inspection.status == inspection.Status.IN_PROGRESS %}
+                    <span class="status-badge status-in-progress">
+                        {{ inspection.get_status_display }}
+                    </span>
+
+                {% elif inspection.status == inspection.Status.COMPLETED %}
+                    <span class="status-badge status-completed">
+                        {{ inspection.get_status_display }}
+                    </span>
+
+                {% elif inspection.status == inspection.Status.CANCELLED %}
+                    <span class="status-badge status-cancelled">
+                        {{ inspection.get_status_display }}
+                    </span>
+
+                {% else %}
+                    <span class="status-badge status-neutral">
+                        {{ inspection.get_status_display }}
+                    </span>
+                {% endif %}
+
+                {% if inspection.result == inspection.Result.PASSED %}
+                    <span class="status-badge status-passed">
+                        {{ inspection.get_result_display }}
+                    </span>
+
+                {% elif inspection.result == inspection.Result.FAILED %}
+                    <span class="status-badge status-failed">
+                        {{ inspection.get_result_display }}
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="page-actions">
+            {% if inspection.status == inspection.Status.PENDING %}
+                <a class="button" href="{% url 'inspections:assign' inspection.pk %}" >
+                    Assign employees
+                </a>
+
+                <a class="button button-success" href="{% url 'inspections:start' inspection.pk %}" >
+                    Start activity
+                </a>
+
+                <a class="button button-danger" href="{% url 'inspections:cancel' inspection.pk %}" >
+                    Cancel activity
+                </a>
             {% endif %}
-        </dd>
-        <dt><strong>Actual end</strong></dt>
-        <dd>
-            {% if inspection.actual_end %}
-                {{ inspection.actual_end }}
-            {% else %}
-                -
+
+            {% if inspection.status == inspection.Status.IN_PROGRESS %}
+                <a class="button button-success" href="{% url 'inspections:complete' inspection.pk %}" >
+                    Complete activity
+                </a>
+
+                <a class="button button-danger" href="{% url 'inspections:cancel' inspection.pk %}" >
+                    Cancel activity
+                </a>
             {% endif %}
-        </dd>
-    </dl>
+        </div>
+    </header>
 
-    <section>
-        <h3>Assigned employees</h3>
+    <div class="detail-layout">
+        <div class="activity-detail-grid">
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Equipment and location
+                        </h2>
 
-        <ul>
-            {% for employee in inspection.assigned_employees.all %}
-                <li>{{ employee.full_name }}</li>
-            {% empty %}
-                <li>No assigned employees.</li>
-            {% endfor %}
-        </ul>
-    </section>
+                        <p class="detail-card-description">
+                            Equipment, customer, site, and responsible
+                            customer contact.
+                        </p>
+                    </div>
+                </div>
 
-    <section>
-        <h3>Notes</h3>
+                <dl class="detail-list">
+                    <dt>Equipment</dt>
+                    <dd>
+                        {{ inspection.equipment.equipment_type.name }}
+                    </dd>
 
-        {% if inspection.notes %}
-            <p>{{ inspection.notes|linebreaksbr }}</p>
-        {% else %}
-            <p>No notes.</p>
+                    <dt>Model</dt>
+                    <dd>
+                        {% if inspection.equipment.model_name %}
+                            {{ inspection.equipment.model_name }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Serial number</dt>
+                    <dd>{{ inspection.equipment.serial_number }}</dd>
+
+                    <dt>Customer</dt>
+                    <dd>
+                        {{ inspection.equipment.customer_site.customer.company_name }}
+                    </dd>
+
+                    <dt>Customer site</dt>
+                    <dd>
+                        {{ inspection.equipment.customer_site.name }}
+                    </dd>
+
+                    <dt>Responsible contact</dt>
+                    <dd>
+                        {% if inspection.customer_contact %}
+                            {{ inspection.customer_contact.full_name }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not recorded
+                            </span>
+                        {% endif %}
+                    </dd>
+                </dl>
+
+                <div class="context-navigation">
+                    <a class="button button-small" href="{% url 'equipment:detail' inspection.equipment.slug %}" >
+                        Equipment details
+                    </a>
+
+                    <a href=" {% url 'customers:site-details' inspection.equipment.customer_site.customer.slug inspection.equipment.customer_site.slug %}">
+                        Customer-site details
+                    </a>
+                </div>
+            </section>
+
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Schedule and duration
+                        </h2>
+
+                        <p class="detail-card-description">
+                            Planned and actual activity timestamps.
+                        </p>
+                    </div>
+                </div>
+
+                <dl class="detail-list">
+                    <dt>Received at</dt>
+                    <dd>{{ inspection.received_at }}</dd>
+
+                    <dt>Due date</dt>
+                    <dd>
+                        {% if inspection.due_date %}
+                            {{ inspection.due_date }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Planned start</dt>
+                    <dd>
+                        {% if inspection.planned_start %}
+                            {{ inspection.planned_start }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Actual start</dt>
+                    <dd>
+                        {% if inspection.actual_start %}
+                            {{ inspection.actual_start }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not started
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Actual end</dt>
+                    <dd>
+                        {% if inspection.actual_end %}
+                            {{ inspection.actual_end }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not completed
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Estimated duration</dt>
+                    <dd>
+                        {{ inspection.estimated_duration }}
+                        minutes
+                    </dd>
+                </dl>
+            </section>
+        </div>
+
+        <div class="activity-detail-grid">
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Activity state
+                        </h2>
+
+                        <p class="detail-card-description">
+                            Current activity, equipment status,
+                            and final result.
+                        </p>
+                    </div>
+                </div>
+
+                <dl class="detail-list">
+                    <dt>Activity type</dt>
+                    <dd>
+                        {{ inspection.get_inspection_type_display }}
+                    </dd>
+
+                    <dt>Activity status</dt>
+                    <dd>
+                        {{ inspection.get_status_display }}
+                    </dd>
+
+                    <dt>Equipment status</dt>
+                    <dd>
+                        {{ inspection.equipment.get_status_display }}
+                    </dd>
+
+                    <dt>Result</dt>
+                    <dd>
+                        {% if inspection.result %}
+                            {% if inspection.result == inspection.Result.PASSED %}
+                                <span class="status-badge status-passed">
+                                    {{ inspection.get_result_display }}
+                                </span>
+                            {% else %}
+                                <span class="status-badge status-failed">
+                                    {{ inspection.get_result_display }}
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                No result
+                            </span>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </section>
+
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Assigned employees
+                        </h2>
+
+                        <p class="detail-card-description">
+                            Employees assigned to perform this activity.
+                        </p>
+                    </div>
+                </div>
+
+                {% if inspection.assigned_employees.all %}
+                    <ul class="activity-employee-list">
+                        {% for employee in inspection.assigned_employees.all %}
+                            <li class="activity-employee-card">
+                                <span class="activity-employee-name">
+                                    {{ employee.full_name }}
+                                </span>
+
+                                <a class="button button-small" href="{% url 'employees:details' employee.pk %}" >
+                                    Employee details
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="empty-state">
+                        <h3>No assigned employees</h3>
+
+                        <p>
+                            Assign at least one qualified employee
+                            before starting the activity.
+                        </p>
+
+                        {% if inspection.status == inspection.Status.PENDING %}
+                            <a class="button button-primary" href="{% url 'inspections:assign' inspection.pk %}">
+                                Assign employees
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+
+        <section class="detail-card">
+            <div class="detail-card-header">
+                <div>
+                    <h2 class="detail-card-title">
+                        Activity notes
+                    </h2>
+
+                    <p class="detail-card-description">
+                        Initial description, reported fault, or
+                        additional information.
+                    </p>
+                </div>
+            </div>
+
+            {% if inspection.notes %}
+                <p class="activity-notes">
+                    {{ inspection.notes|linebreaksbr }}
+                </p>
+            {% else %}
+                <p class="detail-value-muted">
+                    No activity notes have been added.
+                </p>
+            {% endif %}
+        </section>
+
+        <section class="detail-card">
+            <div class="detail-card-header">
+                <div>
+                    <h2 class="detail-card-title">
+                        Result notes
+                    </h2>
+
+                    <p class="detail-card-description">
+                        Final findings or description of performed
+                        repair work.
+                    </p>
+                </div>
+            </div>
+
+            {% if inspection.result_notes %}
+                <p class="activity-notes">
+                    {{ inspection.result_notes|linebreaksbr }}
+                </p>
+            {% else %}
+                <p class="detail-value-muted">
+                    No result notes have been added.
+                </p>
+            {% endif %}
+        </section>
+
+        {% if inspection.status == inspection.Status.CANCELLED %}
+            <section class="activity-danger-card">
+                <strong>Cancellation reason</strong>
+
+                <p>
+                    {{ inspection.cancellation_reason }}
+                </p>
+            </section>
         {% endif %}
-    </section>
 
-    {% if inspection.status == inspection.Status.PENDING %}
-        <p>
-            <a href="{% url 'inspections:assign' inspection.pk %}">
-                Assign employees
+        <nav
+            class="context-navigation"
+            aria-label="Activity navigation"
+        >
+            <a class="button" href="{% url 'inspections:list' %}" >
+                All activities
             </a>
-        </p>
-        <p>
-            <a href="{% url 'inspections:start' inspection.pk %}">
-                Start activity
-            </a>
-        </p>
-        <p>
-            <a href="{% url 'inspections:cancel' inspection.pk %}">
-                Cancel activity
-            </a>
-        </p>
-    {% endif %}
-    {% if inspection.status == inspection.Status.IN_PROGRESS %}
-        <p>
-            <a href="{% url 'inspections:complete' inspection.pk %}">
-                Complete activity
-            </a>
-        </p>
-        <p>
-            <a href="{% url 'inspections:cancel' inspection.pk %}">
-                Cancel activity
-            </a>
-        </p>
-    {% endif %}
-    <p>
-        <a href="{% url 'equipment:detail' inspection.equipment.pk %}">
-            Equipment details and status history
-        </a>
-    </p>
 
-    <p>
-        <a href="{% url 'inspections:list' %}">
-            Back to activities
-        </a>
-    </p>
+            <a class="button" href="{% url 'equipment:detail' inspection.equipment.slug %}" >
+                Equipment details
+            </a>
+
+            <a href="{% url 'customers:site-details' inspection.equipment.customer_site.customer.slug inspection.equipment.customer_site.slug %}">
+                Customer site
+            </a>
+
+            <a class="button" href="{% url 'core:home' %}" >
+                Home
+            </a>
+        </nav>
+    </div>
 {% endblock %}

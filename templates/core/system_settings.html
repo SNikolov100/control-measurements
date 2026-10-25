@@ -1,30 +1,89 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     System settings | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li aria-current="page">
+                System settings
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>System settings</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                System settings
+            </h1>
 
-    <p>
-        Configure the default calendar, workday, notification,
-        and inspection automation settings.
-    </p>
+            <p class="page-description">
+                Configure the calendar, working time, deadline
+                alerts, and activity workflow requirements.
+            </p>
+        </div>
+    </header>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+    <div class="form-layout">
+        <div class="form-container">
+            <section class="form-card">
+                <div class="form-card-header">
+                    <h2 class="form-card-title">
+                        Application behaviour
+                    </h2>
 
-        {{ form.as_p }}
+                    <p class="form-card-description">
+                        These settings control the general operational
+                        behaviour of the application.
+                    </p>
+                </div>
 
-        <button type="submit">
-            Save system settings
-        </button>
-    </form>
+                {% if form.non_field_errors %}
+                    <div class="form-non-field-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
 
-    <p>
-        <a href="{% url 'core:home' %}">
-            Back to home
-        </a>
-    </p>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% include "core/includes/system_settings_fields.html" %}
+
+                    <div class="confirmation-panel">
+                        Only one system-settings record is allowed.
+                        Saving this form updates the existing record
+                        when one already exists.
+                    </div>
+
+                    <div class="form-actions">
+                        <button
+                            class="button button-primary"
+                            type="submit"
+                        >
+                            Save system settings
+                        </button>
+
+                        <a class="button" href="{% url 'core:home' %}">
+                            Return without saving
+                        </a>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
 {% endblock %}

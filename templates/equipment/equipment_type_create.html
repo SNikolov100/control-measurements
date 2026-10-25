@@ -1,25 +1,101 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
-    Create equipment type | Control Measurements
+    Add equipment type | Control Measurements
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/equipment.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'equipment:list' %}">
+                    Equipment
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'equipment:types-list' %}">
+                    Equipment types
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Add equipment type
+            </li>
+        </ol>
+    </nav>
 {% endblock %}
 
 {% block content %}
-    <h2>Create equipment type</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Add equipment type
+            </h1>
 
-    <form method="post">
-        {% csrf_token %}
+            <p class="page-description">
+                Configure a reusable equipment category with its
+                specialty, default interval, and expected duration.
+            </p>
+        </div>
+    </header>
 
-        {{ form.as_p }}
+    <div class="form-layout">
+        <div class="form-container">
+            <section class="form-card">
+                <div class="form-card-header">
+                    <h2 class="form-card-title">
+                        Equipment-type information
+                    </h2>
 
-        <button type="submit">
-            Save equipment type
-        </button>
-    </form>
+                    <p class="form-card-description">
+                        The default values will be suggested when
+                        equipment of this type is registered.
+                    </p>
+                </div>
 
-    <p>
-        {<a href="{% url 'equipment:types-list' %}">
-            Back to equipment types
-        </a>
-    </p>
+                {% if form.non_field_errors %}
+                    <div class="form-non-field-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% include "equipment/includes/equipment_type_form_fields.html" %}
+
+                    <div class="confirmation-panel">
+                        Concrete equipment may override the default
+                        inspection interval and duration when needed.
+                    </div>
+
+                    <div class="form-actions">
+                        <button
+                            class="button button-primary"
+                            type="submit"
+                        >
+                            Save equipment type
+                        </button>
+
+                        <a class="button" href="{% url 'equipment:types-list' %}">
+                            Return without saving
+                        </a>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
 {% endblock %}

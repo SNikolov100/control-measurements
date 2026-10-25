@@ -1,0 +1,168 @@
+{% if page_obj %}
+    <div class="pagination-panel">
+        <div class="pagination-summary">
+            <span>
+                Showing
+                <strong>{{ page_obj.start_index }}</strong>
+                to
+                <strong>{{ page_obj.end_index }}</strong>
+                of
+                <strong>{{ paginator.count }}</strong>
+                records
+            </span>
+        </div>
+
+        <form
+            class="page-size-form"
+            method="get"
+        >
+            {% for parameter_name, parameter_value in pagination_preserved_parameters %}
+                <input
+                    type="hidden"
+                    name="{{ parameter_name }}"
+                    value="{{ parameter_value }}"
+                >
+            {% endfor %}
+
+            <label for="page-size-select">
+                Records per page
+            </label>
+
+            <select
+                id="page-size-select"
+                name="page_size"
+                onchange="this.form.submit()"
+            >
+                {% for page_size in page_size_choices %}
+                    <option
+                        value="{{ page_size }}"
+                        {% if page_size == current_page_size %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ page_size }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <noscript>
+                <button
+                    class="button button-small"
+                    type="submit"
+                >
+                    Apply
+                </button>
+            </noscript>
+        </form>
+
+        {% if is_paginated %}
+            <nav
+                class="pagination-navigation"
+                aria-label="Pagination"
+            >
+                <div class="pagination-links">
+                    {% if page_obj.has_previous %}
+                        <a
+                            class="pagination-link"
+                            href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page=1"
+                        >
+                            First
+                        </a>
+
+                        <a
+                            class="pagination-link"
+                            href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}"
+                        >
+                            Previous
+                        </a>
+                    {% else %}
+                        <span
+                            class="
+                                pagination-link
+                                pagination-link-disabled
+                            "
+                            aria-disabled="true"
+                        >
+                            First
+                        </span>
+
+                        <span
+                            class="
+                                pagination-link
+                                pagination-link-disabled
+                            "
+                            aria-disabled="true"
+                        >
+                            Previous
+                        </span>
+                    {% endif %}
+
+                    <div class="pagination-pages">
+                        {% for page_number in pagination_page_range %}
+                            {% if page_number == pagination_ellipsis %}
+                                <span class="pagination-ellipsis">
+                                    …
+                                </span>
+
+                            {% elif page_number == page_obj.number %}
+                                <span
+                                    class="
+                                        pagination-link
+                                        pagination-link-current
+                                    "
+                                    aria-current="page"
+                                >
+                                    {{ page_number }}
+                                </span>
+
+                            {% else %}
+                                <a
+                                    class="pagination-link"
+                                    href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_number }}"
+                                >
+                                    {{ page_number }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    {% if page_obj.has_next %}
+                        <a
+                            class="pagination-link"
+                            href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}"
+                        >
+                            Next
+                        </a>
+
+                        <a
+                            class="pagination-link"
+                            href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ paginator.num_pages }}"
+                        >
+                            Last
+                        </a>
+                    {% else %}
+                        <span
+                            class="
+                                pagination-link
+                                pagination-link-disabled
+                            "
+                            aria-disabled="true"
+                        >
+                            Next
+                        </span>
+
+                        <span
+                            class="
+                                pagination-link
+                                pagination-link-disabled
+                            "
+                            aria-disabled="true"
+                        >
+                            Last
+                        </span>
+                    {% endif %}
+                </div>
+            </nav>
+        {% endif %}
+    </div>
+{% endif %}

@@ -68,7 +68,11 @@ class Specialty(TextNormalizationMixin, TimestampMixin):
         verbose_name = translate("Specialty")
         verbose_name_plural = translate("Specialties")
 
-class CompanySettings(CompanyMixin, TimestampMixin, SingleRecordMixin):
+class CompanySettings(TextNormalizationMixin, CompanyMixin, TimestampMixin, SingleRecordMixin):
+    strip_fields = ('company_name', 'short_name', 'country', 'city', 'address', 'phone', 'email', 'notes')
+    lowercase_fields = ('email',)
+    default_text_values = {'country': 'Bulgaria'}
+
     def __str__(self):
         return self.company_name
 

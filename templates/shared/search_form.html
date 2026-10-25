@@ -1,0 +1,45 @@
+<form
+    class="search-form"
+    method="get"
+    role="search"
+>
+    {% for parameter_name, parameter_value in search_preserved_parameters %}
+        <input
+            type="hidden"
+            name="{{ parameter_name }}"
+            value="{{ parameter_value }}"
+        >
+    {% endfor %}
+
+    <div class="search-field">
+        <label
+            class="visually-hidden"
+            for="list-search-input"
+        >
+            Search
+        </label>
+
+        <input
+            id="list-search-input"
+            class="search-input"
+            type="search"
+            name="{{ search_parameter }}"
+            value="{{ search_query }}"
+            placeholder="{{ search_placeholder|default:'Search records' }}"
+            autocomplete="off"
+        >
+
+        <button
+            class="button button-primary"
+            type="submit"
+        >
+            Search
+        </button>
+
+        {% if search_query %}
+            <a class="button" href="?{% if current_page_size %}page_size={{ current_page_size }}{% endif %}">
+                Clear
+            </a>
+        {% endif %}
+    </div>
+</form>

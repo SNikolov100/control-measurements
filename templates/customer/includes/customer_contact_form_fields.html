@@ -1,0 +1,157 @@
+<div class="form-fields">
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.full_name.id_for_label }}"
+        >
+            Full name
+
+            <span class="required-indicator">
+                *
+            </span>
+        </label>
+
+        {{ form.full_name.errors }}
+        {{ form.full_name }}
+
+        {% if form.full_name.help_text %}
+            <p class="form-help">
+                {{ form.full_name.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.position.id_for_label }}"
+        >
+            Position
+
+            <span class="optional-indicator">
+                Optional
+            </span>
+        </label>
+
+        {{ form.position.errors }}
+        {{ form.position }}
+
+        {% if form.position.help_text %}
+            <p class="form-help">
+                {{ form.position.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.phone.id_for_label }}"
+        >
+            Phone
+
+            <span class="optional-indicator">
+                Optional
+            </span>
+        </label>
+
+        {{ form.phone.errors }}
+        {{ form.phone }}
+
+        {% if form.phone.help_text %}
+            <p class="form-help">
+                {{ form.phone.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.email.id_for_label }}"
+        >
+            Email
+
+            <span class="optional-indicator">
+                Optional
+            </span>
+        </label>
+
+        {{ form.email.errors }}
+        {{ form.email }}
+
+        {% if form.email.help_text %}
+            <p class="form-help">
+                {{ form.email.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.notes.id_for_label }}"
+        >
+            Notes
+
+            <span class="optional-indicator">
+                Optional
+            </span>
+        </label>
+
+        {{ form.notes.errors }}
+        {{ form.notes }}
+
+        {% if form.notes.help_text %}
+            <p class="form-help">
+                {{ form.notes.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        {{ form.is_primary.errors }}
+
+        <label
+            class="form-checkbox-field"
+            for="{{ form.is_primary.id_for_label }}"
+        >
+            {{ form.is_primary }}
+
+            <span class="form-checkbox-content">
+                <span class="form-checkbox-label">
+                    Primary responsible contact
+                </span>
+
+                {% if form.is_primary.help_text %}
+                    <span class="form-help">
+                        {{ form.is_primary.help_text }}
+                    </span>
+                {% endif %}
+            </span>
+        </label>
+    </div>
+
+    <div class="form-field">
+        {{ form.is_active.errors }}
+
+        <label
+            class="form-checkbox-field"
+            for="{{ form.is_active.id_for_label }}"
+        >
+            {{ form.is_active }}
+
+            <span class="form-checkbox-content">
+                <span class="form-checkbox-label">
+                    Active responsible contact
+                </span>
+
+                {% if form.is_active.help_text %}
+                    <span class="form-help">
+                        {{ form.is_active.help_text }}
+                    </span>
+                {% endif %}
+            </span>
+        </label>
+    </div>
+</div>

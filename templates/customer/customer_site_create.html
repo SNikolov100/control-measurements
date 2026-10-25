@@ -1,34 +1,138 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Add customer site | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/details.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:list' %}">
+                    Customers
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:details' customer.slug %}">
+                    {{ customer.short_name|default:customer.company_name }}
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Add site
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>Add customer site</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Add customer site
+            </h1>
 
-    <p>
-        Customer:
-        <strong>{{ customer.company_name }}</strong>
-    </p>
+            <p class="page-description">
+                Add a workshop, laboratory, department, branch,
+                or another operational location for the customer.
+            </p>
+        </div>
+    </header>
 
-    <p>
-        Enter the information for the new customer site.
-    </p>
+    <div class="form-layout">
+        <section class="detail-card form-container">
+            <div class="detail-card-header">
+                <div>
+                    <h2 class="detail-card-title">
+                        Parent customer
+                    </h2>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+                    <p class="detail-card-description">
+                        The new site will be added to this customer.
+                    </p>
+                </div>
 
-        {{ form.as_p }}
+                {% if customer.is_active %}
+                    <span class="status-badge status-active">
+                        Active
+                    </span>
+                {% else %}
+                    <span class="status-badge status-inactive">
+                        Inactive
+                    </span>
+                {% endif %}
+            </div>
 
-        <button type="submit">
-            Save customer site
-        </button>
-    </form>
+            <dl class="detail-list">
+                <dt>Customer</dt>
+                <dd>{{ customer.company_name }}</dd>
 
-    <p>
-        <a href="{% url 'customers:details' customer.pk %}">
-            Cancel and return to customer details
-        </a>
-    </p>
+                <dt>City</dt>
+                <dd>
+                    {{ customer.city|default:"Not provided" }}
+                </dd>
+
+                <dt>Address</dt>
+                <dd>
+                    {{ customer.address|default:"Not provided" }}
+                </dd>
+            </dl>
+        </section>
+
+        <section class="form-card form-container">
+            <div class="form-card-header">
+                <h2 class="form-card-title">
+                    Site information
+                </h2>
+
+                <p class="form-card-description">
+                    Enter the site name, location, and contact
+                    information.
+                </p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="form-non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% include "customer/includes/customer_site_form_fields.html" %}
+
+                <div class="confirmation-panel">
+                    Leave the site city or address empty to use
+                    the current values from the customer.
+                </div>
+
+                <div class="form-actions">
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        Save customer site
+                    </button>
+
+                    <a class="button" href="{% url 'customers:details' customer.slug %}" >
+                        Return without saving
+                    </a>
+                </div>
+            </form>
+        </section>
+    </div>
 {% endblock %}

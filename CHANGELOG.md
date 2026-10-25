@@ -153,9 +153,6 @@ documented in this file.
   the same equipment is in progress.
 - Employee activation and deactivation now create employee history
   records.
-
-### Changed
-
 - Refactored repeated create, detail, update, delete, and nested-parent
   view logic into reusable mixins.
 - Refactored repeated text normalization from individual models into
@@ -218,6 +215,6 @@ documented in this file.
 - Equipment statuses are managed through activity start, completion,
   and cancellation operations rather than through a manual status
   interface.
-- The next development stage will focus on the shared layout,
-  navigation, HTML/CSS design, form presentation, search, filters,
-  sorting, and pagination.
+- The next development stage will focus on the filters,
+  sorting, option to English/Bulgarian language  and calendar for 
+  activities.

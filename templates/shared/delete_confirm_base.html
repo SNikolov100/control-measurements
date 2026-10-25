@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     {% block delete_page_title %}
@@ -7,58 +8,122 @@
     | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link
+        rel="stylesheet"
+        href="{% static 'css/details.css' %}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/forms.css' %}"
+    >
+{% endblock %}
+
 {% block content %}
-    <section class="delete-card">
-        <h2>
-            {% block delete_heading %}
-                Delete record
-            {% endblock %}
-        </h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                {% block delete_heading %}
+                    Delete record
+                {% endblock %}
+            </h1>
 
-        <div class="warning">
-            {% block delete_warning %}
-                This action cannot be undone.
-            {% endblock %}
+            <p class="page-description">
+                Review the record carefully before confirming
+                permanent deletion.
+            </p>
         </div>
+    </header>
 
-        {% if deletion_error %}
-            <div class="error">
-                {{ deletion_error }}
-            </div>
-        {% endif %}
+    <div class="form-layout">
+        <div class="form-container">
+            <section class="form-card delete-confirmation-card">
+                <div
+                    class="
+                        confirmation-panel
+                        confirmation-danger
+                        delete-warning
+                    "
+                >
+                    <strong>Warning</strong>
 
-        {% block delete_object_details %}
-        {% endblock %}
-
-        <div class="actions">
-            {% if not deletion_blocked %}
-                <form method="post" novalidate>
-                    {% csrf_token %}
-
-                    <div class="delete-confirmation">
-                        {{ form.confirm.errors }}
-
-                        <label
-                            for="{{ form.confirm.id_for_label }}"
-                        >
-                            {{ form.confirm }}
-                            {{ form.confirm.label }}
-                        </label>
-                    </div>
-
-                    <button
-                        type="submit"
-                        class="delete-button"
-                    >
-                        {% block delete_button_text %}
-                            Delete permanently
+                    <p>
+                        {% block delete_warning %}
+                            Are you sure you want to delete this
+                            record? This action cannot be undone.
                         {% endblock %}
-                    </button>
-                </form>
-            {% endif %}
+                    </p>
+                </div>
 
-            {% block delete_cancel_action %}
-            {% endblock %}
+                {% if deletion_error %}
+                    <div class="form-non-field-errors">
+                        <strong>Deletion blocked</strong>
+
+                        <p>
+                            {{ deletion_error }}
+                        </p>
+                    </div>
+                {% endif %}
+
+                <div class="delete-record-details">
+                    {% block delete_object_details %}
+                    {% endblock %}
+                </div>
+
+                {% if not deletion_blocked %}
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="form-non-field-errors">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="delete-confirmation-field">
+                            {{ form.confirm.errors }}
+
+                            <label
+                                class="form-checkbox-field"
+                                for="{{ form.confirm.id_for_label }}"
+                            >
+                                {{ form.confirm }}
+
+                                <span class="form-checkbox-content">
+                                    <span class="form-checkbox-label">
+                                        {{ form.confirm.label }}
+                                    </span>
+
+                                    <span class="form-help">
+                                        The record will be deleted only after this
+                                        confirmation is selected.
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="form-actions">
+                            <button
+                                class="button button-danger"
+                                type="submit"
+                            >
+                                {% block delete_button_text %}
+                                    Delete permanently
+                                {% endblock %}
+                            </button>
+
+                            {% block delete_cancel_action %}
+                            {% endblock %}
+                        </div>
+                    </form>
+                {% else %}
+                    <div class="form-actions">
+                        {% block delete_blocked_action %}
+                        {% endblock %}
+                    </div>
+                {% endif %}
+            </section>
         </div>
-    </section>
+    </div>
 {% endblock %}

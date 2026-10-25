@@ -1,27 +1,233 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Edit employee | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
+    <link rel="stylesheet" href="{% static 'css/employees.css' %}" >
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'employees:list' %}">
+                    Employees
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'employees:details' employee.pk %}">
+                    {{ employee.full_name }}
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Edit
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>Edit employee</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Edit employee
+            </h1>
 
-    <h3>{{ employee.full_name }}</h3>
+            <p class="page-description">
+                Update the employee's contact information,
+                position, notes, and professional specialties.
+            </p>
+        </div>
+    </header>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+    <div class="form-layout employee-form-context">
+        <section class="form-card">
+            <div class="form-card-header">
+                <h2 class="form-card-title">
+                    {{ employee.full_name }}
+                </h2>
 
-        {{ form.as_p }}
+                <p class="form-card-description">
+                    Active status is managed separately through
+                    the controlled activation and deactivation
+                    workflow.
+                </p>
+            </div>
 
-        <button type="submit">
-            Save changes
-        </button>
-    </form>
+            {% if form.non_field_errors %}
+                <div class="form-non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
 
-    <p>
-        <a href="{% url 'employees:details' employee.pk %}">
-            Cancel and return to employee details
-        </a>
-    </p>
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="form-fields">
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.full_name.id_for_label }}"
+                        >
+                            Full name
+
+                            <span class="required-indicator">
+                                *
+                            </span>
+                        </label>
+
+                        {{ form.full_name.errors }}
+                        {{ form.full_name }}
+
+                        {% if form.full_name.help_text %}
+                            <p class="form-help">
+                                {{ form.full_name.help_text }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.position.id_for_label }}"
+                        >
+                            Position
+
+                            <span class="optional-indicator">
+                                Optional
+                            </span>
+                        </label>
+
+                        {{ form.position.errors }}
+                        {{ form.position }}
+
+                        {% if form.position.help_text %}
+                            <p class="form-help">
+                                {{ form.position.help_text }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.phone.id_for_label }}"
+                        >
+                            Phone
+
+                            <span class="optional-indicator">
+                                Optional
+                            </span>
+                        </label>
+
+                        {{ form.phone.errors }}
+                        {{ form.phone }}
+
+                        {% if form.phone.help_text %}
+                            <p class="form-help">
+                                {{ form.phone.help_text }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.email.id_for_label }}"
+                        >
+                            Email
+
+                            <span class="optional-indicator">
+                                Optional
+                            </span>
+                        </label>
+
+                        {{ form.email.errors }}
+                        {{ form.email }}
+
+                        {% if form.email.help_text %}
+                            <p class="form-help">
+                                {{ form.email.help_text }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.notes.id_for_label }}"
+                        >
+                            Notes
+
+                            <span class="optional-indicator">
+                                Optional
+                            </span>
+                        </label>
+
+                        {{ form.notes.errors }}
+                        {{ form.notes }}
+
+                        {% if form.notes.help_text %}
+                            <p class="form-help">
+                                {{ form.notes.help_text }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field employee-specialty-grid">
+                        <span class="form-label">
+                            Specialties
+
+                            <span class="optional-indicator">
+                                Optional
+                            </span>
+                        </span>
+
+                        {{ form.specialties.errors }}
+
+                        {% if form.specialties.help_text %}
+                            <p class="employee-specialty-help">
+                                {{ form.specialties.help_text }}
+                            </p>
+                        {% endif %}
+
+                        {{ form.specialties }}
+                    </div>
+                </div>
+
+                <div class="confirmation-panel">
+                    An employee without a specialty may represent
+                    a newly appointed or training employee. Such an
+                    employee will not be offered for specialized
+                    activity assignments.
+                </div>
+
+                <div class="form-actions">
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        Save changes
+                    </button>
+
+                    <a class="button" href="{% url 'employees:list' %}" >
+                        Return without saving
+                    </a>
+
+                </div>
+            </form>
+        </section>
+    </div>
 {% endblock %}

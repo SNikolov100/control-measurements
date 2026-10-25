@@ -1,47 +1,210 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Assign employees | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/details.css' %}" >
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
+    <link rel="stylesheet" href="{% static 'css/inspections.css' %}" >
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'inspections:list' %}">
+                    Activities
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'inspections:details' inspection.pk %}">
+                    {{ inspection.get_inspection_type_display }}
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Assign employees
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>Assign employees</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Assign employees
+            </h1>
 
-    <h3>
-        {{ inspection.equipment.equipment_type.short_name }}
-        -
-        {{ inspection.equipment.serial_number }}
-    </h3>
+            <p class="page-description">
+                Select one or more active employees with the
+                required specialty for this activity.
+            </p>
+        </div>
+    </header>
 
-    <dl>
-        <dt><strong>Activity type</strong></dt>
-        <dd>{{ inspection.get_inspection_type_display }}</dd>
+    <div class="form-layout">
+        <div class="activity-detail-grid">
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Equipment
+                        </h2>
 
-        <dt><strong>Specialty</strong></dt>
-        <dd>
-            {{ inspection.equipment.equipment_type.specialty.name }}
-        </dd>
+                        <p class="detail-card-description">
+                            Equipment related to the activity.
+                        </p>
+                    </div>
+                </div>
 
-        <dt><strong>Status</strong></dt>
-        <dd>{{ inspection.get_status_display }}</dd>
+                <dl class="detail-list">
+                    <dt>Equipment type</dt>
+                    <dd>
+                        {{ inspection.equipment.equipment_type.name }}
+                    </dd>
 
-        <dt><strong>Received at</strong></dt>
-        <dd>{{ inspection.received_at }}</dd>
-    </dl>
+                    <dt>Model</dt>
+                    <dd>
+                        {% if inspection.equipment.model_name %}
+                            {{ inspection.equipment.model_name }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+                    <dt>Serial number</dt>
+                    <dd>
+                        {{ inspection.equipment.serial_number }}
+                    </dd>
 
-        {{ form.as_p }}
+                    <dt>Customer</dt>
+                    <dd>
+                        {{ inspection.equipment.customer_site.customer.company_name }}
+                    </dd>
 
-        <button type="submit">
-            Save assignment
-        </button>
-    </form>
+                    <dt>Customer site</dt>
+                    <dd>
+                        {{ inspection.equipment.customer_site.name }}
+                    </dd>
+                </dl>
+            </section>
 
-    <p>
-        <a href="{% url 'inspections:list' %}">
-            Cancel and return to activities
-        </a>
-    </p>
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Activity information
+                        </h2>
+
+                        <p class="detail-card-description">
+                            Activity type, specialty, status,
+                            and received date.
+                        </p>
+                    </div>
+
+                    <span class="status-badge status-pending">
+                        {{ inspection.get_status_display }}
+                    </span>
+                </div>
+
+                <dl class="detail-list">
+                    <dt>Activity type</dt>
+                    <dd>
+                        {{ inspection.get_inspection_type_display }}
+                    </dd>
+
+                    <dt>Required specialty</dt>
+                    <dd>
+                        {{ inspection.equipment.equipment_type.specialty.name }}
+                    </dd>
+
+                    <dt>Received at</dt>
+                    <dd>{{ inspection.received_at }}</dd>
+
+                    <dt>Estimated duration</dt>
+                    <dd>
+                        {{ inspection.estimated_duration }}
+                        minutes
+                    </dd>
+                </dl>
+            </section>
+        </div>
+
+        <div class="form-container">
+            <section class="form-card">
+                <div class="form-card-header">
+                    <h2 class="form-card-title">
+                        Qualified employees
+                    </h2>
+
+                    <p class="form-card-description">
+                        Only active employees with the required
+                        specialty are available for selection.
+                    </p>
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="form-non-field-errors">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="form-fields">
+                        <div class="form-field">
+                            <label
+                                class="form-label"
+                                for="{{ form.assigned_employees.id_for_label }}"
+                            >
+                                Assigned employees
+
+                                <span class="optional-indicator">
+                                    Optional until the activity is started
+                                </span>
+                            </label>
+
+                            {{ form.assigned_employees.errors }}
+
+                            {{ form.assigned_employees }}
+
+                            {% if form.assigned_employees.help_text %}
+                                <p class="form-help">
+                                    {{ form.assigned_employees.help_text }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button
+                            class="button button-primary"
+                            type="submit"
+                        >
+                            Save assignment
+                        </button>
+
+                        <a class="button" href="{% url 'inspections:list' %}" >
+                            Cancel
+                        </a>
+
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
 {% endblock %}

@@ -1,156 +1,302 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
-    Customer details | Control Measurements
+    {{ customer.company_name }} | Control Measurements
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/details.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:list' %}">
+                    Customers
+                </a>
+            </li>
+
+            <li aria-current="page">
+                {{ customer.short_name|default:customer.company_name }}
+            </li>
+        </ol>
+    </nav>
 {% endblock %}
 
 {% block content %}
-    <h2>Customer details</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                {{ customer.company_name }}
+            </h1>
 
-    <h3>{{ customer.company_name }}</h3>
+            <p class="page-description">
+                Customer information, sites, responsible contacts,
+                and registered equipment.
+            </p>
+        </div>
 
-    <section>
-        <h4>Company information</h4>
-
-        <dl>
-            <dt><strong>Company name</strong></dt>
-            <dd>{{ customer.company_name }}</dd>
-
-            <dt><strong>Short name</strong></dt>
-            <dd>{{ customer.short_name }}</dd>
-
-            <dt><strong>City</strong></dt>
-            <dd>
-                {% if customer.city %}
-                    {{ customer.city }}
-                {% else %}
-                    -
-                {% endif %}
-            </dd>
-
-            <dt><strong>Country</strong></dt>
-            <dd>
-                {% if customer.country %}
-                    {{ customer.country }}
-                {% else %}
-                    -
-                {% endif %}
-            </dd>
-
-            <dt><strong>Address</strong></dt>
-            <dd>
-                {% if customer.address %}
-                    {{ customer.address }}
-                {% else %}
-                    -
-                {% endif %}
-            </dd>
-
-            <dt><strong>Phone</strong></dt>
-            <dd>
-                {% if customer.phone %}
-                    {{ customer.phone }}
-                {% else %}
-                    -
-                {% endif %}
-            </dd>
-
-            <dt><strong>Email</strong></dt>
-            <dd>
-                {% if customer.email %}
-                    {{ customer.email }}
-                {% else %}
-                    -
-                {% endif %}
-            </dd>
-
-            <dt><strong>Active</strong></dt>
-            <dd>
-                {% if customer.is_active %}
-                    Yes
-                {% else %}
-                    No
-                {% endif %}
-            </dd>
-
-            <dt><strong>Slug</strong></dt>
-            <dd>{{ customer.slug }}</dd>
-        </dl>
-    </section>
-
-    <section>
-        <h4>Notes</h4>
-
-        {% if customer.notes %}
-            <p>{{ customer.notes|linebreaksbr }}</p>
-        {% else %}
-            <p>No notes.</p>
-        {% endif %}
-    </section>
-
-    <section>
-        <p>
-            <a href="{% url 'customers:site-create' customer.pk %}">
-                Add customer site
+        <div class="page-actions">
+            <a
+                class="button"
+                href="{% url 'customers:edit' customer.slug %}"
+            >
+                Edit customer
             </a>
-        </p>
 
-        {% if customer.sites.all %}
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>City</th>
-                        <th>Address</th>
-                        <th>Active</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+            <a
+                class="button button-primary"
+                href="{% url 'customers:site-create' customer.slug %}"
+            >
+                Add site
+            </a>
+        </div>
+    </header>
 
-                <tbody>
+    <div class="detail-layout">
+        <div class="detail-grid">
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Customer information
+                        </h2>
+
+                        <p class="detail-card-description">
+                            Main identification and location data.
+                        </p>
+                    </div>
+
+                    {% if customer.is_active %}
+                        <span class="status-badge status-active">
+                            Active
+                        </span>
+                    {% else %}
+                        <span class="status-badge status-inactive">
+                            Inactive
+                        </span>
+                    {% endif %}
+                </div>
+
+                <dl class="detail-list">
+                    <dt>Company name</dt>
+                    <dd>{{ customer.company_name }}</dd>
+
+                    <dt>Short name</dt>
+                    <dd>
+                        {% if customer.short_name %}
+                            {{ customer.short_name }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Country</dt>
+                    <dd>
+                        {{ customer.country|default:"Not provided" }}
+                    </dd>
+
+                    <dt>City</dt>
+                    <dd>
+                        {{ customer.city|default:"Not provided" }}
+                    </dd>
+
+                    <dt>Address</dt>
+                    <dd>
+                        {{ customer.address|default:"Not provided" }}
+                    </dd>
+                </dl>
+            </section>
+
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Contact information
+                        </h2>
+
+                        <p class="detail-card-description">
+                            General contact details for the customer.
+                        </p>
+                    </div>
+                </div>
+
+                <dl class="detail-list">
+                    <dt>Phone</dt>
+                    <dd>
+                        {% if customer.phone %}
+                            {{ customer.phone }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Email</dt>
+                    <dd>
+                        {% if customer.email %}
+                            <a href="mailto:{{ customer.email }}">
+                                {{ customer.email }}
+                            </a>
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Slug</dt>
+                    <dd>{{ customer.slug }}</dd>
+                </dl>
+            </section>
+        </div>
+
+        <section class="detail-card">
+            <div class="detail-card-header">
+                <div>
+                    <h2 class="detail-card-title">
+                        Notes
+                    </h2>
+
+                    <p class="detail-card-description">
+                        Additional information about the customer.
+                    </p>
+                </div>
+            </div>
+
+            {% if customer.notes %}
+                <p class="detail-notes">
+                    {{ customer.notes|linebreaksbr }}
+                </p>
+            {% else %}
+                <p class="detail-value-muted">
+                    No notes have been added.
+                </p>
+            {% endif %}
+        </section>
+
+        <section class="section-card">
+            <div class="section-card-header">
+                <div>
+                    <h2 class="section-card-title">
+                        Customer sites
+                    </h2>
+
+                    <p class="section-card-description">
+                        Operational sites, workshops, laboratories,
+                        departments, and other customer locations.
+                    </p>
+                </div>
+
+                <a
+                    class="button button-primary"
+                    href="{% url 'customers:site-create' customer.slug %}"
+                >
+                    Add site
+                </a>
+            </div>
+
+            {% if customer.sites.all %}
+                <div class="record-list">
                     {% for site in customer.sites.all %}
-                        <tr>
-                            <td>{{ site.name }}</td>
+                        <article class="record-card">
+                            <div class="record-card-main">
+                                <h3 class="record-card-title">
+                                    {{ site.name }}
+                                </h3>
 
-                            <td>{{ site.effective_city|default:"-" }}</td>
+                                <div class="record-card-meta">
+                                    {% if site.short_name %}
+                                        <span>
+                                            {{ site.short_name }}
+                                        </span>
+                                    {% endif %}
 
-                            <td>{{ site.effective_address|default:"-" }}</td>
+                                    <span>
+                                        {{ site.effective_city|default:"No city" }}
+                                    </span>
 
-                            <td>
-                                {% if site.is_active %}
-                                    Yes
-                                {% else %}
-                                    No
-                                {% endif %}
-                            </td>
+                                    <span>
+                                        {{ site.effective_address|default:"No address" }}
+                                    </span>
 
-                            <td>
-                                <a href="{% url 'customers:site-details' customer.pk site.pk %}">
+                                    {% if site.is_active %}
+                                        <span class="status-badge status-active">
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge status-inactive">
+                                            Inactive
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="record-card-actions">
+                                <a
+                                    class="button button-small"
+                                    href="{% url 'customers:site-details' customer.slug site.slug %}"
+                                >
                                     Details
                                 </a>
-                                |
-                                <a href="{% url 'customers:site-edit' customer.pk site.pk %}">
+
+                                <a
+                                    class="button button-small"
+                                    href="{% url 'customers:site-edit' customer.slug site.slug %}"
+                                >
                                     Edit
                                 </a>
-                            </td>
-                        </tr>
+                            </div>
+                        </article>
                     {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>This customer has no registered sites.</p>
-        {% endif %}
-    </section>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>No customer sites</h3>
 
-    <p>
-        <a href="{% url 'customers:edit' customer.pk %}">
-            Edit customer
-        </a>
-    </p>
+                    <p>
+                        Add the first site before registering
+                        responsible contacts and equipment.
+                    </p>
 
-    <p>
-        <a href="{% url 'customers:list' %}">
-            Back to customers
-        </a>
-    </p>
+                    <a
+                        class="button button-primary"
+                        href="{% url 'customers:site-create' customer.slug %}"
+                    >
+                        Add site
+                    </a>
+                </div>
+            {% endif %}
+        </section>
+
+        <nav
+            class="context-navigation"
+            aria-label="Customer navigation"
+        >
+            <a
+                class="button"
+                href="{% url 'customers:list' %}"
+            >
+                Back to customers
+            </a>
+
+            <a
+                class="button"
+                href="{% url 'core:home' %}"
+            >
+                Home
+            </a>
+        </nav>
+    </div>
 {% endblock %}

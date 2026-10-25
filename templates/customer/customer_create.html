@@ -1,29 +1,96 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Add customer | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:list' %}">
+                    Customers
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Add customer
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>Add customer</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Add customer
+            </h1>
 
-    <p>
-        Enter the company information for the new customer.
-    </p>
+            <p class="page-description">
+                Register a customer company before adding its
+                operational sites, responsible contacts, and
+                equipment.
+            </p>
+        </div>
+    </header>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+    <div class="form-layout">
+        <div class="form-container">
+            <section class="form-card">
+                <div class="form-card-header">
+                    <h2 class="form-card-title">
+                        Customer information
+                    </h2>
 
-        {{ form.as_p }}
+                    <p class="form-card-description">
+                        Enter the company, location, and contact
+                        details for the new customer.
+                    </p>
+                </div>
 
-        <button type="submit">
-            Save customer
-        </button>
-    </form>
+                {% if form.non_field_errors %}
+                    <div class="form-non-field-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
 
-    <p>
-        <a href="{% url 'customers:list' %}">
-            Back to customers
-        </a>
-    </p>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% include "customer/includes/customer_form_fields.html" %}
+
+                    <div class="confirmation-panel">
+                        After saving, operational sites and
+                        responsible contacts can be added from
+                        the customer details page.
+                    </div>
+
+                    <div class="form-actions">
+                        <button
+                            class="button button-primary"
+                            type="submit"
+                        >
+                            Save customer
+                        </button>
+
+                        <a class="button" href="{% url 'customers:list' %}" >
+                            Return without saving
+                        </a>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
 {% endblock %}

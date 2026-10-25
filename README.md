@@ -61,6 +61,28 @@ reusable model mixins, and common validators.
 - System settings form
 - Specialty list, creation, editing, and protected deletion
 
+## Current interface
+
+The application now uses a shared responsive service interface with:
+
+- permanent navigation and an always-available Home link;
+- breadcrumbs and contextual navigation;
+- reusable cards, tables, forms, buttons, and status badges;
+- explicit labels, placeholders, help text, and validation errors;
+- responsive list and detail pages;
+- reusable confirmation pages for protected deletion;
+- searchable and paginated main registers.
+
+The main operational workflow is:
+
+Customer
+→ Customer site
+→ Responsible contact
+→ Equipment
+→ Activity
+→ Assigned employees
+→ Result and history
+
 ### System settings
 
 - Default calendar period
@@ -401,25 +423,35 @@ The current shared infrastructure includes:
 
 </details>
 
-## Development approach
+### Development approach
 
-The next stage will focus on the user interface and operational
-navigation:
+Development follows a staged and workflow-oriented approach. Each stage
+is completed and tested before additional functionality is introduced.
 
-- a stable shared layout for all templates;
-- permanent navigation with an always-available Home link;
-- customer-site pages as the main operational workspace;
-- dedicated static CSS files;
-- reusable form and table components;
-- clear labels, placeholders, help text, and custom error messages;
-- required and optional field indicators;
-- breadcrumbs and contextual back navigation;
-- equipment and activity search;
-- combinable filters;
-- column sorting;
-- pagination that preserves active GET parameters;
-- responsive presentation of lists, forms, details, and status
-  histories.
+The functional foundation and the shared service interface are now
+implemented. The project currently includes:
+
+- reusable model, form, and view mixins;
+- shared text normalization and validation;
+- complete CRUD workflows for the main domain models;
+- customer-site workspaces for contacts and equipment;
+- controlled equipment and employee status changes;
+- the complete activity lifecycle from creation to completion or
+  cancellation;
+- shared navigation, breadcrumbs, forms, tables, detail pages, and
+  protected-delete confirmations;
+- reusable search and pagination for the main registers;
+- Unicode slug routes for customers, customer sites, and equipment;
+- workflow-oriented redirects that return the operator to the most useful
+  working list.
+
+The next development stage will focus on working with larger registers
+and improving daily operator workflows.
+
+The planned order is:
+- Add primary/combined activity filters
+- Add reusable sorting
+- Improve phone-number validation
 
 ## Installation
 

@@ -1,0 +1,189 @@
+<div class="form-fields">
+    {% if form.customer_site %}
+        <div class="form-field">
+            <label
+                class="form-label"
+                for="{{ form.customer_site.id_for_label }}"
+            >
+                Customer site
+
+                <span class="required-indicator">*</span>
+            </label>
+
+            {{ form.customer_site.errors }}
+            {{ form.customer_site }}
+
+            {% if form.customer_site.help_text %}
+                <p class="form-help">
+                    {{ form.customer_site.help_text }}
+                </p>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.equipment_type.id_for_label }}"
+        >
+            Equipment type
+
+            <span class="required-indicator">*</span>
+        </label>
+
+        {{ form.equipment_type.errors }}
+        {{ form.equipment_type }}
+
+        {% if form.equipment_type.help_text %}
+            <p class="form-help">
+                {{ form.equipment_type.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.model_name.id_for_label }}"
+        >
+            Model
+
+            <span class="optional-indicator">Optional</span>
+        </label>
+
+        {{ form.model_name.errors }}
+        {{ form.model_name }}
+
+        {% if form.model_name.help_text %}
+            <p class="form-help">
+                {{ form.model_name.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.serial_number.id_for_label }}"
+        >
+            Serial number
+
+            <span class="required-indicator">*</span>
+        </label>
+
+        {{ form.serial_number.errors }}
+        {{ form.serial_number }}
+
+        {% if form.serial_number.help_text %}
+            <p class="form-help">
+                {{ form.serial_number.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.inventory_number.id_for_label }}"
+        >
+            Inventory number
+
+            <span class="optional-indicator">Optional</span>
+        </label>
+
+        {{ form.inventory_number.errors }}
+        {{ form.inventory_number }}
+
+        {% if form.inventory_number.help_text %}
+            <p class="form-help">
+                {{ form.inventory_number.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.inspection_interval_value.id_for_label }}"
+        >
+            Inspection interval value
+
+            <span class="optional-indicator">
+                Uses the equipment-type default when empty
+            </span>
+        </label>
+
+        {{ form.inspection_interval_value.errors }}
+        {{ form.inspection_interval_value }}
+
+        {% if form.inspection_interval_value.help_text %}
+            <p class="form-help">
+                {{ form.inspection_interval_value.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.inspection_interval_unit.id_for_label }}"
+        >
+            Inspection interval unit
+
+            <span class="optional-indicator">
+                Uses the equipment-type default when empty
+            </span>
+        </label>
+
+        {{ form.inspection_interval_unit.errors }}
+        {{ form.inspection_interval_unit }}
+
+        {% if form.inspection_interval_unit.help_text %}
+            <p class="form-help">
+                {{ form.inspection_interval_unit.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.estimated_inspection_duration.id_for_label }}"
+        >
+            Estimated inspection duration in minutes
+
+            <span class="optional-indicator">
+                Uses the equipment-type default when empty
+            </span>
+        </label>
+
+        {{ form.estimated_inspection_duration.errors }}
+        {{ form.estimated_inspection_duration }}
+
+        {% if form.estimated_inspection_duration.help_text %}
+            <p class="form-help">
+                {{ form.estimated_inspection_duration.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.notes.id_for_label }}"
+        >
+            Notes
+
+            <span class="optional-indicator">Optional</span>
+        </label>
+
+        {{ form.notes.errors }}
+        {{ form.notes }}
+
+        {% if form.notes.help_text %}
+            <p class="form-help">
+                {{ form.notes.help_text }}
+            </p>
+        {% endif %}
+    </div>
+</div>

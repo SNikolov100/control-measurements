@@ -1,108 +1,230 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Equipment | Control Measurements
 {% endblock %}
 
-{% block content %}
-    <h2>Equipment registry</h2>
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/tables.css' %}" >
+    <link rel="stylesheet" href="{% static 'css/equipment.css' %}" >
+{% endblock %}
 
-    <p>
-        <a href="{% url 'equipment:create' %}">
-            Add equipment
-        </a>
-    </p>
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Equipment
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Equipment registry
+            </h1>
+
+            <p class="page-description">
+                Browse registered equipment, customer locations,
+                serial numbers, current statuses, and available
+                actions.
+            </p>
+        </div>
+
+        <div class="page-actions">
+            <a class="button" href="{% url 'equipment:types-list' %}" >
+                Equipment types
+            </a>
+        </div>
+    </header>
+
+    <section class="list-tools">
+        <div class="list-tools-header">
+            <div>
+                <h2 class="list-tools-title">
+                    Equipment search
+                </h2>
+
+                <p class="list-tools-description">
+                    Search by serial number, inventory number, model,
+                    equipment type, specialty, customer, or site.
+                </p>
+            </div>
+        </div>
+
+        {% include "shared/search_form.html" with search_placeholder="Search equipment" %}
+    </section>
+        {% if search_query %}
+            <p class="search-result-summary">
+                Search results for:
+                <strong>{{ search_query }}</strong>
+
+                {% if paginator %}
+                    · {{ paginator.count }} matching records
+                {% endif %}
+            </p>
+        {% endif %}
 
     {% if equipment_items %}
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Equipment</th>
-                    <th>Customer</th>
-                    <th>Customer site</th>
-                    <th>Specialty</th>
-                    <th>Model</th>
-                    <th>Serial number</th>
-                    <th>Inventory number</th>
-                    <th>Inspection interval</th>
-                    <th>Status</th>
-                    <th>Active</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
+        <section
+            class="table-card"
+            aria-label="Equipment registry"
+        >
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Equipment</th>
+                            <th>Model</th>
+                            <th>Identifiers</th>
+                            <th>Customer and site</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
 
-            <tbody>
-                {% for equipment in equipment_items %}
-                    <tr>
-                        <td>
-                            {{ equipment.equipment_type.name }}
-                        </td>
+                    <tbody>
+                        {% for equipment in equipment_items %}
+                            <tr>
+                                <td>
+                                    <div class="equipment-name">
+                                        <strong>
+                                            {{ equipment.equipment_type.name }}
+                                        </strong>
 
-                        <td>
-                            {{ equipment.customer_site.customer.short_name }}
-                        </td>
+                                        <span class="equipment-specialty">
+                                            {{ equipment.equipment_type.specialty.short_name }}
+                                        </span>
+                                    </div>
+                                </td>
 
-                        <td>
-                            {{ equipment.customer_site.name }}
-                        </td>
+                                <td>
+                                    {% if equipment.model_name %}
+                                        {{ equipment.model_name }}
+                                    {% else %}
+                                        <span class="table-empty-cell">
+                                            -
+                                        </span>
+                                    {% endif %}
+                                </td>
 
-                        <td>
-                            {{ equipment.equipment_type.specialty.name }}
-                        </td>
+                                <td>
+                                    <div class="equipment-identifiers">
+                                        <span class="equipment-serial">
+                                            {{ equipment.serial_number }}
+                                        </span>
 
-                        <td>
-                            {% if equipment.model_name %}
-                                {{ equipment.model_name }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
+                                        {% if equipment.inventory_number %}
+                                            <span class="equipment-inventory">
+                                                Inventory:
+                                                {{ equipment.inventory_number }}
+                                            </span>
+                                        {% else %}
+                                            <span class="equipment-inventory">
+                                                No inventory number
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
 
-                        <td>
-                            {{ equipment.serial_number }}
-                        </td>
+                                <td>
+                                    <div class="equipment-location">
+                                        <strong>
+                                            {% if equipment.customer_site.customer.short_name %}
+                                                {{ equipment.customer_site.customer.short_name }}
+                                            {% else %}
+                                                {{ equipment.customer_site.customer.company_name }}
+                                            {% endif %}
+                                        </strong>
 
-                        <td>
-                            {% if equipment.inventory_number %}
-                                {{ equipment.inventory_number }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
+                                        <span>
+                                            {{ equipment.customer_site.name }}
+                                        </span>
+                                    </div>
+                                </td>
 
-                        <td>
-                            {{ equipment.inspection_interval_value }}
-                            {{ equipment.get_inspection_interval_unit_display }}
-                        </td>
+                                <td class="equipment-status">
+                                    {% if equipment.status == equipment.Status.IN_SERVICE %}
+                                        <span class="status-badge status-active">
+                                            {{ equipment.get_status_display }}
+                                        </span>
 
-                        <td>
-                            {{ equipment.get_status_display }}
-                        </td>
+                                    {% elif equipment.status == equipment.Status.UNDER_INSPECTION or equipment.status == equipment.Status.UNDER_REPAIR %}
+                                        <span class="status-badge status-in-progress">
+                                            {{ equipment.get_status_display }}
+                                        </span>
 
-                        <td>
-                            {% if equipment.is_active %}
-                                Yes
-                            {% else %}
-                                No
-                            {% endif %}
-                        </td>
+                                    {% elif equipment.status == equipment.Status.DECOMMISSIONED %}
+                                        <span class="status-badge status-inactive">
+                                            {{ equipment.get_status_display }}
+                                        </span>
 
-                        <td>
-                            <a href="{% url 'equipment:detail' equipment.pk %}">
-                                Details
-                            </a>
+                                    {% else %}
+                                        <span class="status-badge status-warning">
+                                            {{ equipment.get_status_display }}
+                                        </span>
+                                    {% endif %}
+                                </td>
 
-                            |
+                                <td class="table-actions">
+                                    <div class="action-group">
+                                        <a class="button button-small" href="{% url 'equipment:detail' equipment.slug %}" >
+                                            Details
+                                        </a>
 
-                            <a href="{% url 'equipment:edit' equipment.pk %}">
-                                Edit
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                                        <a class="button button-small" href="{% url 'equipment:edit' equipment.slug %}" >
+                                            Edit
+                                        </a>
+
+                                        <a class="button button-small button-primary" href="{% url 'inspections:create' equipment.slug %}" >
+                                            New activity
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% include "shared/pagination.html" %}
     {% else %}
-        <p>No equipment has been registered.</p>
+        <section class="empty-state">
+            {% if search_query %}
+                <h2>No matching equipment</h2>
+
+                <p>
+                    No equipment matches
+                    <strong>{{ search_query }}</strong>.
+                </p>
+
+                <a
+                    class="button"
+                    href="{% url 'equipment:list' %}?page_size={{ current_page_size }}"
+                >
+                    Clear search
+                </a>
+            {% else %}
+                <h2>No registered equipment</h2>
+
+                <p>
+                    Equipment is registered from the appropriate
+                    customer-site page.
+                </p>
+
+                <a class="button" href="{% url 'customers:list' %}">
+                    Open customers
+                </a>
+            {% endif %}
+        </section>
     {% endif %}
 {% endblock %}

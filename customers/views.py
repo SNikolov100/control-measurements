@@ -8,14 +8,27 @@ from .forms import (
 from .models import Customer, CustomerSite, CustomerContact
 from equipment.forms import CustomerSiteEquipmentCreateForm
 from equipment.models import Equipment
-from core.view_mixins import ConfirmedDeleteMixin
+from core.view_mixins import ConfirmedDeleteMixin, PaginationMixin, SearchMixin
 from .view_mixins import CustomerParentMixin, CustomerSiteParentMixin
 from equipment.view_mixins import EquipmentRegistrationMixin
 
-class CustomerListView(ListView):
+class CustomerListView(SearchMixin, PaginationMixin, ListView):
     model = Customer
     template_name = 'customer/customer_list.html'
     context_object_name = 'customers'
+
+    search_fields = (
+        'company_name__icontains',
+        'short_name__icontains',
+        'country__icontains',
+        'city__icontains',
+        'address__icontains',
+        'phone__icontains',
+        'email__icontains',
+        'sites__name__icontains',
+        'sites__short_name__icontains',
+    )
+    search_distinct = True
 
 class CustomerCreateView(CreateView):
     model = Customer
@@ -27,15 +40,20 @@ class CustomerEditView(UpdateView):
     model = Customer
     form_class = CustomerEditForm
     template_name = 'customer/customer_edit.html'
+    context_object_name = 'customer'
+    slug_field = 'slug'
+    slug_url_kwarg = 'customer_slug'
     success_url = reverse_lazy('customers:list')
 
 class CustomerDetailView(DetailView):
     model = Customer
     template_name = 'customer/customer_detail.html'
     context_object_name = 'customer'
+    slug_field = 'slug'
+    slug_url_kwarg = 'customer_slug'
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related("sites")
+        return super().get_queryset().prefetch_related('sites')
 
 class CustomerSiteCreateView(CustomerParentMixin, CreateView):
     model = CustomerSite
@@ -51,6 +69,8 @@ class CustomerSiteEditView(CustomerParentMixin, UpdateView):
     form_class = CustomerSiteEditForm
     template_name = 'customer/customer_site_edit.html'
     context_object_name = 'site'
+    slug_field = 'slug'
+    slug_url_kwarg = 'site_slug'
 
     def get_queryset(self):
         return super().get_queryset().filter(customer=self.customer)
@@ -59,13 +79,15 @@ class CustomerSiteDetailView(CustomerParentMixin, DetailView):
     model = CustomerSite
     template_name = 'customer/customer_site_detail.html'
     context_object_name = 'site'
+    slug_field = 'slug'
+    slug_url_kwarg = 'site_slug'
 
     def get_queryset(self):
         return (super()
             .get_queryset()
             .filter(customer=self.customer)
-            .select_related("customer")
-            .prefetch_related("contacts","equipment_items",)
+            .select_related('customer')
+            .prefetch_related('contacts','equipment_items',)
         )
 
 class CustomerContactCreateView(CustomerSiteParentMixin, CreateView):

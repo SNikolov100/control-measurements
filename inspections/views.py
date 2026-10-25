@@ -6,12 +6,25 @@ from .models import Inspection
 from django.urls import reverse, reverse_lazy
 from .services import complete_inspection, start_inspection, cancel_inspection
 from .view_mixins import InspectionActionMixin
+from core.view_mixins import PaginationMixin, SearchMixin
 
 
-class InspectionListView(ListView):
+class InspectionListView(SearchMixin, PaginationMixin, ListView):
     model = Inspection
     template_name = 'inspections/inspection_list.html'
     context_object_name = 'inspections'
+    search_fields = (
+        "equipment__serial_number__icontains",
+
+        "equipment__model_name__icontains",
+        "equipment__equipment_type__name__icontains",
+        "equipment__equipment_type__short_name__icontains",
+        "assigned_employees__full_name__icontains",
+        "customer_contact__full_name__icontains",
+    )
+
+    search_distinct = True
+
 
     def get_queryset(self):
         queryset_result = (super().get_queryset()
@@ -40,7 +53,7 @@ class InspectionCreateView(CreateView):
                 'equipment_type',
                 'equipment_type__specialty',
             ),
-            pk=kwargs['equipment_pk'],
+            slug=kwargs['equipment_slug'],
         )
 
         return super().dispatch(request,*args,**kwargs,)
@@ -60,7 +73,11 @@ class InspectionCreateView(CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('equipment:detail', kwargs={'pk': self.equipment.pk})
+        customer_site = self.equipment.customer_site
+        customer_slug = customer_site.customer.slug
+        site_slug = customer_site.slug
+        return reverse('customers:site-details',kwargs={'customer_slug': customer_slug ,'site_slug': site_slug},
+        )
 
 class InspectionAssignmentView(UpdateView):
     model = Inspection

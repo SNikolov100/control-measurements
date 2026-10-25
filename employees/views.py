@@ -3,12 +3,23 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, ListView, UpdateView, DetailView, FormView
 from .forms import EmployeeCreateForm, EmployeeEditForm, EmployeeActivityStatusForm
 from .models import Employee
+from core.view_mixins import PaginationMixin, SearchMixin
 
-class EmployeeListView(ListView):
+class EmployeeListView(SearchMixin, PaginationMixin, ListView):
     model = Employee
     template_name = 'employees/employee_list.html'
     context_object_name = 'employees'
 
+    search_fields = (
+        'full_name__icontains',
+        'position__icontains',
+        'phone__icontains',
+        'email__icontains',
+        'specialties__code__icontains',
+        'specialties__name__icontains',
+        'specialties__short_name__icontains',
+    )
+    search_distinct = True
     def get_queryset(self):
         queryset_result = super().get_queryset().prefetch_related("specialties")
         return queryset_result
@@ -59,4 +70,4 @@ class EmployeeActivityStatusView(FormView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse("employees:details", kwargs={"pk": self.employee.pk})
+        return reverse('employees:list')

@@ -1,75 +1,219 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Equipment types | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/tables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/equipment.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'equipment:list' %}">
+                    Equipment
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Equipment types
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>Equipment types</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Equipment types
+            </h1>
 
-    <p>
-        <a href="{% url 'equipment:type-create' %}">
-            Add equipment type
-        </a>
-    </p>
+            <p class="page-description">
+                Configure equipment categories, required
+                specialties, default inspection intervals,
+                and expected activity durations.
+            </p>
+        </div>
 
+        <div class="page-actions">
+            <a class="button" href="{% url 'equipment:list' %}">
+                Equipment registry
+            </a>
+
+            <a class="button button-primary" href="{% url 'equipment:type-create' %}">
+                Add equipment type
+            </a>
+        </div>
+    </header>
+    <section class="list-tools">
+        <div class="list-tools-header">
+            <div>
+                <h2 class="list-tools-title">
+                    Equipment-type search
+                </h2>
+
+                <p class="list-tools-description">
+                    Search by name, short name, description,
+                    or required specialty.
+                </p>
+            </div>
+        </div>
+
+        {% include "shared/search_form.html" with search_placeholder="Search equipment types" %}
+    </section>
+
+    {% if search_query %}
+        <p class="search-result-summary">
+            Search results for:
+            <strong>{{ search_query }}</strong>
+
+            {% if paginator %}
+                · {{ paginator.count }} matching records
+            {% endif %}
+        </p>
+    {% endif %}
     {% if equipment_types %}
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Short name</th>
-                    <th>Specialty</th>
-                    <th>Default interval</th>
-                    <th>Default duration</th>
-                    <th>Active</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
+        <section
+            class="table-card"
+            aria-label="Equipment types"
+        >
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Equipment type</th>
+                            <th>Specialty</th>
+                            <th>Default interval</th>
+                            <th>Default duration</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
 
-            <tbody>
-                {% for equipment_type in equipment_types %}
-                    <tr>
-                        <td>{{ equipment_type.name }}</td>
+                    <tbody>
+                        {% for equipment_type in equipment_types %}
+                            <tr>
+                                <td>
+                                    <span class="table-primary-text">
+                                        {{ equipment_type.name }}
+                                    </span>
 
-                        <td>{{ equipment_type.short_name }}</td>
+                                    {% if equipment_type.short_name %}
+                                        <span class="table-secondary-text">
+                                            {{ equipment_type.short_name }}
+                                        </span>
+                                    {% endif %}
+                                </td>
 
-                        <td>
-                            {{ equipment_type.specialty.name }}
-                        </td>
+                                <td>
+                                    <span class="specialty-badge">
+                                        {% if equipment_type.specialty.short_name %}
+                                            {{ equipment_type.specialty.short_name }}
+                                        {% else %}
+                                            {{ equipment_type.specialty.name }}
+                                        {% endif %}
+                                    </span>
+                                </td>
 
-                        <td>
-                            {{ equipment_type.default_interval_value }}
-                            {{ equipment_type.get_default_interval_unit_display }}
-                        </td>
+                                <td>
+                                    <span class="table-primary-text">
+                                        {{ equipment_type.default_interval_value }}
+                                    </span>
 
-                        <td>
-                            {{ equipment_type.default_inspection_duration }}
-                            minutes
-                        </td>
+                                    <span class="table-secondary-text">
+                                        {{ equipment_type.get_default_interval_unit_display }}
+                                    </span>
+                                </td>
 
-                        <td>
-                            {% if equipment_type.is_active %}
-                                Yes
-                            {% else %}
-                                No
-                            {% endif %}
-                        </td>
+                                <td>
+                                    <span class="table-primary-text">
+                                        {{ equipment_type.default_inspection_duration }}
+                                    </span>
 
-                        <td>
-                            <a href="{% url 'equipment:type-edit' equipment_type.pk %}">
-                                Edit
-                            </a>
-                            |
-                            <a href="{% url 'equipment:type-delete' equipment_type.pk %}">
-                                Delete
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                                    <span class="table-secondary-text">
+                                        minutes
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% if equipment_type.is_active %}
+                                        <span class="status-badge status-active">
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge status-inactive">
+                                            Inactive
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="table-actions">
+                                    <div class="action-group">
+                                        <a
+                                            class="button button-small"
+                                            href="{% url 'equipment:type-edit' equipment_type.pk %}"
+                                        >
+                                            Edit
+                                        </a>
+
+                                        <a
+                                            class="button button-small button-danger"
+                                            href="{% url 'equipment:type-delete' equipment_type.pk %}"
+                                        >
+                                            Delete
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% include "shared/pagination.html" %}
     {% else %}
-        <p>No equipment types have been created.</p>
+        <section class="empty-state">
+            {% if search_query %}
+                <h2>No matching equipment types</h2>
+
+                <p>
+                    No equipment types match
+                    <strong>{{ search_query }}</strong>.
+                    Try another name, description, or specialty.
+                </p>
+
+                <a
+                    class="button"
+                    href="{% url 'equipment:types-list' %}?page_size={{ current_page_size }}"
+                >
+                    Clear search
+                </a>
+            {% else %}
+                <h2>No equipment types</h2>
+
+                <p>
+                    Add the first equipment type before registering
+                    concrete equipment.
+                </p>
+
+                <a
+                    class="button button-primary"
+                    href="{% url 'equipment:type-create' %}"
+                >
+                    Add equipment type
+                </a>
+            {% endif %}
+        </section>
     {% endif %}
 {% endblock %}

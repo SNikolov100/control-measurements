@@ -7,7 +7,7 @@ app_name = 'equipment'
 urlpatterns = [
     path('', views.EquipmentListView.as_view(), name='list'),
     path('create/', views.EquipmentCreateView.as_view(), name='create'),
-    path('<int:pk>/', include([
+    path('<str:equipment_slug>/', include([
         path('edit/', views.EquipmentEditView.as_view(), name='edit'),
         path('detail/', views.EquipmentDetailView.as_view(), name='detail'),
     ])),

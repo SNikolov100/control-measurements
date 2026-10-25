@@ -1,81 +1,237 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Start activity | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/details.css' %}" >
+
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
+
+    <link rel="stylesheet" href="{% static 'css/inspections.css' %}" >
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'inspections:list' %}">
+                    Activities
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'inspections:details' inspection.pk %}">
+                    {{ inspection.get_inspection_type_display }}
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Start activity
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>Start activity</h2>
-
-    <h3>
-        {{ inspection.equipment.equipment_type.short_name }}
-        -
-        {{ inspection.equipment.serial_number }}
-    </h3>
-
-    {% if form.non_field_errors %}
+    <header class="page-header">
         <div>
-            {{ form.non_field_errors }}
+            <h1 class="page-title">
+                Start activity
+            </h1>
+
+            <p class="page-description">
+                Review the activity and assigned employees before
+                recording the actual start time.
+            </p>
         </div>
-    {% endif %}
+    </header>
 
-    <dl>
-        <dt><strong>Activity type</strong></dt>
-        <dd>{{ inspection.get_inspection_type_display }}</dd>
+    <div class="form-layout">
+        <div class="activity-detail-grid">
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Equipment
+                        </h2>
 
-        <dt><strong>Customer</strong></dt>
-        <dd>
-            {{ inspection.equipment.customer_site.customer.company_name }}
-        </dd>
+                        <p class="detail-card-description">
+                            Equipment and customer location related
+                            to this activity.
+                        </p>
+                    </div>
+                </div>
 
-        <dt><strong>Customer site</strong></dt>
-        <dd>{{ inspection.equipment.customer_site.name }}</dd>
+                <dl class="detail-list">
+                    <dt>Equipment type</dt>
+                    <dd>
+                        {{ inspection.equipment.equipment_type.name }}
+                    </dd>
 
-        <dt><strong>Current status</strong></dt>
-        <dd>{{ inspection.get_status_display }}</dd>
+                    <dt>Model</dt>
+                    <dd>
+                        {% if inspection.equipment.model_name %}
+                            {{ inspection.equipment.model_name }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
 
-        <dt><strong>Assigned employees</strong></dt>
-        <dd>
-            {% for employee in inspection.assigned_employees.all %}
-                {{ employee.full_name }}
+                    <dt>Serial number</dt>
+                    <dd>
+                        {{ inspection.equipment.serial_number }}
+                    </dd>
 
-                {% if not forloop.last %}
-                    ,
-                {% endif %}
-            {% empty %}
-                No assigned employees
-            {% endfor %}
-        </dd>
+                    <dt>Customer</dt>
+                    <dd>
+                        {{ inspection.equipment.customer_site.customer.company_name }}
+                    </dd>
 
-        <dt><strong>Planned start</strong></dt>
-        <dd>
-            {% if inspection.planned_start %}
-                {{ inspection.planned_start }}
-            {% else %}
-                -
+                    <dt>Customer site</dt>
+                    <dd>
+                        {{ inspection.equipment.customer_site.name }}
+                    </dd>
+                </dl>
+            </section>
+
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Activity information
+                        </h2>
+
+                        <p class="detail-card-description">
+                            Current activity status and scheduling
+                            information.
+                        </p>
+                    </div>
+
+                    <span class="status-badge status-pending">
+                        {{ inspection.get_status_display }}
+                    </span>
+                </div>
+
+                <dl class="detail-list">
+                    <dt>Activity type</dt>
+                    <dd>
+                        {{ inspection.get_inspection_type_display }}
+                    </dd>
+
+                    <dt>Required specialty</dt>
+                    <dd>
+                        {{ inspection.equipment.equipment_type.specialty.name }}
+                    </dd>
+
+                    <dt>Received at</dt>
+                    <dd>
+                        {{ inspection.received_at }}
+                    </dd>
+
+                    <dt>Planned start</dt>
+                    <dd>
+                        {% if inspection.planned_start %}
+                            {{ inspection.planned_start }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Estimated duration</dt>
+                    <dd>
+                        {{ inspection.estimated_duration }}
+                        minutes
+                    </dd>
+                </dl>
+            </section>
+        </div>
+
+        <section class="form-card form-container">
+            <div class="form-card-header">
+                <h2 class="form-card-title">
+                    Start confirmation
+                </h2>
+
+                <p class="form-card-description">
+                    Starting the activity records the actual start
+                    time and automatically updates the equipment
+                    status.
+                </p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="form-non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
             {% endif %}
-        </dd>
 
-        <dt><strong>Estimated duration</strong></dt>
-        <dd>{{ inspection.estimated_duration }} minutes</dd>
-    </dl>
+            <div class="form-summary">
+                <h3 class="section-heading">
+                    Assigned employees
+                </h3>
 
-    <p>
-        Starting the activity will record the actual start time and
-        update the equipment status.
-    </p>
+                {% if inspection.assigned_employees.all %}
+                    <ul class="activity-employee-list">
+                        {% for employee in inspection.assigned_employees.all %}
+                            <li class="activity-employee-card">
+                                <span class="activity-employee-name">
+                                    {{ employee.full_name }}
+                                </span>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+                                <span class="detail-value-muted">
+                                    Active
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="activity-warning-card">
+                        No employees are assigned. The activity cannot
+                        be started until at least one qualified employee
+                        has been assigned.
+                    </div>
+                {% endif %}
+            </div>
 
-        <button type="submit">
-            Start activity
-        </button>
-    </form>
+            <div class="confirmation-panel confirmation-warning">
+                Confirming this operation will change the activity
+                status to <strong>In progress</strong> and record the
+                current time as its actual start.
+            </div>
 
-    <p>
-        <a href="{% url 'inspections:details' inspection.pk %}">
-            Cancel and return to activity details
-        </a>
-    </p>
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="form-actions">
+                    <button
+                        class="button button-success"
+                        type="submit"
+                    >
+                        Start activity
+                    </button>
+
+                    <a class="button" href="{% url 'inspections:list' %}" >
+                        Cancel
+                    </a>
+
+                    <a class="button" href="{% url 'inspections:assign' inspection.pk %}" >
+                        Change assignment
+                    </a>
+                </div>
+            </form>
+        </section>
+    </div>
 {% endblock %}

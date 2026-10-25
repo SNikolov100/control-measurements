@@ -1,35 +1,140 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
-    Add contact | Control Measurements
+    Add responsible contact | Control Measurements
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/details.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}" >
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:list' %}" >
+                    Customers
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:details' customer.slug %}" >
+                    {{ customer.short_name|default:customer.company_name }}
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:site-details' customer.slug site.slug %}" >
+                    {{ site.short_name|default:site.name }}
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Add responsible contact
+            </li>
+        </ol>
+    </nav>
 {% endblock %}
 
 {% block content %}
-    <h2>Add contact</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Add responsible contact
+            </h1>
 
-    <p>
-        Customer:
-        <strong>{{ customer.company_name }}</strong>
-    </p>
+            <p class="page-description">
+                Register a person who may represent the customer
+                site and hand over equipment for control activities.
+            </p>
+        </div>
+    </header>
 
-    <p>
-        Customer site:
-        <strong>{{ site.name }}</strong>
-    </p>
+    <div class="form-layout">
+        <section class="detail-card form-container">
+            <div class="detail-card-header">
+                <div>
+                    <h2 class="detail-card-title">
+                        Customer and site
+                    </h2>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+                    <p class="detail-card-description">
+                        The responsible contact will be associated
+                        with this customer site.
+                    </p>
+                </div>
+            </div>
 
-        {{ form.as_p }}
+            <dl class="detail-list">
+                <dt>Customer</dt>
+                <dd>{{ customer.company_name }}</dd>
 
-        <button type="submit">
-            Save contact
-        </button>
-    </form>
+                <dt>Customer site</dt>
+                <dd>{{ site.name }}</dd>
 
-    <p>
-        <a href="{% url 'customers:site-details' customer.pk site.pk %}">
-            Cancel and return to customer site
-        </a>
-    </p>
+                <dt>City</dt>
+                <dd>
+                    {{ site.effective_city|default:"Not provided" }}
+                </dd>
+
+                <dt>Address</dt>
+                <dd>
+                    {{ site.effective_address|default:"Not provided" }}
+                </dd>
+            </dl>
+        </section>
+
+        <section class="form-card form-container">
+            <div class="form-card-header">
+                <h2 class="form-card-title">
+                    Contact information
+                </h2>
+
+                <p class="form-card-description">
+                    Enter the person's contact details and role
+                    for this customer site.
+                </p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="form-non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% include "customer/includes/customer_contact_form_fields.html" %}
+
+                <div class="confirmation-panel">
+                    The primary contact is suggested first during
+                    future equipment-intake operations. Another
+                    active contact may still be selected for an
+                    individual intake.
+                </div>
+
+                <div class="form-actions">
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        Save responsible contact
+                    </button>
+
+                    <a class="button" href="{% url 'customers:site-details' customer.slug site.slug %}" >
+                        Return without saving
+                    </a>
+                </div>
+            </form>
+        </section>
+    </div>
 {% endblock %}

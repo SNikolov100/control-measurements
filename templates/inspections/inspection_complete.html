@@ -1,61 +1,260 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Complete activity | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/details.css' %}" >
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
+    <link rel="stylesheet" href="{% static 'css/inspections.css' %}" >
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'inspections:list' %}">
+                    Activities
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'inspections:details' inspection.pk %}">
+                    {{ inspection.get_inspection_type_display }}
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Complete activity
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>Complete activity</h2>
-
-    <h3>
-        {{ inspection.equipment.equipment_type.short_name }}
-        -
-        {{ inspection.equipment.serial_number }}
-    </h3>
-
-    {% if form.non_field_errors %}
+    <header class="page-header">
         <div>
-            {{ form.non_field_errors }}
+            <h1 class="page-title">
+                Complete activity
+            </h1>
+
+            <p class="page-description">
+                Record the final result and complete the current
+                equipment activity.
+            </p>
         </div>
-    {% endif %}
+    </header>
 
-    <dl>
-        <dt><strong>Activity type</strong></dt>
-        <dd>{{ inspection.get_inspection_type_display }}</dd>
+    <div class="form-layout">
+        <div class="activity-detail-grid">
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Equipment
+                        </h2>
 
-        <dt><strong>Status</strong></dt>
-        <dd>{{ inspection.get_status_display }}</dd>
+                        <p class="detail-card-description">
+                            Equipment and customer location related
+                            to this activity.
+                        </p>
+                    </div>
+                </div>
 
-        <dt><strong>Actual start</strong></dt>
-        <dd>{{ inspection.actual_start }}</dd>
+                <dl class="detail-list">
+                    <dt>Equipment type</dt>
+                    <dd>
+                        {{ inspection.equipment.equipment_type.name }}
+                    </dd>
 
-        <dt><strong>Assigned employees</strong></dt>
-        <dd>
-            {% for employee in inspection.assigned_employees.all %}
-                {{ employee.full_name }}
+                    <dt>Model</dt>
+                    <dd>
+                        {% if inspection.equipment.model_name %}
+                            {{ inspection.equipment.model_name }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
 
-                {% if not forloop.last %}
-                    ,
-                {% endif %}
-            {% empty %}
-                No assigned employees
-            {% endfor %}
-        </dd>
-    </dl>
+                    <dt>Serial number</dt>
+                    <dd>
+                        {{ inspection.equipment.serial_number }}
+                    </dd>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+                    <dt>Customer</dt>
+                    <dd>
+                        {{ inspection.equipment.customer_site.customer.company_name }}
+                    </dd>
 
-        {{ form.as_p }}
+                    <dt>Customer site</dt>
+                    <dd>
+                        {{ inspection.equipment.customer_site.name }}
+                    </dd>
+                </dl>
+            </section>
 
-        <button type="submit">
-            Complete activity
-        </button>
-    </form>
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Activity information
+                        </h2>
 
-    <p>
-        <a href="{% url 'inspections:details' inspection.pk %}">
-            Cancel and return to activity details
-        </a>
-    </p>
+                        <p class="detail-card-description">
+                            Current activity status and actual
+                            execution information.
+                        </p>
+                    </div>
+
+                    <span class="status-badge status-in-progress">
+                        {{ inspection.get_status_display }}
+                    </span>
+                </div>
+
+                <dl class="detail-list">
+                    <dt>Activity type</dt>
+                    <dd>
+                        {{ inspection.get_inspection_type_display }}
+                    </dd>
+
+                    <dt>Required specialty</dt>
+                    <dd>
+                        {{ inspection.equipment.equipment_type.specialty.name }}
+                    </dd>
+
+                    <dt>Actual start</dt>
+                    <dd>
+                        {{ inspection.actual_start }}
+                    </dd>
+
+                    <dt>Estimated duration</dt>
+                    <dd>
+                        {{ inspection.estimated_duration }}
+                        minutes
+                    </dd>
+
+                    <dt>Equipment status</dt>
+                    <dd>
+                        {{ inspection.equipment.get_status_display }}
+                    </dd>
+                </dl>
+            </section>
+        </div>
+
+        <section class="form-card form-container">
+            <div class="form-card-header">
+                <h2 class="form-card-title">
+                    Completion result
+                </h2>
+
+                <p class="form-card-description">
+                    {% if inspection.inspection_type == inspection.InspectionType.REPAIR %}
+                        Describe the repair work performed before
+                        completing the activity.
+                    {% else %}
+                        Select the result and add final notes when
+                        they are required.
+                    {% endif %}
+                </p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="form-non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="form-fields">
+                    {% if form.result %}
+                        <div class="form-field">
+                            <label
+                                class="form-label"
+                                for="{{ form.result.id_for_label }}"
+                            >
+                                Result
+
+                                <span class="required-indicator">
+                                    *
+                                </span>
+                            </label>
+
+                            {{ form.result.errors }}
+
+                            {{ form.result }}
+
+                            {% if form.result.help_text %}
+                                <p class="form-help">
+                                    {{ form.result.help_text }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.result_notes.id_for_label }}"
+                        >
+                            Result notes
+
+                            {% if inspection.inspection_type == inspection.InspectionType.REPAIR %}
+                                <span class="required-indicator">
+                                    *
+                                </span>
+                            {% else %}
+                                <span class="optional-indicator">
+                                    Required for a failed result
+                                </span>
+                            {% endif %}
+                        </label>
+
+                        {{ form.result_notes.errors }}
+
+                        {{ form.result_notes }}
+
+                        {% if form.result_notes.help_text %}
+                            <p class="form-help">
+                                {{ form.result_notes.help_text }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="confirmation-panel confirmation-warning">
+                    Completing the activity will record the actual
+                    end time, change the status to
+                    <strong>Completed</strong>, and automatically
+                    update the equipment status according to the
+                    recorded result.
+                </div>
+
+                <div class="form-actions">
+                    <button
+                        class="button button-success"
+                        type="submit"
+                    >
+                        Complete activity
+                    </button>
+
+                    <a class="button" href="{% url 'inspections:list' %}" >
+                        Cancel
+                    </a>
+
+                </div>
+            </form>
+        </section>
+    </div>
 {% endblock %}

@@ -1,133 +1,327 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Activities | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/tables.css' %}" >
+    <link rel="stylesheet" href="{% static 'css/inspections.css' %}" >
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Activities
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>Activities</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Control activities
+            </h1>
+
+            <p class="page-description">
+                Assign, start, complete, cancel, and review equipment
+                inspections, calibrations, repairs, and reinspections.
+            </p>
+        </div>
+    </header>
+
+    <section class="list-tools">
+        <div class="list-tools-header">
+            <div>
+                <h2 class="list-tools-title">
+                    Activity search
+                </h2>
+
+                <p class="list-tools-description">
+                    Search by equipment, identifiers, customer,
+                    site, employee, contact, or activity notes.
+                </p>
+            </div>
+        </div>
+
+        {% include "shared/search_form.html" with search_placeholder="Search activities" %}
+    </section>
+    {% if search_query %}
+        <p class="search-result-summary">
+            Search results for:
+            <strong>{{ search_query }}</strong>
+
+            {% if paginator %}
+                · {{ paginator.count }} matching records
+            {% endif %}
+        </p>
+    {% endif %}
 
     {% if inspections %}
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Equipment</th>
-                    <th>Customer</th>
-                    <th>Customer site</th>
-                    <th>Activity type</th>
-                    <th>Assigned employees</th>
-                    <th>Received at</th>
-                    <th>Due date</th>
-                    <th>Planned start</th>
-                    <th>Status</th>
-                    <th>Result</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
+        <section
+            class="table-card"
+            aria-label="Control activities"
+        >
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Equipment</th>
+                            <th>Customer and site</th>
+                            <th>Activity</th>
+                            <th>Assigned employees</th>
+                            <th>Dates</th>
+                            <th>Status</th>
+                            <th>Result</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
 
-            <tbody>
-                {% for inspection in inspections %}
-                    <tr>
-                        <td>
-                            {{ inspection.equipment.equipment_type.short_name }}
-                            -
-                            {{ inspection.equipment.serial_number }}
-                        </td>
+                    <tbody>
+                        {% for inspection in inspections %}
+                            <tr>
+                                <td>
+                                    <div class="activity-equipment">
+                                        <span class="activity-equipment-name">
+                                            {{ inspection.equipment.equipment_type.short_name }}
+                                        </span>
 
-                        <td>
-                            {{ inspection.equipment.customer_site.customer.short_name }}
-                        </td>
+                                        <span class="activity-equipment-number">
+                                            Serial:
+                                            {{ inspection.equipment.serial_number }}
+                                        </span>
+                                    </div>
+                                </td>
 
-                        <td>
-                            {{ inspection.equipment.customer_site.name }}
-                        </td>
+                                <td>
+                                    <div class="activity-location">
+                                        <strong>
+                                            {% if inspection.equipment.customer_site.customer.short_name %}
+                                                {{ inspection.equipment.customer_site.customer.short_name }}
+                                            {% else %}
+                                                {{ inspection.equipment.customer_site.customer.company_name }}
+                                            {% endif %}
+                                        </strong>
 
-                        <td>
-                            {{ inspection.get_inspection_type_display }}
-                        </td>
+                                        <span>
+                                            {{ inspection.equipment.customer_site.name }}
+                                        </span>
+                                    </div>
+                                </td>
 
-                        <td>
-                            {% for employee in inspection.assigned_employees.all %}
-                                {{ employee.full_name }}
+                                <td class="activity-type">
+                                    <span class="table-primary-text">
+                                        {{ inspection.get_inspection_type_display }}
+                                    </span>
+                                </td>
 
-                                {% if not forloop.last %}
-                                    ,
-                                {% endif %}
-                            {% empty %}
-                                No assigned employees
-                            {% endfor %}
-                        </td>
+                                <td>
+                                    <div class="activity-employees">
+                                        {% for employee in inspection.assigned_employees.all %}
+                                            <span class="activity-employee">
+                                                {{ employee.full_name }}
+                                            </span>
+                                        {% empty %}
+                                            <span class="activity-empty-value">
+                                                Not assigned
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
 
-                        <td>
-                            {{ inspection.received_at }}
-                        </td>
+                                <td>
+                                    <div class="activity-dates">
+                                        <span class="activity-date-primary">
+                                            Received:
+                                            {{ inspection.received_at }}
+                                        </span>
 
-                        <td>
-                            {% if inspection.due_date %}
-                                {{ inspection.due_date }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
+                                        {% if inspection.due_date %}
+                                            <span class="activity-date-secondary">
+                                                Due:
+                                                {{ inspection.due_date }}
+                                            </span>
+                                        {% endif %}
 
-                        <td>
-                            {% if inspection.planned_start %}
-                                {{ inspection.planned_start }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
+                                        {% if inspection.planned_start %}
+                                            <span class="activity-date-secondary">
+                                                Planned:
+                                                {{ inspection.planned_start }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
 
-                        <td>
-                            {{ inspection.get_status_display }}
-                        </td>
+                                <td class="activity-status-column">
+                                    {% if inspection.status == inspection.Status.PENDING %}
+                                        <span
+                                            class="status-badge status-pending"
+                                        >
+                                            {{ inspection.get_status_display }}
+                                        </span>
 
-                        <td>
-                            {% if inspection.result %}
-                                {{ inspection.get_result_display }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
+                                    {% elif inspection.status == inspection.Status.IN_PROGRESS %}
+                                        <span
+                                            class="status-badge status-in-progress"
+                                        >
+                                            {{ inspection.get_status_display }}
+                                        </span>
 
-                        <td>
-                            <a href="{% url 'inspections:details' inspection.pk %}">
-                                Details
-                            </a>
+                                    {% elif inspection.status == inspection.Status.COMPLETED %}
+                                        <span
+                                            class="status-badge status-completed"
+                                        >
+                                            {{ inspection.get_status_display }}
+                                        </span>
 
-                            {% if inspection.status == inspection.Status.PENDING %}
-                                |
+                                    {% elif inspection.status == inspection.Status.CANCELLED %}
+                                        <span
+                                            class="status-badge status-cancelled"
+                                        >
+                                            {{ inspection.get_status_display }}
+                                        </span>
 
-                                <a href="{% url 'inspections:assign' inspection.pk %}">
-                                    Assign
-                                </a>
-                                |
+                                    {% else %}
+                                        <span
+                                            class="status-badge status-neutral"
+                                        >
+                                            {{ inspection.get_status_display }}
+                                        </span>
+                                    {% endif %}
+                                </td>
 
-                                <a href="{% url 'inspections:start' inspection.pk %}">
-                                    Start
-                                </a>
-                                |
-                                <a href="{% url 'inspections:cancel' inspection.pk %}">
-                                    Cancel
-                                </a>
-                            {% endif %}
-                            {% if inspection.status == inspection.Status.IN_PROGRESS %}
-                                |
+                                <td>
+                                    <div class="activity-result">
+                                        {% if inspection.result == inspection.Result.PASSED %}
+                                            <span
+                                                class="status-badge status-passed"
+                                            >
+                                                {{ inspection.get_result_display }}
+                                            </span>
 
-                                <a href="{% url 'inspections:complete' inspection.pk %}">
-                                    Complete
-                                </a>
-                                |
-                                <a href="{% url 'inspections:cancel' inspection.pk %}">
-                                    Cancel
-                                </a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                                        {% elif inspection.result == inspection.Result.FAILED %}
+                                            <span
+                                                class="status-badge status-failed"
+                                            >
+                                                {{ inspection.get_result_display }}
+                                            </span>
+
+                                        {% else %}
+                                            <span class="activity-result-empty">
+                                                -
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+
+                                <td class="table-actions">
+                                    <div class="action-group">
+                                        <a
+                                            class="button button-small"
+                                            href="{% url 'inspections:details' inspection.pk %}"
+                                        >
+                                            Details
+                                        </a>
+
+                                        {% if inspection.status == inspection.Status.PENDING %}
+                                            <a
+                                                class="button button-small"
+                                                href="{% url 'inspections:assign' inspection.pk %}"
+                                            >
+                                                Assign
+                                            </a>
+
+                                            <a
+                                                class="button button-small button-success"
+                                                href="{% url 'inspections:start' inspection.pk %}"
+                                            >
+                                                Start
+                                            </a>
+
+                                            <a
+                                                class="button button-small button-danger"
+                                                href="{% url 'inspections:cancel' inspection.pk %}"
+                                            >
+                                                Cancel
+                                            </a>
+                                        {% endif %}
+
+                                        {% if inspection.status == inspection.Status.IN_PROGRESS %}
+                                            <a
+                                                class="button button-small button-success"
+                                                href="{% url 'inspections:complete' inspection.pk %}"
+                                            >
+                                                Complete
+                                            </a>
+
+                                            <a
+                                                class="button button-small button-danger"
+                                                href="{% url 'inspections:cancel' inspection.pk %}"
+                                            >
+                                                Cancel
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        {% include "shared/pagination.html" %}
+
     {% else %}
-        <p>No activities have been created.</p>
+        <section class="empty-state">
+            {% if search_query %}
+                <h2>No matching activities</h2>
+
+                <p>
+                    No activities match
+                    <strong>{{ search_query }}</strong>.
+                    Try another serial number, customer, employee,
+                    or activity description.
+                </p>
+
+                {% if current_page_size %}
+                    ?page_size={{ current_page_size }}
+                        Clear search
+                    </a>
+                {% else %}
+                    <a
+                        class="button"
+                        href="{% url 'inspections:list' %}"
+                    >
+                        Clear search
+                    </a>
+                {% endif %}
+            {% else %}
+                <h2>No activities</h2>
+
+                <p>
+                    Activities are created from a specific equipment
+                    item. Open a customer site or the equipment registry
+                    to create the first activity.
+                </p>
+
+                <a
+                    class="button"
+                    href="{% url 'equipment:list' %}"
+                >
+                    Open equipment registry
+                </a>
+            {% endif %}
+        </section>
     {% endif %}
 {% endblock %}

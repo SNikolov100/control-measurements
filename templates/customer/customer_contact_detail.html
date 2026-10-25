@@ -1,103 +1,301 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
-    Contact details | Control Measurements
+    {{ contact.full_name }} | Control Measurements
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/details.css' %}">
+    <link rel="stylesheet" href="{% static 'css/customers.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:list' %}">
+                    Customers
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:details' customer.slug %}">
+                    {% if customer.short_name %}
+                        {{ customer.short_name }}
+                    {% else %}
+                        {{ customer.company_name }}
+                    {% endif %}
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:site-details' customer.slug site.slug %}">
+                    {% if site.short_name %}
+                        {{ site.short_name }}
+                    {% else %}
+                        {{ site.name }}
+                    {% endif %}
+                </a>
+            </li>
+
+            <li aria-current="page">
+                {{ contact.full_name }}
+            </li>
+        </ol>
+    </nav>
 {% endblock %}
 
 {% block content %}
-    <h2>Contact details</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                {{ contact.full_name }}
+            </h1>
 
-    <h3>{{ contact.full_name }}</h3>
+            <p class="page-description">
+                Responsible-contact information, customer site,
+                contact details, and operational status.
+            </p>
 
-    <section>
-        <h4>Customer information</h4>
-
-        <dl>
-            <dt><strong>Customer</strong></dt>
-            <dd>{{ customer.company_name }}</dd>
-
-            <dt><strong>Customer site</strong></dt>
-            <dd>{{ site.name }}</dd>
-        </dl>
-    </section>
-
-    <section>
-        <h4>Contact information</h4>
-
-        <dl>
-            <dt><strong>Name</strong></dt>
-            <dd>{{ contact.full_name }}</dd>
-
-            <dt><strong>Position</strong></dt>
-            <dd>
+            <div class="detail-header-summary">
                 {% if contact.position %}
-                    {{ contact.position }}
-                {% else %}
-                    -
+                    <span class="detail-header-meta">
+                        {{ contact.position }}
+                    </span>
                 {% endif %}
-            </dd>
 
-            <dt><strong>Phone</strong></dt>
-            <dd>
-                {% if contact.phone %}
-                    {{ contact.phone }}
-                {% else %}
-                    -
-                {% endif %}
-            </dd>
-
-            <dt><strong>Email</strong></dt>
-            <dd>
-                {% if contact.email %}
-                    {{ contact.email }}
-                {% else %}
-                    -
-                {% endif %}
-            </dd>
-
-            <dt><strong>Primary contact</strong></dt>
-            <dd>
                 {% if contact.is_primary %}
-                    Yes
-                {% else %}
-                    No
+                    <span class="status-badge status-active">
+                        Primary contact
+                    </span>
                 {% endif %}
-            </dd>
 
-            <dt><strong>Active</strong></dt>
-            <dd>
                 {% if contact.is_active %}
-                    Yes
+                    <span class="status-badge status-active">
+                        Active
+                    </span>
                 {% else %}
-                    No
+                    <span class="status-badge status-inactive">
+                        Inactive
+                    </span>
                 {% endif %}
-            </dd>
-        </dl>
-    </section>
+            </div>
+        </div>
 
-    <section>
-        <h4>Notes</h4>
+        <div class="page-actions">
+            <a class="button" href="{% url 'customers:contact-edit' customer.slug site.slug contact.pk %}">
+                Edit contact
+            </a>
 
-        {% if contact.notes %}
-            <p>{{ contact.notes|linebreaksbr }}</p>
-        {% else %}
-            <p>No notes.</p>
-        {% endif %}
-    </section>
-    <p>
-        <a href="{% url 'customers:contact-delete' customer.pk site.pk contact.pk %}">
-            Delete contact
-        </a>
-    </p>
-    <p>
-        <a href="{% url 'customers:contact-edit' customer.pk site.pk contact.pk %}">
-            Edit contact
-        </a>
-    </p>
+            <a class="button button-danger" href="{% url 'customers:contact-delete' customer.slug site.slug contact.pk %}">
+                Delete contact
+            </a>
+        </div>
+    </header>
 
-    <p>
-        <a href="{% url 'customers:site-details' customer.pk site.pk %}">
-            Back to customer site
-        </a>
-    </p>
+    <div class="detail-layout">
+        <div class="detail-grid">
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Customer and site
+                        </h2>
+
+                        <p class="detail-card-description">
+                            Customer-site context for this
+                            responsible contact.
+                        </p>
+                    </div>
+                </div>
+
+                <dl class="detail-list">
+                    <dt>Customer</dt>
+                    <dd>{{ customer.company_name }}</dd>
+
+                    <dt>Customer site</dt>
+                    <dd>{{ site.name }}</dd>
+
+                    <dt>City</dt>
+                    <dd>
+                        {{ site.effective_city|default:"Not provided" }}
+                    </dd>
+
+                    <dt>Address</dt>
+                    <dd>
+                        {{ site.effective_address|default:"Not provided" }}
+                    </dd>
+                </dl>
+
+                <div class="context-navigation">
+                    <a
+                        class="button button-small"
+                        href="{% url 'customers:site-details' customer.slug site.slug %}"
+                    >
+                        Customer-site details
+                    </a>
+                </div>
+            </section>
+
+            <section class="detail-card">
+                <div class="detail-card-header">
+                    <div>
+                        <h2 class="detail-card-title">
+                            Contact information
+                        </h2>
+
+                        <p class="detail-card-description">
+                            Personal contact information and
+                            responsibility for the customer site.
+                        </p>
+                    </div>
+                </div>
+
+                <dl class="detail-list">
+                    <dt>Full name</dt>
+                    <dd>{{ contact.full_name }}</dd>
+
+                    <dt>Position</dt>
+                    <dd>
+                        {% if contact.position %}
+                            {{ contact.position }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Phone</dt>
+                    <dd>
+                        {% if contact.phone %}
+                            {{ contact.phone }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Email</dt>
+                    <dd>
+                        {% if contact.email %}
+                            <a href="mailto:{{ contact.email }}">
+                                {{ contact.email }}
+                            </a>
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not provided
+                            </span>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </section>
+        </div>
+
+        <section class="detail-card">
+            <div class="detail-card-header">
+                <div>
+                    <h2 class="detail-card-title">
+                        Operational status
+                    </h2>
+
+                    <p class="detail-card-description">
+                        Primary and active status of the responsible
+                        contact.
+                    </p>
+                </div>
+            </div>
+
+            <dl class="detail-list">
+                <dt>Primary contact</dt>
+                <dd>
+                    {% if contact.is_primary %}
+                        <span class="status-badge status-active">
+                            Yes
+                        </span>
+                    {% else %}
+                        <span class="status-badge status-neutral">
+                            No
+                        </span>
+                    {% endif %}
+                </dd>
+
+                <dt>Active contact</dt>
+                <dd>
+                    {% if contact.is_active %}
+                        <span class="status-badge status-active">
+                            Active
+                        </span>
+                    {% else %}
+                        <span class="status-badge status-inactive">
+                            Inactive
+                        </span>
+                    {% endif %}
+                </dd>
+
+                <dt>Used in activities</dt>
+                <dd>
+                    {% if contact.delivered_inspections.exists %}
+                        <span class="status-badge status-warning">
+                            Yes
+                        </span>
+                    {% else %}
+                        <span class="status-badge status-neutral">
+                            No
+                        </span>
+                    {% endif %}
+                </dd>
+                </dl>
+                </section>
+
+                <section class="detail-card">
+                    <div class="detail-card-header">
+                        <div>
+                            <h2 class="detail-card-title">
+                                Notes
+                            </h2>
+
+                            <p class="detail-card-description">
+                                Additional information about the responsible
+                                contact.
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if contact.notes %}
+                        <p class="detail-notes">
+                            {{ contact.notes|linebreaksbr }}
+                        </p>
+                    {% else %}
+                        <p class="detail-value-muted">
+                            No notes have been added.
+                        </p>
+                    {% endif %}
+                </section>
+
+        <nav
+            class="context-navigation"
+            aria-label="Responsible contact navigation"
+        >
+            <a class="button" href="{% url 'customers:site-details' customer.slug site.slug %}">
+                Back to customer site
+            </a>
+
+            <a class="button" href="{% url 'customers:details' customer.slug %}">
+                Customer details
+            </a>
+
+            <a class="button" href="{% url 'customers:list' %}">
+                All customers
+            </a>
+        </nav>
+    </div>
 {% endblock %}

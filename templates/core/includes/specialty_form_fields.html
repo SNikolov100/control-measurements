@@ -1,0 +1,148 @@
+<div class="form-fields">
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.code.id_for_label }}"
+        >
+            Code
+
+            <span class="required-indicator">*</span>
+        </label>
+
+        {{ form.code.errors }}
+        {{ form.code }}
+
+        {% if form.code.help_text %}
+            <p class="form-help">
+                {{ form.code.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.name.id_for_label }}"
+        >
+            Specialty name
+
+            <span class="required-indicator">*</span>
+        </label>
+
+        {{ form.name.errors }}
+        {{ form.name }}
+
+        {% if form.name.help_text %}
+            <p class="form-help">
+                {{ form.name.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.short_name.id_for_label }}"
+        >
+            Short name
+
+            <span class="optional-indicator">
+                Optional
+            </span>
+        </label>
+
+        {{ form.short_name.errors }}
+        {{ form.short_name }}
+
+        {% if form.short_name.help_text %}
+            <p class="form-help">
+                {{ form.short_name.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.description.id_for_label }}"
+        >
+            Description
+
+            <span class="optional-indicator">
+                Optional
+            </span>
+        </label>
+
+        {{ form.description.errors }}
+        {{ form.description }}
+
+        {% if form.description.help_text %}
+            <p class="form-help">
+                {{ form.description.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field specialty-form-color">
+        <label
+            class="form-label"
+            for="{{ form.color.id_for_label }}"
+        >
+            Display color
+
+            <span class="required-indicator">*</span>
+        </label>
+
+        {{ form.color.errors }}
+        {{ form.color }}
+
+        {% if form.color.help_text %}
+            <p class="form-help">
+                {{ form.color.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        <label
+            class="form-label"
+            for="{{ form.sort_order.id_for_label }}"
+        >
+            Sort order
+
+            <span class="required-indicator">*</span>
+        </label>
+
+        {{ form.sort_order.errors }}
+        {{ form.sort_order }}
+
+        {% if form.sort_order.help_text %}
+            <p class="form-help">
+                {{ form.sort_order.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="form-field">
+        {{ form.is_active.errors }}
+
+        <label
+            class="form-checkbox-field"
+            for="{{ form.is_active.id_for_label }}"
+        >
+            {{ form.is_active }}
+
+            <span class="form-checkbox-content">
+                <span class="form-checkbox-label">
+                    Active specialty
+                </span>
+
+                {% if form.is_active.help_text %}
+                    <span class="form-help">
+                        {{ form.is_active.help_text }}
+                    </span>
+                {% endif %}
+            </span>
+        </label>
+    </div>
+</div>

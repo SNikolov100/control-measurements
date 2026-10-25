@@ -79,7 +79,12 @@
 {% endblock %}
 
 {% block delete_cancel_action %}
-    <a href="{% url 'core:specialty-list' %}">
-        Cancel and return to specialties
+    <a class="button" href="{% url 'core:specialty-list' %}">
+        Return without deleting
+    </a>
+{% endblock %}
+{% block delete_blocked_action %}
+    <a class="button" href="{% url 'core:specialty-list' %}">
+        Return to specialties
     </a>
 {% endblock %}

@@ -1,86 +1,234 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Employees | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/tables.css' %}" >
+    <link rel="stylesheet" href="{% static 'css/employees.css' %}" >
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Employees
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>Employees</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Employees
+            </h1>
 
-    <p>
-        <a href="{% url 'employees:create' %}">
-            Add employee
-        </a>
-    </p>
+            <p class="page-description">
+                Manage employees, specialties, active status,
+                assignments, and employee history.
+            </p>
+        </div>
 
+        <div class="page-actions">
+            <a
+                class="button button-primary"
+                href="{% url 'employees:create' %}"
+            >
+                Add employee
+            </a>
+        </div>
+    </header>
+    <section class="list-tools">
+        <div class="list-tools-header">
+            <div>
+                <h2 class="list-tools-title">
+                    Employee search
+                </h2>
+
+                <p class="list-tools-description">
+                    Search by name, position, phone, email,
+                    specialty, or notes.
+                </p>
+            </div>
+        </div>
+
+        {% include "shared/search_form.html" with search_placeholder="Search employees" %}
+    </section>
+
+    {% if search_query %}
+        <p class="search-result-summary">
+            Search results for:
+            <strong>{{ search_query }}</strong>
+
+            {% if paginator %}
+                · {{ paginator.count }} matching records
+            {% endif %}
+        </p>
+    {% endif %}
     {% if employees %}
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Phone</th>
-                    <th>Email</th>
-                    <th>Specialties</th>
-                    <th>Active</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
+        <section
+            class="table-card"
+            aria-label="Employee register"
+        >
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Contact information</th>
+                            <th>Specialties</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
 
-            <tbody>
-                {% for employee in employees %}
-                    <tr>
-                        <td>{{ employee.full_name }}</td>
+                    <tbody>
+                        {% for employee in employees %}
+                            <tr>
+                                <td>
+                                    <div class="employee-name">
+                                        <strong>
+                                            {{ employee.full_name }}
+                                        </strong>
 
-                        <td>
-                            {% if employee.phone %}
-                                {{ employee.phone }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
+                                        <span class="employee-position">
+                                            {% if employee.position %}
+                                                {{ employee.position }}
+                                            {% else %}
+                                                No position
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </td>
 
-                        <td>
-                            {% if employee.email %}
-                                {{ employee.email }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
+                                <td>
+                                    <div class="employee-contact">
+                                        <span class="employee-contact-primary">
+                                            {% if employee.phone %}
+                                                {{ employee.phone }}
+                                            {% else %}
+                                                No phone
+                                            {% endif %}
+                                        </span>
 
-                        <td>
-                            {% for specialty in employee.specialties.all %}
-                                {{ specialty.short_name }}
+                                        <span class="employee-contact-secondary">
+                                            {% if employee.email %}
+                                                {{ employee.email }}
+                                            {% else %}
+                                                No email
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </td>
 
-                                {% if not forloop.last %}
-                                    ,
-                                {% endif %}
-                            {% empty %}
-                                No specialties
-                            {% endfor %}
-                        </td>
+                                <td>
+                                    <div class="employee-specialties">
+                                        {% for specialty in employee.specialties.all %}
+                                            <span class="specialty-badge">
+                                                {% if specialty.short_name %}
+                                                    {{ specialty.short_name }}
+                                                {% else %}
+                                                    {{ specialty.name }}
+                                                {% endif %}
+                                            </span>
+                                        {% empty %}
+                                            <span class="table-empty-cell">
+                                                No specialties
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
 
-                        <td>
-                            {% if employee.is_active %}
-                                Yes
-                            {% else %}
-                                No
-                            {% endif %}
-                        </td>
+                                <td class="employee-status-column">
+                                    {% if employee.is_active %}
+                                        <span class="status-badge status-active">
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge status-inactive">
+                                            Inactive
+                                        </span>
+                                    {% endif %}
+                                </td>
 
-                        <td>
-                            <a href="{% url 'employees:details' employee.pk %}">
-                                Details
-                            </a>
-                            |
-                            <a href="{% url 'employees:edit' employee.pk %}">
-                                Edit
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                                <td class="table-actions">
+                                    <div class="action-group">
+                                        <a
+                                            class="button button-small"
+                                            href="{% url 'employees:details' employee.pk %}"
+                                        >
+                                            Details
+                                        </a>
+
+                                        <a
+                                            class="button button-small"
+                                            href="{% url 'employees:edit' employee.pk %}"
+                                        >
+                                            Edit
+                                        </a>
+
+                                        {% if employee.is_active %}
+                                            <a
+                                                class="button button-small button-danger"
+                                                href="{% url 'employees:activity-status' employee.pk %}"
+                                            >
+                                                Deactivate
+                                            </a>
+                                        {% else %}
+                                            <a
+                                                class="button button-small button-success"
+                                                href="{% url 'employees:activity-status' employee.pk %}"
+                                            >
+                                                Activate
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% include "shared/pagination.html" %}
     {% else %}
-        <p>No employees have been created.</p>
+        <section class="empty-state">
+            {% if search_query %}
+                <h2>No matching employees</h2>
+
+                <p>
+                    No employees match
+                    <strong>{{ search_query }}</strong>.
+                </p>
+
+                <a class="button href="{% url 'employees:list' %}?page_size={{ current_page_size }}">
+                    Clear search
+                </a>
+            {% else %}
+                <h2>No employees</h2>
+
+                <p>
+                    Add the first employee before assigning personnel
+                    to control activities.
+                </p>
+
+                <a
+                    class="button button-primary"
+                    href="{% url 'employees:create' %}"
+                >
+                    Add employee
+                </a>
+            {% endif %}
+        </section>
     {% endif %}
 {% endblock %}

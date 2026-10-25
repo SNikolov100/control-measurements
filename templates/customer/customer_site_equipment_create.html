@@ -1,41 +1,138 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Add equipment | Control Measurements
 {% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/details.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/equipment.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:list' %}">
+                    Customers
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:details' customer.slug %}">
+                    {{ customer.short_name|default:customer.company_name }}
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:site-details' customer.slug site.slug %}">
+                    {{ site.short_name|default:site.name }}
+                </a>
+            </li>
+
+            <li aria-current="page">
+                Add equipment
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h2>Add equipment</h2>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">Add equipment</h1>
 
-    <p>
-        Customer:
-        <strong>{{ customer.company_name }}</strong>
-    </p>
+            <p class="page-description">
+                Register equipment directly for the selected
+                customer site.
+            </p>
+        </div>
+    </header>
 
-    <p>
-        Customer site:
-        <strong>{{ site.name }}</strong>
-    </p>
+    <div class="form-layout">
+        <section class="detail-card form-container">
+            <div class="detail-card-header">
+                <div>
+                    <h2 class="detail-card-title">
+                        Customer and site
+                    </h2>
 
-    <p>
-        If the inspection interval or estimated duration is left
-        empty, the default values from the selected equipment type
-        will be used.
-    </p>
+                    <p class="detail-card-description">
+                        The new equipment will be registered at
+                        this customer site.
+                    </p>
+                </div>
+            </div>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+            <dl class="detail-list">
+                <dt>Customer</dt>
+                <dd>{{ customer.company_name }}</dd>
 
-        {{ form.as_p }}
+                <dt>Customer site</dt>
+                <dd>{{ site.name }}</dd>
 
-        <button type="submit">
-            Save equipment
-        </button>
-    </form>
+                <dt>City</dt>
+                <dd>
+                    {{ site.effective_city|default:"Not provided" }}
+                </dd>
 
-    <p>
-        <a href="{% url 'customers:site-details' customer.pk site.pk %}">
-            Cancel and return to customer site
-        </a>
-    </p>
+                <dt>Address</dt>
+                <dd>
+                    {{ site.effective_address|default:"Not provided" }}
+                </dd>
+            </dl>
+        </section>
+
+        <section class="form-card form-container">
+            <div class="form-card-header">
+                <h2 class="form-card-title">
+                    Equipment information
+                </h2>
+
+                <p class="form-card-description">
+                    Enter the equipment type, identifiers,
+                    interval, and expected duration.
+                </p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="form-non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% include "equipment/includes/equipment_form_fields.html" %}
+
+                <div class="confirmation-panel">
+                    Empty interval and duration fields use the
+                    defaults configured for the selected
+                    equipment type.
+                </div>
+
+                <div class="form-actions">
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        Save equipment
+                    </button>
+
+                    <a class="button" href="{% url 'customers:site-details' customer.slug site.slug %}">
+                        Return without saving
+                    </a>
+                </div>
+            </form>
+        </section>
+    </div>
 {% endblock %}

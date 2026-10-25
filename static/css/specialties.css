@@ -1,0 +1,40 @@
+.specialty-identity {
+    display: grid;
+    gap: 3px;
+}
+
+.specialty-code {
+    color: var(--color-neutral-600);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.specialty-color {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.specialty-color-swatch {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    background-color:
+        var(--specialty-color, var(--color-neutral-300));
+    border: 1px solid var(--color-neutral-300);
+    border-radius: 50%;
+}
+
+.specialty-color-code {
+    color: var(--color-neutral-600);
+    font-family: monospace;
+    font-size: 13px;
+}
+
+.specialty-form-color input[type="color"] {
+    width: 100%;
+    min-height: 52px;
+    padding: 5px;
+    cursor: pointer;
+}

@@ -1,0 +1,84 @@
+<nav class="main-navigation" aria-label="Primary navigation">
+    <div class="navigation-inner">
+        <a class="brand" href="{% url 'core:home' %}">
+            <span class="brand-mark">CM</span>
+
+            <span class="brand-text">
+                <strong>Control Measurements</strong>
+                <small>Equipment and activity management</small>
+            </span>
+        </a>
+
+        <ul class="navigation-list">
+            <li>
+                <a href="{% url 'core:home' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'customers:list' %}">
+                    Customers
+                </a>
+            </li>
+
+            <li class="navigation-dropdown">
+                <details>
+                    <summary>Equipment</summary>
+
+                    <ul class="navigation-submenu">
+                        <li>
+                            <a href="{% url 'equipment:list' %}">
+                                Equipment registry
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'equipment:types-list' %}">
+                                Equipment types
+                            </a>
+                        </li>
+                    </ul>
+                </details>
+            </li>
+
+            <li>
+                <a href="{% url 'employees:list' %}">
+                    Employees
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'inspections:list' %}">
+                    Activities
+                </a>
+            </li>
+
+            <li class="navigation-dropdown">
+                <details>
+                    <summary>Settings</summary>
+
+                    <ul class="navigation-submenu">
+                        <li>
+                            <a href="{% url 'core:company-settings' %}">
+                                Our company
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'core:system-settings' %}">
+                                System settings
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'core:specialty-list' %}">
+                                Specialties
+                            </a>
+                        </li>
+                    </ul>
+                </details>
+            </li>
+        </ul>
+    </div>
+</nav>

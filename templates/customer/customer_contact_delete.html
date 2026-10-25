@@ -1,15 +1,15 @@
 {% extends "shared/delete_confirm_base.html" %}
 
 {% block delete_page_title %}
-    Delete contact
+    Delete responsible contact
 {% endblock %}
 
 {% block delete_heading %}
-    Delete contact
+    Delete responsible contact
 {% endblock %}
 
 {% block delete_warning %}
-    Are you sure you want to delete this contact?
+    Are you sure you want to delete this responsible contact?
     This action cannot be undone.
 {% endblock %}
 
@@ -23,7 +23,7 @@
         <dt>Customer site</dt>
         <dd>{{ site.name }}</dd>
 
-        <dt>Name</dt>
+        <dt>Full name</dt>
         <dd>{{ contact.full_name }}</dd>
 
         <dt>Position</dt>
@@ -31,7 +31,7 @@
             {% if contact.position %}
                 {{ contact.position }}
             {% else %}
-                -
+                Not provided
             {% endif %}
         </dd>
 
@@ -40,7 +40,7 @@
             {% if contact.phone %}
                 {{ contact.phone }}
             {% else %}
-                -
+                Not provided
             {% endif %}
         </dd>
 
@@ -49,7 +49,7 @@
             {% if contact.email %}
                 {{ contact.email }}
             {% else %}
-                -
+                Not provided
             {% endif %}
         </dd>
 
@@ -62,9 +62,18 @@
             {% endif %}
         </dd>
 
-        <dt>Active</dt>
+        <dt>Active contact</dt>
         <dd>
             {% if contact.is_active %}
+                Yes
+            {% else %}
+                No
+            {% endif %}
+        </dd>
+
+        <dt>Used in activities</dt>
+        <dd>
+            {% if contact.delivered_inspections.exists %}
                 Yes
             {% else %}
                 No
@@ -74,11 +83,16 @@
 {% endblock %}
 
 {% block delete_button_text %}
-    Delete contact permanently
+    Delete responsible contact permanently
 {% endblock %}
 
 {% block delete_cancel_action %}
-    <a href="{% url 'customers:contact-details' customer.pk site.pk contact.pk %}">
-        Cancel and return to contact details
+    <a class="button" href="{% url 'customers:site-details' customer.slug site.slug %}">
+        Return without deleting
+    </a>
+{% endblock %}
+{% block delete_blocked_action %}
+    <a class="button" href="{% url 'customers:site-details' customer.slug site.slug %}">
+        Return to customer site
     </a>
 {% endblock %}
