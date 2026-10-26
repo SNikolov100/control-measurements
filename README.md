@@ -1,8 +1,8 @@
 # Control Measurements
 
 Control Measurements is a Django application for managing customers,
-equipment, employees, inspections, calibration schedules, repairs,
-and upcoming control measurements.
+equipment, employees, inspections, calibrations, repairs,
+and control measurement schedules.
 
 
 ---
@@ -174,6 +174,105 @@ The project currently uses:
 
 More detailed technical documentation will later be organized in a
 separate `docs/` directory.
+
+
+## Repository
+
+[Control Measurements on GitHub](https://github.com/SNikolov100/control-measurements)
+
+## Requirements
+
+- Python 3.12+
+- pip
+- Git
+- SQLite (included with Python)
+
+<details>
+<summary><strong>Quick Start</strong></summary>
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/SNikolov100/control-measurements.git
+cd control-measurements
+```
+
+### 2. Create a virtual environment
+
+```bash
+python -m venv venv
+```
+
+### 3. Activate the virtual environment
+
+On Windows:
+
+```bash
+venv\Scripts\activate
+```
+
+On Linux or macOS:
+
+```bash
+source venv/bin/activate
+```
+
+### 4. Install the dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 5. Create the environment file
+
+Copy `.env.example` to a new file named `.env`.
+
+On Windows Command Prompt:
+
+```bash
+copy .env.example .env
+```
+
+On Linux or macOS:
+
+```bash
+cp .env.example .env
+```
+
+Open the newly created `.env` file and replace the example secret key with your own Django secret key.
+
+A new key can be generated with:
+
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+Your `.env` file should follow this structure:
+
+```env
+DJANGO_SECRET_KEY=replace-with-your-generated-secret-key
+DJANGO_DEBUG=True
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+```
+
+> Do not commit the `.env` file. It is intentionally excluded through `.gitignore`.
+
+### 6. Apply the database migrations
+
+```bash
+python manage.py migrate
+```
+
+### 7. Start the development server
+
+```bash
+python manage.py runserver
+```
+
+Open the application at:
+
+[http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+</details>
 
 ## License
 
