@@ -2,7 +2,9 @@ from django.db import models
 from django.utils.translation import gettext_lazy as translate
 from core.model_mixins import CompanyMixin, TimestampMixin, AutoSlugMixin, TextNormalizationMixin
 from django.core.exceptions import ValidationError
-from core.validators import phone_validator
+from core.validators import phone_validator, validate_uploaded_image
+from pathlib import Path
+from uuid import uuid4
 
 
 class Customer(TextNormalizationMixin, AutoSlugMixin, CompanyMixin, TimestampMixin):
@@ -91,6 +93,9 @@ class CustomerSite(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
         verbose_name =translate('Customer site')
         verbose_name_plural=translate('Customer sites')
 
+def customer_contact_photo_upload_path(instance, filename):
+    file_extension = Path(filename).suffix.lower()
+    return 'customer_contacts/'f'{uuid4().hex}{file_extension}'
 
 class CustomerContact(TextNormalizationMixin, TimestampMixin):
     strip_fields = ('full_name', 'position', 'phone', 'email', 'notes',)
@@ -121,6 +126,13 @@ class CustomerContact(TextNormalizationMixin, TimestampMixin):
     email = models.EmailField(
         blank=True,
         verbose_name=translate('Email'),
+    )
+    photo = models.ImageField(
+        upload_to=customer_contact_photo_upload_path,
+        validators=[validate_uploaded_image],
+        blank=True,
+        null=True,
+        verbose_name=translate("Contact photo"),
     )
     notes = models.TextField(
         blank=True,

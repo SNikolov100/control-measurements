@@ -3,6 +3,14 @@ from django.utils.text import slugify
 from core.model_mixins import TimestampMixin, AutoSlugMixin, TextNormalizationMixin
 from django.utils.translation import gettext_lazy as translate
 from django.core.validators import MinValueValidator
+from core.validators import validate_uploaded_image
+from uuid import uuid4
+from pathlib import Path
+
+
+def equipment_image_upload_path(instance, filename):
+    file_extension = Path(filename).suffix.lower()
+    return "equipment/"f"{uuid4().hex}{file_extension}"
 
 class EquipmentType(TextNormalizationMixin, TimestampMixin):
     strip_fields = ('name', 'short_name', 'description',)
@@ -128,6 +136,13 @@ class Equipment(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
     notes = models.TextField(
         blank=True,
         verbose_name=translate("Notes"),
+    )
+    image = models.ImageField(
+        upload_to=equipment_image_upload_path,
+        validators=[validate_uploaded_image],
+        blank=True,
+        null=True,
+        verbose_name=translate("Equipment image"),
     )
 
     def save(self, *args, **kwargs):

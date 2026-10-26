@@ -102,7 +102,7 @@
                 </div>
             {% endif %}
 
-            <form method="post" novalidate>
+            <form method="post" enctype="multipart/form-data" novalidate>
                 {% csrf_token %}
 
                 {% include "equipment/includes/equipment_form_fields.html" %}

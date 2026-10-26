@@ -10,6 +10,7 @@ class EmployeeBaseForm(forms.ModelForm):
             'position',
             'phone',
             'email',
+            'photo',
             'notes',
             'specialties',
         )
@@ -35,6 +36,11 @@ class EmployeeBaseForm(forms.ModelForm):
                     'autocomplete': 'email',
                 },
             ),
+            'photo': forms.ClearableFileInput(
+                attrs={
+                    "accept": 'image/jpeg,image/png,image/webp',
+                },
+            ),
             'notes': forms.Textarea(
                 attrs={
                     'rows': 5,
@@ -48,12 +54,15 @@ class EmployeeBaseForm(forms.ModelForm):
             'position': translate("Enter the employee's position or work role."),
             'phone': translate('Enter a contact phone number.'),
             'email': translate('Enter a valid email address.'),
+            'photo': translate('Upload a JPEG, PNG, or WebP photo up to 5 MB. The photo is optional.'),
             'notes': translate('Optional additional information.'),
             'specialties': translate('Select one or more specialties in which the employee is qualified to work.'),
         }
         error_messages = {
             'full_name': {'required': translate("Enter the employee's full name.")},
             'email': {'invalid': translate('Enter a valid email address.')},
+            'photo': {'invalid_image': translate('Upload a valid JPEG, PNG, or WebP image.'),
+            },
         }
 
 class EmployeeCreateForm(EmployeeBaseForm):
@@ -67,10 +76,10 @@ class EmployeeActivityStatusForm(forms.Form):
         widget=forms.Textarea(
             attrs={
                 'rows': 5,
-                'placeholder': "Enter the reason for changing the employee's active status.",
+                'placeholder': translate("Enter the reason for changing the employee's active status."),
             },
         ),
-        label='Reason',
-        help_text='Enter the reason for activating or deactivating the employee.',
+        label= translate('Reason'),
+        help_text= translate('Enter the reason for activating or deactivating the employee.'),
         error_messages={'required': translate("Enter the reason for changing the employee's active status."),}
     )

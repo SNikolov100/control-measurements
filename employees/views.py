@@ -20,6 +20,7 @@ class EmployeeListView(SearchMixin, PaginationMixin, ListView):
         'specialties__short_name__icontains',
     )
     search_distinct = True
+
     def get_queryset(self):
         queryset_result = super().get_queryset().prefetch_related("specialties")
         return queryset_result
@@ -37,7 +38,7 @@ class EmployeeEditView(UpdateView):
     context_object_name = 'employee'
     success_url = reverse_lazy('employees:list')
 
-class EmployeeDеtailView(DetailView):
+class EmployeeDetailView(DetailView):
     model = Employee
     template_name = 'employees/employee_detail.html'
     context_object_name = 'employee'

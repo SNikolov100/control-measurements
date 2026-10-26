@@ -1,37 +1,28 @@
-# Python
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Virtual environments
 venv/
 .venv/
 env/
 
-# Django
 db.sqlite3
 db.sqlite3-journal
 media/
 staticfiles/
 
-# Environment variables and secrets
 .env
 .env.local
 
-# PyCharm
 .idea/
 
-# Visual Studio Code
 .vscode/
 
-# Operating systems
 .DS_Store
 Thumbs.db
 
-# Testing and coverage
 .pytest_cache/
 .coverage
 htmlcov/
 
-# Logs
 *.log

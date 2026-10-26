@@ -44,22 +44,66 @@
         <div class="list-tools-header">
             <div>
                 <h2 class="list-tools-title">
-                    Activity search
+                    Activity search and filters
                 </h2>
 
                 <p class="list-tools-description">
-                    Search by equipment, identifiers, customer,
-                    site, employee, contact, or activity notes.
+                    Search by equipment, identifier, customer,
+                    site, employee, contact, specialty, or notes.
                 </p>
             </div>
         </div>
 
         {% include "shared/search_form.html" with search_placeholder="Search activities" %}
+
+        <div
+            class="quick-filters"
+            aria-label="Activity status filters"
+        >
+            {% for status_filter in status_filters %}
+                {% if status_filter.value %}
+                    <a
+                        class=" quick-filter
+                            {% if current_status_filter == status_filter.value %}
+                                quick-filter-active
+                            {% endif %}
+                        "
+                        href="?{% if status_filter_query %}{{ status_filter_query }}&amp;{% endif %}status={{ status_filter.value }}"
+                    >
+                        {{ status_filter.label }}
+                    </a>
+                {% else %}
+                    <a
+                        class="
+                            quick-filter
+                            {% if not current_status_filter %}
+                                quick-filter-active
+                            {% endif %}
+                        "
+                        href="?{% if status_filter_query %}{{ status_filter_query }}{% endif %}"
+                    >
+                        {{ status_filter.label }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+        </div>
     </section>
-    {% if search_query %}
+
+    {% if search_query or current_status_filter %}
         <p class="search-result-summary">
-            Search results for:
-            <strong>{{ search_query }}</strong>
+            {% if search_query %}
+                Search results for:
+                <strong>{{ search_query }}</strong>
+            {% endif %}
+
+            {% if current_status_filter %}
+                {% if search_query %}
+                    ·
+                {% endif %}
+
+                Filter:
+                <strong>{{ current_status_label }}</strong>
+            {% endif %}
 
             {% if paginator %}
                 · {{ paginator.count }} matching records
@@ -284,28 +328,17 @@
 
     {% else %}
         <section class="empty-state">
-            {% if search_query %}
+            {% if search_query or current_status_filter %}
                 <h2>No matching activities</h2>
 
                 <p>
-                    No activities match
-                    <strong>{{ search_query }}</strong>.
-                    Try another serial number, customer, employee,
-                    or activity description.
+                    No activities match the current search
+                    and filter selection.
                 </p>
 
-                {% if current_page_size %}
-                    ?page_size={{ current_page_size }}
-                        Clear search
-                    </a>
-                {% else %}
-                    <a
-                        class="button"
-                        href="{% url 'inspections:list' %}"
-                    >
-                        Clear search
-                    </a>
-                {% endif %}
+                <a class="button" href="{% url 'inspections:list' %}?page_size={{ current_page_size }}">
+                    Clear search and filters
+                </a>
             {% else %}
                 <h2>No activities</h2>
 
@@ -315,10 +348,7 @@
                     to create the first activity.
                 </p>
 
-                <a
-                    class="button"
-                    href="{% url 'equipment:list' %}"
-                >
+                <a class="button" href="{% url 'equipment:list' %}">
                     Open equipment registry
                 </a>
             {% endif %}

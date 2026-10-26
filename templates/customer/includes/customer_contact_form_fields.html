@@ -87,6 +87,58 @@
         {% endif %}
     </div>
 
+    <div class="form-field contact-photo-field">
+        <label
+            class="form-label"
+            for="{{ form.photo.id_for_label }}"
+        >
+            Contact photo
+
+            <span class="optional-indicator">
+                Optional
+            </span>
+        </label>
+
+        {{ form.photo.errors }}
+
+        {% if contact and contact.photo %}
+            <div class="contact-current-photo">
+                <a
+                    href="{{ contact.photo.url }}"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    <img
+                        class="contact-current-photo-image"
+                        src="{{ contact.photo.url }}"
+                        alt="Current photo of {{ contact.full_name }}"
+                    >
+                </a>
+
+                <div class="contact-current-photo-info">
+                    <strong>
+                        Current photo
+                    </strong>
+
+                    <span>
+                        Select another file to replace the photo.
+                        Use the clear option to remove it.
+                    </span>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="contact-photo-input">
+            {{ form.photo }}
+        </div>
+
+        {% if form.photo.help_text %}
+            <p class="form-help">
+                {{ form.photo.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
     <div class="form-field">
         <label
             class="form-label"

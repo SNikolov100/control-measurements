@@ -101,6 +101,48 @@
         {% endif %}
     </div>
 
+    <div class="form-field equipment-image-field">
+        <label
+            class="form-label"
+            for="{{ form.image.id_for_label }}"
+        >
+            Equipment image
+
+            <span class="optional-indicator">
+                Optional
+            </span>
+        </label>
+
+        {{ form.image.errors }}
+
+        {% if form.instance.image %}
+            <div class="current-image-preview">
+                <img
+                    class="current-image-preview-image"
+                    src="{{ form.instance.image.url }}"
+                    alt="Current equipment image"
+                >
+
+                <div class="current-image-preview-info">
+                    <strong>Current image</strong>
+
+                    <span>
+                        Select another file to replace this image.
+                        Use the clear option to remove it.
+                    </span>
+                </div>
+            </div>
+        {% endif %}
+
+        {{ form.image }}
+
+        {% if form.image.help_text %}
+            <p class="form-help">
+                {{ form.image.help_text }}
+            </p>
+        {% endif %}
+    </div>
+
     <div class="form-field">
         <label
             class="form-label"

@@ -2,6 +2,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as translate
 from employees.models import Employee
 from .models import Inspection
+from .services import get_allowed_inspection_types
 
 
 class InspectionBaseForm(forms.ModelForm):
@@ -55,8 +56,15 @@ class InspectionCreateForm(InspectionBaseForm):
         super().__init__(*args, **kwargs)
         self.equipment = equipment
         self.fields['estimated_duration'].required = False
+
         if equipment is not None:
             self.instance.equipment = equipment
+            allowed_inspection_types = set(get_allowed_inspection_types(equipment))
+            self.fields["inspection_type"].choices = tuple(
+                choice
+                for choice in Inspection.InspectionType.choices
+                if choice[0] in allowed_inspection_types
+            )
 
     def clean_estimated_duration(self):
         estimated_duration = self.cleaned_data.get('estimated_duration')
@@ -116,29 +124,37 @@ class InspectionCompleteForm(forms.Form):
         self.inspection = inspection
 
         if inspection and inspection.inspection_type == Inspection.InspectionType.REPAIR:
-            self.fields.pop('result')
+            self.fields['result'].label = translate('Repair result')
+            self.fields['result'].choices = (
+                (
+                    Inspection.Result.PASSED.value, translate('Repair completed successfully'),
+                ),
+                (
+                    Inspection.Result.FAILED.value, translate('Repair unsuccessful'),
+                ),
+            )
             self.fields['result_notes'].widget.attrs.update(
-                {'placeholder': 'Describe the repair work performed, replaced components, and adjustments.'}
+                {'placeholder': 'Describe the repair work performed, replaced components, adjustments, and the reason if the repair was unsuccessful.'}
             )
         else:
-            self.fields["result_notes"].widget.attrs.update(
+            self.fields['result'].label = translate('Inspection result')
+            self.fields['result_notes'].widget.attrs.update(
                 {'placeholder': 'Add final findings or describe the reason for a failed result.'}
             )
 
     def clean(self):
         cleaned_data = super().clean()
-
-        if self.inspection is None:
-            return cleaned_data
-
         result = cleaned_data.get('result')
-        result_notes = cleaned_data.get('result_notes', '').strip()
+        result_notes = cleaned_data.get('result_notes')
+        if self.inspection and self.inspection.inspection_type == Inspection.InspectionType.REPAIR:
+            if not result:
+                self.add_error('result', translate('Select whether the repair was successful.'))
 
-        if result == Inspection.Result.FAILED and not result_notes:
-            self.add_error('result_notes',translate('Describe why the activity failed.'),)
+            if not result_notes:
+                self.add_error('result_notes', translate('Describe the repair work performed and the final repair outcome.'))
 
-        if self.inspection.inspection_type == Inspection.InspectionType.REPAIR and not result_notes:
-            self.add_error('result_notes',translate('Describe the work performed during the repair.'),)
+        elif result == Inspection.Result.FAILED.value and not result_notes:
+            self.add_error('result_notes', translate('Describe why the activity failed.'))
 
         return cleaned_data
 

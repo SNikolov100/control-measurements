@@ -72,7 +72,7 @@
                 </div>
             {% endif %}
 
-            <form method="post" novalidate>
+            <form method="post" enctype="multipart/form-data" novalidate>
                 {% csrf_token %}
 
                 <div class="form-fields">
@@ -160,6 +160,56 @@
                         {% if form.email.help_text %}
                             <p class="form-help">
                                 {{ form.email.help_text }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field employee-photo-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.photo.id_for_label }}"
+                        >
+                            Employee photo
+
+                            <span class="optional-indicator">
+                                Optional
+                            </span>
+                        </label>
+
+                        {{ form.photo.errors }}
+
+                        {% if employee.photo %}
+                            <div class="employee-current-photo">
+                                <a
+                                    href="{{ employee.photo.url }}"
+                                    target="_blank"
+                                    rel="noopener"
+                                >
+                                    <img
+                                        class="employee-current-photo-image"
+                                        src="{{ employee.photo.url }}"
+                                        alt="Photo of {{ employee.full_name }}"
+                                    >
+                                </a>
+
+                                <div class="employee-current-photo-info">
+                                    <strong>Current photo</strong>
+
+                                    <span>
+                                        Select another file to replace the photo.
+                                        Use the clear option below to remove it.
+                                    </span>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="employee-photo-input">
+                            {{ form.photo }}
+                        </div>
+
+                        {% if form.photo.help_text %}
+                            <p class="form-help">
+                                {{ form.photo.help_text }}
                             </p>
                         {% endif %}
                     </div>

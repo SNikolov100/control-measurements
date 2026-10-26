@@ -100,6 +100,77 @@
         </div>
     </header>
 
+    <section class="contact-profile-card">
+        <div>
+            {% if contact.photo %}
+                <a
+                    href="{{ contact.photo.url }}"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    <img
+                        class="contact-profile-image"
+                        src="{{ contact.photo.url }}"
+                        alt="Photo of {{ contact.full_name }}"
+                    >
+                </a>
+            {% else %}
+                <span
+                    class="
+                        contact-avatar
+                        contact-avatar-large
+                    "
+                    aria-hidden="true"
+                >
+                    {{ contact.full_name|slice:":1"|upper }}
+                </span>
+            {% endif %}
+        </div>
+
+        <div class="contact-profile-content">
+            <h2>
+                {{ contact.full_name }}
+            </h2>
+
+            <p>
+                {% if contact.position %}
+                    {{ contact.position }}
+                {% else %}
+                    No position has been provided.
+                {% endif %}
+            </p>
+
+            <div class="action-group">
+                {% if contact.is_primary %}
+                    <span class="status-badge status-active">
+                        Primary contact
+                    </span>
+                {% endif %}
+
+                {% if contact.is_active %}
+                    <span class="status-badge status-active">
+                        Active
+                    </span>
+                {% else %}
+                    <span class="status-badge status-inactive">
+                        Inactive
+                    </span>
+                {% endif %}
+            </div>
+
+            <a
+                class="button button-small"
+                href="{% url 'customers:contact-edit' customer.slug site.slug contact.pk %}"
+            >
+                {% if contact.photo %}
+                    Replace photo
+                {% else %}
+                    Add photo
+                {% endif %}
+            </a>
+        </div>
+    </section>
+
     <div class="detail-layout">
         <div class="detail-grid">
             <section class="detail-card">

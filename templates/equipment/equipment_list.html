@@ -51,7 +51,7 @@
         <div class="list-tools-header">
             <div>
                 <h2 class="list-tools-title">
-                    Equipment search
+                    Equipment search and filters
                 </h2>
 
                 <p class="list-tools-description">
@@ -62,11 +62,41 @@
         </div>
 
         {% include "shared/search_form.html" with search_placeholder="Search equipment" %}
+
+        <nav
+            class="quick-filters"
+            aria-label="Equipment status filters"
+        >
+            {% for status_filter in status_filters %}
+                <a
+                    class="
+                        quick-filter
+                        {% if status_filter.value == current_status_filter %}
+                            quick-filter-active
+                        {% endif %}
+                    "
+                    href="?{% if status_filter_query %}{{ status_filter_query }}&amp;{% endif %}{% if status_filter.value %}status={{ status_filter.value }}{% endif %}"
+                >
+                    {{ status_filter.label }}
+                </a>
+            {% endfor %}
+        </nav>
     </section>
-        {% if search_query %}
+        {% if search_query or current_status_filter %}
             <p class="search-result-summary">
-                Search results for:
-                <strong>{{ search_query }}</strong>
+                {% if search_query %}
+                    Search results for:
+                    <strong>{{ search_query }}</strong>
+                {% endif %}
+
+                {% if current_status_filter %}
+                    {% if search_query %}
+                        ·
+                    {% endif %}
+
+                    Filter:
+                    <strong>{{ current_status_label }}</strong>
+                {% endif %}
 
                 {% if paginator %}
                     · {{ paginator.count }} matching records
@@ -199,19 +229,16 @@
         {% include "shared/pagination.html" %}
     {% else %}
         <section class="empty-state">
-            {% if search_query %}
+            {% if search_query or current_status_filter %}
                 <h2>No matching equipment</h2>
 
                 <p>
-                    No equipment matches
-                    <strong>{{ search_query }}</strong>.
+                    No equipment matches the selected search
+                    and status filter.
                 </p>
 
-                <a
-                    class="button"
-                    href="{% url 'equipment:list' %}?page_size={{ current_page_size }}"
-                >
-                    Clear search
+                <a class="button" href="{% url 'equipment:list' %}?page_size={{ current_page_size }}">
+                    Clear search and filters
                 </a>
             {% else %}
                 <h2>No registered equipment</h2>

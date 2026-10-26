@@ -2,7 +2,13 @@ from django.db import models, transaction
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as translate
 from core.model_mixins import AutoSlugMixin, TimestampMixin, TextNormalizationMixin
-from core.validators import phone_validator
+from core.validators import phone_validator, validate_uploaded_image
+from pathlib import Path
+from uuid import uuid4
+
+def employee_photo_upload_path(instance, filename):
+    file_extension = Path(filename).suffix.lower()
+    return "employees/"f"{uuid4().hex}{file_extension}"
 
 
 class Employee(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
@@ -42,6 +48,13 @@ class Employee(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
     is_active = models.BooleanField(
         default=True,
         verbose_name=translate('Active'),
+    )
+    photo = models.ImageField(
+        upload_to=employee_photo_upload_path,
+        validators=[validate_uploaded_image],
+        blank=True,
+        null=True,
+        verbose_name=translate("Employee photo"),
     )
 
     def _change_activity_status(self, *, is_active,event_type, description="",):

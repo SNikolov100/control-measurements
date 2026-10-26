@@ -7,8 +7,9 @@ from .forms import (EquipmentTypeEditForm,
                     )
 from .models import Equipment, EquipmentType
 from django.urls import reverse_lazy, reverse
-from core.view_mixins import ConfirmedDeleteMixin, PaginationMixin, SearchMixin
+from core.view_mixins import ConfirmedDeleteMixin, PaginationMixin, SearchMixin, StatusFilterMixin
 from .view_mixins import EquipmentRegistrationMixin
+from django.utils.translation import gettext_lazy as translate
 
 class EquipmentTypeListView(SearchMixin, PaginationMixin, ListView):
     model = EquipmentType
@@ -53,28 +54,35 @@ class EquipmentTypeDeleteView(ConfirmedDeleteMixin, DeleteView):
     def is_deletion_blocked(self):
         return self.object.equipment_items.exists()
 
-class EquipmentListView(SearchMixin, PaginationMixin, ListView):
+class EquipmentListView(StatusFilterMixin, SearchMixin, PaginationMixin, ListView):
     model = Equipment
     template_name = 'equipment/equipment_list.html'
     context_object_name = 'equipment_items'
-
+    status_choices = Equipment.Status
     search_fields = (
-        "serial_number__icontains",
-        "model_name__icontains",
-        "equipment_type__name__icontains",
-        "equipment_type__short_name__icontains",
-        "customer_site__name__icontains",
-        "customer_site__short_name__icontains",
+        'serial_number__icontains',
+        'inventory_number__icontains',
+        'model_name__icontains',
+        'equipment_type__name__icontains',
+        'equipment_type__short_name__icontains',
+        'equipment_type__specialty__code__icontains',
+        'equipment_type__specialty__name__icontains',
+        'equipment_type__specialty__short_name__icontains',
+        'customer_site__customer__company_name__icontains',
+        'customer_site__customer__short_name__icontains',
+        'customer_site__name__icontains',
+        'customer_site__short_name__icontains',
+        'notes__icontains',
     )
 
     def get_queryset(self):
-        return (super().get_queryset().select_related(
+        queryset_result = super().get_queryset().select_related(
                 "customer_site",
                 "customer_site__customer",
                 "equipment_type",
                 "equipment_type__specialty",
                 )
-        )
+        return queryset_result
 
 class EquipmentCreateView(EquipmentRegistrationMixin, CreateView):
     model = Equipment

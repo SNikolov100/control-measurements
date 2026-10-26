@@ -129,6 +129,214 @@
     }
 }
 
+/* Customer-contact photos */
+
+.contact-photo-field input[type="file"] {
+    width: 100%;
+    min-height: 42px;
+    padding: 8px;
+    color: var(--color-neutral-800);
+    background: #fbfcfd;
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--radius-small);
+}
+
+.contact-photo-field input[type="file"]::file-selector-button {
+    min-height: 34px;
+    padding: 7px 12px;
+    margin-right: 12px;
+    color: var(--color-neutral-800);
+    font-weight: 700;
+    background: var(--color-surface);
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+}
+
+.contact-photo-field input[type="file"]::file-selector-button:hover {
+    color: var(--color-primary-900);
+    background: var(--color-primary-100);
+    border-color: #a9c7e3;
+}
+
+.contact-current-photo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px;
+    background: #fbfcfd;
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-medium);
+}
+
+.contact-current-photo > a {
+    display: block;
+    width: 96px;
+    height: 96px;
+    flex-shrink: 0;
+}
+
+.contact-current-photo-image {
+    display: block;
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    background: var(--color-neutral-100);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: 50%;
+}
+
+.contact-current-photo-info {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+}
+
+.contact-current-photo-info strong {
+    color: var(--color-neutral-950);
+}
+
+.contact-current-photo-info span {
+    color: var(--color-neutral-600);
+    font-size: 13px;
+}
+
+.contact-photo-input {
+    display: grid;
+    gap: 8px;
+    color: var(--color-neutral-700);
+    font-size: 13px;
+}
+
+.contact-photo-input > a {
+    overflow-wrap: anywhere;
+}
+
+.contact-photo-input input[type="checkbox"] {
+    width: 18px !important;
+    min-width: 18px;
+    height: 18px !important;
+    min-height: 18px;
+    padding: 0;
+    margin: 0 7px 0 0;
+    vertical-align: middle;
+    accent-color: var(--color-primary-700);
+}
+
+
+/* Contact avatars */
+
+.contact-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    overflow: hidden;
+    color: var(--color-primary-900);
+    font-size: 13px;
+    font-weight: 800;
+    background: var(--color-primary-100);
+    border: 1px solid #c4d9eb;
+    border-radius: 50%;
+    text-decoration: none;
+}
+
+.contact-avatar:hover {
+    border-color: var(--color-primary-600);
+    text-decoration: none;
+}
+
+.contact-avatar-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.contact-avatar-large {
+    width: 140px;
+    height: 140px;
+    font-size: 30px;
+}
+
+
+/* Contact profile */
+
+.contact-profile-card {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr);
+    align-items: center;
+    gap: 22px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-large);
+    box-shadow: var(--shadow-small);
+}
+
+.contact-profile-card > div:first-child {
+    display: flex;
+    justify-content: center;
+}
+
+.contact-profile-image {
+    display: block;
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    background: var(--color-neutral-100);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: 50%;
+}
+
+.contact-profile-content h2 {
+    margin: 0;
+    color: var(--color-primary-900);
+    font-size: 23px;
+}
+
+.contact-profile-content p {
+    margin: 7px 0 12px;
+    color: var(--color-neutral-600);
+}
+
+.contact-profile-content .action-group {
+    margin-bottom: 16px;
+}
+
+
+/* Contact card with avatar */
+
+.contact-card-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+}
+
+.contact-card-content {
+    min-width: 0;
+}
+
+@media (max-width: 600px) {
+    .contact-current-photo {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .contact-profile-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .contact-profile-content .action-group {
+        justify-content: center;
+    }
+}
+
 @media (max-width: 760px) {
     .workspace-section-header {
         align-items: stretch;

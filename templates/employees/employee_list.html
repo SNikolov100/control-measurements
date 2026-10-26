@@ -96,18 +96,44 @@
                         {% for employee in employees %}
                             <tr>
                                 <td>
-                                    <div class="employee-name">
-                                        <strong>
-                                            {{ employee.full_name }}
-                                        </strong>
+                                    <div class="employee-name-with-avatar">
+                                        {% if employee.photo %}
+                                            <a
+                                                class="employee-avatar"
+                                                href="{% url 'employees:details' employee.pk %}"
+                                                aria-label="Open details for {{ employee.full_name }}"
+                                            >
+                                                <img
+                                                    class="employee-avatar-image"
+                                                    src="{{ employee.photo.url }}"
+                                                    alt=""
+                                                >
+                                            </a>
+                                        {% else %}
+                                            <a
+                                                class="employee-avatar"
+                                                href="{% url 'employees:details' employee.pk %}"
+                                                aria-label="Open details for {{ employee.full_name }}"
+                                            >
+                                                <span aria-hidden="true">
+                                                    {{ employee.full_name|slice:":1"|upper }}
+                                                </span>
+                                            </a>
+                                        {% endif %}
 
-                                        <span class="employee-position">
-                                            {% if employee.position %}
-                                                {{ employee.position }}
-                                            {% else %}
-                                                No position
-                                            {% endif %}
-                                        </span>
+                                        <div class="employee-name">
+                                            <strong>
+                                                {{ employee.full_name }}
+                                            </strong>
+
+                                            <span class="employee-position">
+                                                {% if employee.position %}
+                                                    {{ employee.position }}
+                                                {% else %}
+                                                    No position
+                                                {% endif %}
+                                            </span>
+                                        </div>
                                     </div>
                                 </td>
 
@@ -211,7 +237,7 @@
                     <strong>{{ search_query }}</strong>.
                 </p>
 
-                <a class="button href="{% url 'employees:list' %}?page_size={{ current_page_size }}">
+                <a class="button" href="{% url 'employees:list' %}?page_size={{ current_page_size }}">
                     Clear search
                 </a>
             {% else %}

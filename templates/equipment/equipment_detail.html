@@ -105,7 +105,52 @@
             </a>
         </div>
     </header>
+    <section class="equipment-image-card">
+        <div class="equipment-image-container">
+            {% if equipment.image %}
+                <a
+                    href="{{ equipment.image.url }}"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    <img
+                        class="equipment-detail-image"
+                        src="{{ equipment.image.url }}"
+                        alt="{{ equipment.equipment_type.name }}"
+                    >
+                </a>
+            {% else %}
+                <div class="equipment-image-placeholder">
+                    <span>No equipment image</span>
+                </div>
+            {% endif %}
+        </div>
 
+        <div class="equipment-image-content">
+            <h2>Equipment image</h2>
+
+            {% if equipment.image %}
+                <p>
+                    Select the image to open the original file.
+                </p>
+            {% else %}
+                <p>
+                    No image has been uploaded for this equipment.
+                </p>
+            {% endif %}
+
+            <a
+                class="button button-small"
+                href="{% url 'equipment:edit' equipment.slug %}"
+            >
+                {% if equipment.image %}
+                    Replace image
+                {% else %}
+                    Add image
+                {% endif %}
+            </a>
+        </div>
+    </section>
     <div class="detail-layout">
         <div class="equipment-detail-grid">
             <section class="detail-card">

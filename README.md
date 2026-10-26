@@ -4,468 +4,162 @@ Control Measurements is a Django application for managing customers,
 equipment, employees, inspections, calibration schedules, repairs,
 and upcoming control measurements.
 
-## Project status
 
-The Python foundation has been refactored after completion of the
-first functional testing version.
+---
 
-Repeated model normalization, nested parent loading, delete
-confirmation, equipment registration history, and activity action
-handling have been moved into reusable base classes and mixins.
-
-The main functional workflows remain operational after the
-refactoring and have been tested again.
-
-### Implemented applications
-
-- `core`
-- `customers`
-- `equipment`
-- `employees`
-- `inspections`
-
-## Application details
+# Development Status
 
 <details>
-<summary><strong>core application</strong></summary>
+<summary><strong>Core Structure</strong></summary>
 
-The `core` application contains shared models, global settings,
-reusable model mixins, and common validators.
-
-### Models
-
-- `Specialty`
-- `CompanySettings`
-- `SystemSettings`
-
-### Reusable model mixins
-
-- `TimestampMixin`
-- `SingleRecordMixin`
-- `CompanyMixin`
-- `AutoSlugMixin`
-
-### Validators
-
-- HEX color validator
-- Phone number validator
-
-### Functional interface
-
-- Specialty deletion
-- Protected deletion for specialties currently in use
-- Shared base template
-- Initial Home page
-- Main application navigation
-- Company settings form
-- System settings form
-- Specialty list, creation, editing, and protected deletion
-
-## Current interface
-
-The application now uses a shared responsive service interface with:
-
-- permanent navigation and an always-available Home link;
-- breadcrumbs and contextual navigation;
-- reusable cards, tables, forms, buttons, and status badges;
-- explicit labels, placeholders, help text, and validation errors;
-- responsive list and detail pages;
-- reusable confirmation pages for protected deletion;
-- searchable and paginated main registers.
-
-The main operational workflow is:
-
-Customer
-→ Customer site
-→ Responsible contact
-→ Equipment
-→ Activity
-→ Assigned employees
-→ Result and history
-
-### System settings
-
-- Default calendar period
-- Weekend visibility
-- Workday start and end times
-- Inspection warning periods
-- Overdue inspection alerts
-- Inspection automation settings
+- [x] Project structure established
+- [x] Reusable base models implemented
+- [x] Company settings implemented
+- [x] System settings implemented
+- [x] Internationalization (BG/EN) enabled
 
 </details>
 
 <details>
-<summary><strong>customers application</strong></summary>
+<summary><strong>Customers</strong></summary>
 
-The `customers` application manages customer companies, customer
-sites, and contact persons.
-
-### Models
-
-- `Customer`
-- `CustomerSite`
-- `CustomerContact`
-
-### Relationships
-
-```text
-Customer
-`-- CustomerSite
-    `-- CustomerContact
-```
-
-### Implemented functionality
-
-- Automatic Unicode slug generation
-- Unique company and short names
-- Customer-to-site relationships
-- Site-to-contact relationships
-- Multiple active contacts per customer site
-- One active primary contact per customer site
-- Validation preventing inactive contacts from being primary
-- Protected deletion of customers and customer sites
-- Phone and email validation
-
-### Functional interface
-
-- Customer list
-- Customer creation
-- Customer editing
-- Customer detail page
-- Nested customer site creation
-- Nested customer site editing
-- Customer site detail page
-- Customer-to-site URL relationship validation
-- Customer site sections for contacts and equipment
-
-### Refactored behavior
-
-- Customer, customer-site, and customer-contact values use shared text
-  normalization.
-- Email addresses are stored in lowercase.
-- Employee and contact names use title-case normalization.
-- Customer sites may define their own city and address.
-- Empty customer-site city and address values fall back to the parent
-  customer values.
-- Nested URLs verify the complete customer-to-site-to-contact
-  relationship.
-- Contact deletion uses shared confirmation and protected-delete
-  behavior.
+- [x] Customers CRUD
+- [x] Customer sites CRUD
+- [x] Customer contacts CRUD
+- [x] Slug-based URLs
 
 </details>
 
 <details>
-<summary><strong>equipment application</strong></summary>
+<summary><strong>Equipment</strong></summary>
 
-The `equipment` application manages equipment types, concrete
-equipment items, inspection intervals, lifecycle statuses, and
-equipment status history.
-
-### Models
-
-- `EquipmentType`
-- `Equipment`
-- `EquipmentStatusHistory`
-
-### Relationships
-
-```text
-Specialty
-`-- EquipmentType
-    `-- Equipment
-        `-- EquipmentStatusHistory
-
-CustomerSite
-`-- Equipment
-```
-
-### Implemented functionality
-
-- Equipment classification by specialty
-- Default inspection intervals for equipment types
-- Individual inspection intervals for concrete equipment
-- Estimated inspection duration
-- Unique serial number validation
-- Serial and inventory number normalization
-- Automatic Unicode slug generation
-- Equipment lifecycle statuses
-- Automatic synchronization between status and active state
-- Atomic equipment status changes
-- Chronological equipment status history
-- Protected equipment relationships
-
-### Functional interface
-
-- Equipment type list
-- Equipment type creation and editing
-- Protected equipment type deletion
-- Equipment registry
-- Equipment creation and editing
-- Equipment detail page
-- Automatic default interval and duration values
-- Automatic initial equipment history
-- Controlled equipment status changes
-- Equipment status history display
-
-### Refactored behavior
-
-- Equipment types and concrete equipment use shared text
-  normalization.
-- Serial and inventory numbers are normalized to uppercase.
-- Initial equipment status history is created through shared
-  registration behavior.
-- Equipment detail pages use the correct generic DetailView.
-- Equipment type deletion uses the shared protected confirmation
-  workflow.
+- [x] Equipment register
+- [x] Equipment types management
+- [x] Equipment image support
+- [x] Slug-based URLs
 
 </details>
 
 <details>
-<summary><strong>employees application</strong></summary>
+<summary><strong>Employees</strong></summary>
 
-The `employees` application manages employee records, employee
-specialties, and employee history.
-
-### Models
-
-- `Employee`
-- `EmployeeHistory`
-
-### Relationships
-
-```text
-Employee
-|-- many Specialties
-`-- many EmployeeHistory records
-```
-
-### Implemented functionality
-
-- Employee profile data
-- Unicode slug generation from primary key and full name
-- Employee name and contact-data normalization
-- Phone and email validation
-- Many-to-many relationship between employees and specialties
-- Prevention of duplicate specialty relationships
-- Employee activation and deactivation
-- Chronological employee history
-- Protected deletion of employees with history
-
-### Functional interface
-
-- Employee list
-- Employee creation and editing
-- Employee detail page
-- Multiple specialty assignment
-- Controlled employee activation and deactivation
-- Employee activity history
-
-### Refactored behavior
-
-- Employee information uses shared text normalization.
-- Employee names use title-case normalization.
-- Email addresses are stored in lowercase.
-- Activation and deactivation are atomic operations.
-- Every successful activity-status change creates an employee-history
-  record.
-- Active status is not directly editable through the ordinary employee
-  form.
+- [x] Employee management
+- [x] Employee image support
+- [x] Specialty assignment
 
 </details>
 
 <details>
-<summary><strong>inspections application</strong></summary>
+<summary><strong>Activities (Inspections)</strong></summary>
 
-The `inspections` application manages equipment activities, assigned
-employees, scheduling, results, cancellation, and equipment status
-changes.
-
-### Models
-
-- `Inspection`
-
-### Inspection types
-
-- Calibration
-- Periodic inspection
-- Extraordinary inspection
-- Repair
-- Reinspection after repair
-
-### Relationships
-
-```text
-Equipment
-`-- many Inspections
-    |-- many assigned Employees
-    `-- optional CustomerContact
-```
-
-### Implemented functionality
-
-- Multiple employees per activity
-- Employee activity and specialty validation before starting
-- Prevention of simultaneous active activities for one equipment item
-- Planned, actual, and due dates
-- Estimated activity duration
-- Controlled inspection status transitions
-- Automatic start and end timestamps
-- Passed and failed inspection results
-- Separate repair workflow without an inspection result
-- Automatic equipment status synchronization
-- Successful inspections return equipment to service
-- Failed inspections move equipment to repair
-- Completed repairs move equipment to reinspection
-- Required cancellation reason
-- Cancellation behavior based on activity type and current status
-- Atomic start, completion, and cancellation operations
-
-### Refactored behavior
-
-- Activity start, completion, and cancellation use shared action-view
-  behavior.
-- Business transitions remain implemented in service functions.
-- Service validation errors are displayed as form errors instead of
-  technical error pages.
-- Failed activities require result notes.
-- Repair creation requires a fault or repair reason.
-- Repair completion requires a description of the performed work.
-- Activity details display actual timestamps, result notes, equipment
-  status, assigned employees, and cancellation information.
-
-</details>
-
-### Functional interface
-
-- Activity list
-- Activity creation for specific equipment
-- Separate employee assignment
-- Activity detail page
-- Controlled activity start
-- Controlled activity completion
-- Passed and failed results
-- Repair workflow
-- Reinspection after repair
-- Activity cancellation with a required reason
-- Automatic actual start and end timestamps
-- Automatic equipment status synchronization
-- Prevention of simultaneous activities in progress for the same
-  equipment
-
-<details>
-<summary><strong>Current data structure</strong></summary>
-
-```text
-Customer
-`-- CustomerSite
-    |-- CustomerContact
-    `-- Equipment
-        |-- EquipmentStatusHistory
-        `-- Inspection
-            `-- many Employees
-
-Specialty
-|-- many EquipmentTypes
-`-- many Employees
-
-EquipmentType
-`-- many Equipment items
-
-Employee
-`-- many EmployeeHistory records
-```
+- [x] Activity creation
+- [x] Assignment workflow
+- [x] Start workflow
+- [x] Completion workflow
+- [x] Cancellation workflow
+- [x] Status history
 
 </details>
 
 <details>
-<summary><strong>Current operational workflow</strong></summary>
+<summary><strong>User Interface</strong></summary>
 
-The primary operational hierarchy is:
+- [x] Navigation menu
+- [x] Confirmation pages
+- [x] Custom 404 page
+- [ ] Advanced filtering
+- [ ] Final UI styling
+- [ ] Responsive review
 
-Customer
-→ Customer site
-→ Customer contact
-→ Equipment
-→ Activity
-→ Assigned employees
-→ Result and history
-
-Equipment belongs to a customer site. A customer contact may be
-recorded as the person handing over equipment for a specific activity,
-but the equipment does not belong permanently to that contact.
-
-The planned customer-site intake workflow will allow an operator to:
-
-1. open a customer and one of its sites;
-2. select one active customer contact;
-3. mark one or more registered equipment items as received;
-4. register missing equipment directly for the current site;
-5. create an individual activity for every selected equipment item;
-6. automatically associate the customer, site, contact, and equipment
-   with the created activities.
 </details>
 
 <details>
-<summary><strong>Shared architecture</strong></summary>
+<summary><strong>Future Enhancements</strong></summary>
 
-The current shared infrastructure includes:
-
-- configurable text normalization for strip, uppercase, lowercase,
-  title case, and default text values;
-- shared delete confirmation forms;
-- protected-delete handling;
-- shared delete confirmation templates;
-- customer and customer-site parent view mixins;
-- shared equipment registration history behavior;
-- shared inspection action handling;
-- atomic employee activation and deactivation;
-- service-based equipment activity status transitions.
+- [ ] User accounts
+- [ ] Roles and permissions
+- [ ] Backup and restore
+- [ ] Audit improvements
 
 </details>
 
-### Development approach
+---
 
-Development follows a staged and workflow-oriented approach. Each stage
-is completed and tested before additional functionality is introduced.
+# Testing Checklist
 
-The functional foundation and the shared service interface are now
-implemented. The project currently includes:
+<details>
+<summary><strong>Customers</strong></summary>
 
-- reusable model, form, and view mixins;
-- shared text normalization and validation;
-- complete CRUD workflows for the main domain models;
-- customer-site workspaces for contacts and equipment;
-- controlled equipment and employee status changes;
-- the complete activity lifecycle from creation to completion or
-  cancellation;
-- shared navigation, breadcrumbs, forms, tables, detail pages, and
-  protected-delete confirmations;
-- reusable search and pagination for the main registers;
-- Unicode slug routes for customers, customer sites, and equipment;
-- workflow-oriented redirects that return the operator to the most useful
-  working list.
+- [ ] Create customer
+- [ ] Edit customer
+- [ ] Delete customer
+- [ ] Open details page
+- [ ] Verify invalid slug returns 404
 
-The next development stage will focus on working with larger registers
-and improving daily operator workflows.
+</details>
 
-The planned order is:
-- Add primary/combined activity filters
-- Add reusable sorting
-- Improve phone-number validation
+<details>
+<summary><strong>Customer Sites</strong></summary>
 
-## Installation
+- [ ] Create customer site
+- [ ] Edit customer site
+- [ ] Delete customer site
 
-Detailed installation instructions will be added as the project
-develops.
+</details>
 
-The current local setup requires:
+<details>
+<summary><strong>Equipment</strong></summary>
 
-- Python
-- Django
-- A virtual environment
-- The dependencies from `requirements.txt`
-- A local `.env` file based on `.env.example`
-- Applied Django migrations
+- [ ] Create equipment
+- [ ] Upload equipment image
+- [ ] Edit equipment
+- [ ] Delete equipment
+- [ ] Verify invalid slug returns 404
+
+</details>
+
+<details>
+<summary><strong>Employees</strong></summary>
+
+- [ ] Create employee
+- [ ] Upload employee image
+- [ ] Edit employee
+- [ ] Delete employee
+
+</details>
+
+<details>
+<summary><strong>Activities</strong></summary>
+
+- [ ] Create activity
+- [ ] Assign employee
+- [ ] Start activity
+- [ ] Complete activity
+- [ ] Cancel activity
+- [ ] Verify activity history
+- [ ] Verify redirects
+
+</details>
+
+---
+
+# Development Principles
+
+<details>
+<summary><strong>Architecture Guidelines</strong></summary>
+
+- Service layer handles business rules.
+- Models own state transitions.
+- Related operations use transactions when needed.
+- URL parameters use TextChoices `.value`.
+- UI choices may be restricted by forms, but validation is performed in business logic.
+- Delete operations always require confirmation.
+- Operator workflow and usability have priority over technical implementation details.
+- Django Admin is not used.
+- Single-user operation is the current target.
+- Multi-user support may be added later.
+
+</details>
 
 ## Documentation
 

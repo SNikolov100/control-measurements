@@ -8,6 +8,7 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/details.css' %}">
     <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/customers.css' %}">
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -113,7 +114,7 @@
                 </div>
             {% endif %}
 
-            <form method="post" novalidate>
+            <form method="post" enctype="multipart/form-data" novalidate>
                 {% csrf_token %}
 
                 {% include "customer/includes/customer_contact_form_fields.html" %}

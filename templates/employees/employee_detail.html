@@ -96,6 +96,59 @@
         </div>
     </header>
 
+    <section class="employee-profile-card">
+        <div>
+            {% if employee.photo %}
+                <a
+                    href="{{ employee.photo.url }}"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    <img
+                        class="employee-profile-image"
+                        src="{{ employee.photo.url }}"
+                        alt="Photo of {{ employee.full_name }}"
+                    >
+                </a>
+            {% else %}
+                <span
+                    class="
+                        employee-avatar
+                        employee-avatar-large
+                    "
+                    aria-hidden="true"
+                >
+                    {{ employee.full_name|slice:":1"|upper }}
+                </span>
+            {% endif %}
+        </div>
+
+        <div class="employee-profile-content">
+            <h2>
+                {{ employee.full_name }}
+            </h2>
+
+            <p>
+                {% if employee.position %}
+                    {{ employee.position }}
+                {% else %}
+                    No position has been provided.
+                {% endif %}
+            </p>
+
+            <a
+                class="button button-small"
+                href="{% url 'employees:edit' employee.pk %}"
+            >
+                {% if employee.photo %}
+                    Replace photo
+                {% else %}
+                    Add photo
+                {% endif %}
+            </a>
+        </div>
+    </section>
+
     <div class="detail-layout">
         <div class="employee-detail-grid">
             <section class="detail-card">

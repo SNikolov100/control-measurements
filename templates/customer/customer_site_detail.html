@@ -249,48 +249,70 @@
                                 {% endif %}
                             "
                         >
-                            <div>
-                                <div class="action-group">
-                                    <h3 class="contact-card-title">
-                                        {{ contact.full_name }}
-                                    </h3>
-
-                                    {% if contact.is_primary %}
-                                        <span
-                                                         </span>
-                                    {% endif %}
-
-                                    {% if contact.is_active %}
-                                        <span
-                                            class="status-badge status-active"
+                            <div class="contact-card-main">
+                                {% if contact.photo %}
+                                    <a
+                                        class="contact-avatar"
+                                        href="{% url 'customers:contact-details' customer.slug site.slug contact.pk %}"
+                                        aria-label="Open details for {{ contact.full_name }}"
+                                    >
+                                        <img
+                                            class="contact-avatar-image"
+                                            src="{{ contact.photo.url }}"
+                                            alt=""
                                         >
-                                            Active
+                                    </a>
+                                {% else %}
+                                    <a
+                                        class="contact-avatar"
+                                        href="{% url 'customers:contact-details' customer.slug site.slug contact.pk %}"
+                                        aria-label="Open details for {{ contact.full_name }}"
+                                    >
+                                        <span aria-hidden="true">
+                                            {{ contact.full_name|slice:":1"|upper }}
                                         </span>
-                                    {% else %}
-                                        <span
-                                            class="status-badge status-inactive"
-                                        >
-                                            Inactive
+                                    </a>
+                                {% endif %}
+
+                                <div class="contact-card-content">
+                                    <div class="action-group">
+                                        <h3 class="contact-card-title">
+                                            {{ contact.full_name }}
+                                        </h3>
+
+                                        {% if contact.is_primary %}
+                                            <span class="status-badge status-active">
+                                                Primary
+                                            </span>
+                                        {% endif %}
+
+                                        {% if contact.is_active %}
+                                            <span class="status-badge status-active">
+                                                Active
+                                            </span>
+                                        {% else %}
+                                            <span class="status-badge status-inactive">
+                                                Inactive
+                                            </span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="contact-card-meta">
+                                        <span>
+                                            {{ contact.position|default:"No position" }}
                                         </span>
-                                    {% endif %}
-                                </div>
 
-                                <div class="contact-card-meta">
-                                    <span>
-                                        {{ contact.position|default:"No position" }}
-                                    </span>
+                                        <span>
+                                            {{ contact.phone|default:"No phone" }}
+                                        </span>
 
-                                    <span>
-                                        {{ contact.phone|default:"No phone" }}
-                                    </span>
-
-                                    {% if contact.email %}
-                                        <a href="mailto:{{ contact.email }}">
-                                            {{ contact.email }}
-                                        </a>
-                                    {% else %}
-                                        <span>No email</span>
-                                    {% endif %}
+                                        {% if contact.email %}
+                                            <a href="mailto:{{ contact.email }}">
+                                                {{ contact.email }}
+                                            </a>
+                                        {% else %}
+                                            <span>No email</span>
+                                        {% endif %}
                                 </div>
                             </div>
 

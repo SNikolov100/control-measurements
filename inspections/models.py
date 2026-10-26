@@ -4,6 +4,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as translate
 from core.model_mixins import TimestampMixin
 from django.utils import timezone
+from equipment.models import Equipment
 
 class Inspection(TimestampMixin):
     class InspectionType(models.TextChoices):
@@ -47,6 +48,15 @@ class Inspection(TimestampMixin):
         on_delete=models.PROTECT,
         related_name="inspections",
         verbose_name=translate("Equipment"),
+    )
+    previous_equipment_status = models.CharField(
+        max_length=25,
+        choices=Equipment.Status.choices,
+        blank=True,
+        editable=False,
+        verbose_name=translate(
+            "Previous equipment status"
+        ),
     )
     customer_contact = models.ForeignKey(
         "customers.CustomerContact",

@@ -82,6 +82,7 @@ class EquipmentBaseForm(forms.ModelForm):
             'model_name',
             'serial_number',
             'inventory_number',
+            'image',
             'inspection_interval_value',
             'inspection_interval_unit',
             'estimated_inspection_duration',
@@ -91,6 +92,7 @@ class EquipmentBaseForm(forms.ModelForm):
             'model_name': forms.TextInput(attrs={'placeholder': 'For example: Model 100'}),
             'serial_number': forms.TextInput(attrs={'placeholder': 'For example: SN-2026-001'}),
             'inventory_number': forms.TextInput(attrs={'placeholder': 'For example: INV-001'}),
+            'image': forms.ClearableFileInput(attrs={"accept": "image/jpeg,image/png,image/webp"}),
             'inspection_interval_value': forms.NumberInput(
                 attrs={
                     'min': 1,
@@ -116,6 +118,7 @@ class EquipmentBaseForm(forms.ModelForm):
             'model_name': translate('Enter the manufacturer model when available.'),
             'serial_number': translate('Enter the unique manufacturer serial number.'),
             'inventory_number': translate('Enter an internal inventory number when available.'),
+            'image': translate('Upload a JPEG, PNG, or WebP image up to 5 MB. The image is optional.'),
             'inspection_interval_value': translate('Leave empty to use the default value from the equipment type.'),
             'inspection_interval_unit': translate('Leave empty to use the default unit from the equipment type.'),
             'estimated_inspection_duration': translate(
@@ -130,6 +133,7 @@ class EquipmentBaseForm(forms.ModelForm):
                 'unique': translate('Equipment with this serial number already exists.'),
             },
             'inventory_number': {'unique': translate('Equipment with this inventory number already exists.')},
+            'image': {'invalid_image': translate('Upload a valid JPEG, PNG, or WebP image.')},
         }
 
 class EquipmentCreateForm(EquipmentBaseForm):

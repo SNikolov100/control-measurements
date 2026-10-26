@@ -159,11 +159,11 @@
 
                 <p class="form-card-description">
                     {% if inspection.inspection_type == inspection.InspectionType.REPAIR %}
-                        Describe the repair work performed before
-                        completing the activity.
+                        Record whether the repair was successful and
+                        describe the repair work performed.
                     {% else %}
-                        Select the result and add final notes when
-                        they are required.
+                        Select the final activity result and add
+                        result notes when required.
                     {% endif %}
                 </p>
             </div>
@@ -178,37 +178,42 @@
                 {% csrf_token %}
 
                 <div class="form-fields">
-                    {% if form.result %}
-                        <div class="form-field">
-                            <label
-                                class="form-label"
-                                for="{{ form.result.id_for_label }}"
-                            >
-                                Result
-
-                                <span class="required-indicator">
-                                    *
-                                </span>
-                            </label>
-
-                            {{ form.result.errors }}
-
-                            {{ form.result }}
-
-                            {% if form.result.help_text %}
-                                <p class="form-help">
-                                    {{ form.result.help_text }}
-                                </p>
+                    <div class="form-field">
+                        <label
+                            class="form-label"
+                            for="{{ form.result.id_for_label }}"
+                        >
+                            {% if inspection.inspection_type == inspection.InspectionType.REPAIR %}
+                                Repair result
+                            {% else %}
+                                Activity result
                             {% endif %}
-                        </div>
-                    {% endif %}
+
+                            <span class="required-indicator">
+                                *
+                            </span>
+                        </label>
+
+                        {{ form.result.errors }}
+                        {{ form.result }}
+
+                        {% if form.result.help_text %}
+                            <p class="form-help">
+                                {{ form.result.help_text }}
+                            </p>
+                        {% endif %}
+                    </div>
 
                     <div class="form-field">
                         <label
                             class="form-label"
                             for="{{ form.result_notes.id_for_label }}"
                         >
-                            Result notes
+                            {% if inspection.inspection_type == inspection.InspectionType.REPAIR %}
+                                Repair work and outcome
+                            {% else %}
+                                Result notes
+                            {% endif %}
 
                             {% if inspection.inspection_type == inspection.InspectionType.REPAIR %}
                                 <span class="required-indicator">
@@ -216,13 +221,12 @@
                                 </span>
                             {% else %}
                                 <span class="optional-indicator">
-                                    Required for a failed result
+                                    Required for an unsuccessful result
                                 </span>
                             {% endif %}
                         </label>
 
                         {{ form.result_notes.errors }}
-
                         {{ form.result_notes }}
 
                         {% if form.result_notes.help_text %}
@@ -233,13 +237,22 @@
                     </div>
                 </div>
 
-                <div class="confirmation-panel confirmation-warning">
-                    Completing the activity will record the actual
-                    end time, change the status to
-                    <strong>Completed</strong>, and automatically
-                    update the equipment status according to the
-                    recorded result.
-                </div>
+                {% if inspection.inspection_type == inspection.InspectionType.REPAIR %}
+                    <div class="confirmation-panel confirmation-warning">
+                        A successful repair will move the equipment to
+                        <strong>Waiting for reinspection</strong>.
+
+                        An unsuccessful repair will keep the equipment
+                        <strong>Under repair</strong>.
+                    </div>
+                {% else %}
+                    <div class="confirmation-panel confirmation-warning">
+                        Completing the activity will record the actual
+                        end time, change the activity status to
+                        <strong>Completed</strong>, and update the
+                        equipment status according to the recorded result.
+                    </div>
+                {% endif %}
 
                 <div class="form-actions">
                     <button
@@ -249,10 +262,12 @@
                         Complete activity
                     </button>
 
-                    <a class="button" href="{% url 'inspections:list' %}" >
+                    <a
+                        class="button"
+                        href="{% url 'inspections:list' %}"
+                    >
                         Cancel
                     </a>
-
                 </div>
             </form>
         </section>

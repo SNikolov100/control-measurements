@@ -96,6 +96,7 @@ class CustomerSiteBaseForm(forms.ModelForm):
             'email': {'invalid': translate('Enter a valid customer-site email address.')},
         }
 
+
 class CustomerSiteCreateForm(CustomerSiteBaseForm):
     ...
 
@@ -110,6 +111,7 @@ class CustomerContactBaseForm(forms.ModelForm):
             'position',
             'phone',
             'email',
+            'photo',
             'notes',
             'is_primary',
             'is_active',
@@ -135,6 +137,7 @@ class CustomerContactBaseForm(forms.ModelForm):
                     'autocomplete': 'email',
                 },
             ),
+            'photo': forms.ClearableFileInput(attrs={'accept': 'image/jpeg,image/png,image/webp'}),
             'notes': forms.Textarea(
                 attrs={
                     'rows': 5,
@@ -145,6 +148,7 @@ class CustomerContactBaseForm(forms.ModelForm):
         error_messages = {
             'full_name': {'required': translate("Enter the responsible contact's full name.")},
             'email': {'invalid': translate('Enter a valid contact email address.')},
+            'photo': {'invalid_image': translate('Upload a valid JPEG, PNG, or WebP image.')},
         }
 
     def __init__(self, *args, site=None, **kwargs):

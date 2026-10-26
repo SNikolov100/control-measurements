@@ -144,3 +144,62 @@ class SearchMixin:
         context['search_preserved_parameters'] = preserved_parameters
 
         return context
+
+
+class StatusFilterMixin:
+    status_parameter = 'status'
+    status_field = 'status'
+    status_choices = None
+
+    def get_status_filter(self):
+        return self.request.GET.get(self.status_parameter,'',).strip()
+
+    def get_status_choices(self):
+        if self.status_choices is None:
+            raise NotImplementedError('Define status_choices on the view.')
+
+        return self.status_choices
+
+    def get_status_filters(self):
+        filters = [{
+            'value': '',
+            'label': translate('All'),
+        }]
+        filters.extend(
+            {
+                'value': status.value,
+                'label': status.label,
+            } for status in self.get_status_choices()
+        )
+        return filters
+
+    def filter_by_status(self, queryset, status_filter):
+        valid_statuses = {status.value for status in self.get_status_choices()}
+
+        if status_filter not in valid_statuses:
+            return queryset
+        return queryset.filter(**{self.status_field: status_filter})
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return self.filter_by_status(queryset, self.get_status_filter(),)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        current_status_filter = self.get_status_filter()
+        status_filters = self.get_status_filters()
+        current_status_label = ''
+
+        for status_filter in status_filters:
+            if status_filter['value'] == current_status_filter:
+                current_status_label = status_filter['label']
+                break
+
+        context['status_filters'] = status_filters
+        context['current_status_filter'] = current_status_filter
+        context['current_status_label'] = current_status_label
+        query_parameters = self.request.GET.copy()
+        query_parameters.pop("page", None)
+        query_parameters.pop(self.status_parameter, None)
+        context["status_filter_query"] = query_parameters.urlencode()
+        return context
