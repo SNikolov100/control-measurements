@@ -168,12 +168,20 @@ source code.
 
 The project currently uses:
 
-- `README.md` for the project overview
+## Documentation
+
+The project currently uses:
+
+- `README.md` for the project overview and installation instructions
 - `CHANGELOG.md` for notable development changes
 - Git commits for the detailed development history
 
-More detailed technical documentation will later be organized in a
-separate `docs/` directory.
+#### For the standard operator workflow
+
+- [Application Workflow Guide – English](docs/WORKFLOW_GUIDE.md)
+- [Ръководство за работа – Български](docs/WORKFLOW_GUIDE_BG.md)
+
+
 
 
 ## Repository
