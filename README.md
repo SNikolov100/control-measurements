@@ -163,26 +163,27 @@ and control measurement schedules.
 
 ## Documentation
 
-Project documentation will be developed and updated together with the
-source code.
-
-The project currently uses:
-
-## Documentation
-
 The project currently uses:
 
 - `README.md` for the project overview and installation instructions
 - `CHANGELOG.md` for notable development changes
 - Git commits for the detailed development history
 
-#### For the standard operator workflow
+### General Operational Workflow
 
-- [Application Workflow Guide – English](docs/WORKFLOW_GUIDE.md)
-- [Ръководство за работа – Български](docs/WORKFLOW_GUIDE_BG.md)
+The following documents explain the business logic, participants,
+equipment lifecycle and activity status transitions:
 
+- [Typical Operational Workflow – English](docs/WORKFLOW_EN.md)
+- [Обичаен работен процес – Български](docs/WORKFLOW_BG.md)
 
+### Application Workflow Guides
 
+The following guides describe the practical actions performed by
+operators and testers:
+
+- [Application Workflow Guide – English](docs/WORKFLOW_GUIDE_EN.md)
+- [Ръководство за работа с приложението – Български](docs/WORKFLOW_GUIDE_BG.md)
 
 ## Repository
 
