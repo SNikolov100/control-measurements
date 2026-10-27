@@ -5,6 +5,10 @@
 This document describes the standard operational workflow in the
 Control Measurements application.
 
+> General operational logic: [WORKFLOW_EN.md](WORKFLOW_EN.md)
+
+
+
 ## Main Workflow
 
 Initial Setup → Customer → Customer Site → Equipment → Activity → Employee → Result → History
@@ -56,7 +60,63 @@ The initial setup should be completed before employees, equipment, and activitie
 </details>
 
 <details>
-<summary><strong>2. Customer and Site</strong></summary>
+<summary><strong>2. Preparing Test Data</strong></summary>
+
+## ⚠️ Important Test Data Rule
+
+> **All preloaded equipment records must initially have the
+> “In Service” (`in_service`) status.**
+
+The **In Service** status means that:
+
+- the equipment exists in the database;
+- the equipment belongs to a specific customer site;
+- the equipment is physically located at the customer site;
+- the equipment has not yet arrived for the current inspection;
+- there is no active inspection or repair activity for the equipment.
+
+### Do Not Preload Equipment as “Waiting for Inspection”
+
+The **Waiting for Inspection** status should be assigned only after:
+
+1. the equipment has been physically delivered to our facility;
+2. the operator has found or registered it in the system;
+3. a new activity has been created for it.
+
+> **Registering equipment does not mean that the equipment is
+> physically present at our facility.**
+>
+> **Creating a new activity indicates that the equipment has arrived
+> and has entered the current operational workflow.**
+
+### Correct Test Transition
+
+```text
+In Service
+→ Physical receipt of the equipment
+→ Creation of a new activity
+→ Waiting for Inspection
+→ Assignment of a qualified employee
+→ Start of the activity
+```
+
+### Test Data Checklist
+
+Verify the following when preparing and testing the initial data:
+
+- [ ] All preloaded equipment records start with the `in_service` status.
+- [ ] Equipment moves to “Waiting for Inspection” after a new activity is created.
+- [ ] Equipment without an active activity is not shown as waiting for inspection.
+- [ ] A trainee without a specialty cannot be assigned independently.
+- [ ] Available employees are filtered by the required specialty.
+- [ ] An unsuccessful inspection sends the equipment into the repair workflow.
+- [ ] A repeat inspection is created after a successful repair.
+- [ ] Equipment returns to normal service only after a successful final result.
+
+</details>
+
+<details>
+<summary><strong>3. Customer and Customer Site</strong></summary>
 
 1. Search for an existing customer.
 2. Create the customer if no matching record exists.
@@ -66,7 +126,7 @@ The initial setup should be completed before employees, equipment, and activitie
 </details>
 
 <details>
-<summary><strong>3. Equipment Registration</strong></summary>
+<summary><strong>4. Equipment Registration</strong></summary>
 
 1. Open the equipment list for the selected customer site.
 2. Search for the equipment before creating a new record.
@@ -77,7 +137,7 @@ The initial setup should be completed before employees, equipment, and activitie
 </details>
 
 <details>
-<summary><strong>4. Activity Creation</strong></summary>
+<summary><strong>5. Activity Creation</strong></summary>
 
 1. Select the equipment.
 2. Create the required activity.
@@ -89,7 +149,7 @@ The initial setup should be completed before employees, equipment, and activitie
 </details>
 
 <details>
-<summary><strong>5. Activity Processing</strong></summary>
+<summary><strong>6. Activity Processing</strong></summary>
 
 The standard activity lifecycle is:
 
@@ -106,7 +166,7 @@ main Activities list.
 </details>
 
 <details>
-<summary><strong>6. Repair Workflow</strong></summary>
+<summary><strong>7. Repair Workflow</strong></summary>
 
 1. Create a repair activity.
 2. Assign an employee.
@@ -121,7 +181,7 @@ Repair activities may initially have no fixed completion date.
 
 
 <details>
-<summary><strong>7. Important Operator Rules</strong></summary>
+<summary><strong>8. Important Operator Rules</strong></summary>
 
 - Search before creating a new record.
 - Verify that the correct customer site is selected.
