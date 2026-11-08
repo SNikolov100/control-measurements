@@ -21,25 +21,26 @@
         </div>
     {% endif %}
 
-    <div class="form-field">
-        <label
-            class="form-label"
-            for="{{ form.equipment_type.id_for_label }}"
-        >
-            Equipment type
+    {% if form.equipment_type %}
+        <div class="form-field">
+            <label
+                class="form-label"
+                for="{{ form.equipment_type.id_for_label }}"
+            >
+                Equipment type
+                <span class="required-indicator">*</span>
+            </label>
 
-            <span class="required-indicator">*</span>
-        </label>
+            {{ form.equipment_type.errors }}
+            {{ form.equipment_type }}
 
-        {{ form.equipment_type.errors }}
-        {{ form.equipment_type }}
-
-        {% if form.equipment_type.help_text %}
-            <p class="form-help">
-                {{ form.equipment_type.help_text }}
-            </p>
-        {% endif %}
-    </div>
+            {% if form.equipment_type.help_text %}
+                <p class="form-help">
+                    {{ form.equipment_type.help_text }}
+                </p>
+            {% endif %}
+        </div>
+    {% endif %}
 
     <div class="form-field">
         <label
@@ -48,7 +49,7 @@
         >
             Model
 
-            <span class="optional-indicator">Optional</span>
+            <span class="required-indicator">*</span>
         </label>
 
         {{ form.model_name.errors }}

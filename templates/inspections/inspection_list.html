@@ -285,12 +285,23 @@
                                                 Assign
                                             </a>
 
-                                            <a
-                                                class="button button-small button-success"
-                                                href="{% url 'inspections:start' inspection.pk %}"
-                                            >
-                                                Start
-                                            </a>
+                                            {% if inspection.assigned_employees.exists %}
+                                                <a
+                                                    class="button button-success"
+                                                    href="{% url 'inspections:start' inspection.pk %}"
+                                                >
+                                                    Start
+                                                </a>
+                                            {% else %}
+                                                <button
+                                                    class="button button-success button-disabled"
+                                                    type="button"
+                                                    disabled
+                                                    title="Assign at least one qualified employee before starting the activity."
+                                                >
+                                                    Start
+                                                </button>
+                                            {% endif %}
 
                                             <a
                                                 class="button button-small button-danger"

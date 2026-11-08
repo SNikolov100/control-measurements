@@ -45,8 +45,7 @@
             <h1 class="page-title">Edit equipment</h1>
 
             <p class="page-description">
-                Update the equipment identifiers, type,
-                inspection settings, and notes.
+                 Update the equipment identifiers, image, inspection settings, and notes.
             </p>
         </div>
     </header>
@@ -107,11 +106,13 @@
 
                 {% include "equipment/includes/equipment_form_fields.html" %}
 
-                <div class="confirmation-panel">
-                    Changing the equipment type may also require
-                    reviewing the inspection interval and expected
-                    duration.
-                </div>
+                {% if form.equipment_type %}
+                    <div class="confirmation-panel">
+                        If the inspection interval or expected duration is left empty,
+                        the saved value will be replaced with the default value defined
+                        by the equipment type.
+                    </div>
+                {% endif %}
 
                 <div class="form-actions">
                     <button

@@ -37,6 +37,11 @@ and control measurement schedules.
 - [x] Equipment types management
 - [x] Equipment image support
 - [x] Slug-based URLs
+- [x] Equipment ownership is fixed after registration
+- [x] Equipment type is fixed in the standard edit workflow
+- [x] Equipment status is managed through activity transitions
+- [x] Equipment interval and duration defaults are inherited from the equipment type
+- [x] Inventory numbers are globally unique when provided
 
 </details>
 
@@ -78,8 +83,21 @@ and control measurement schedules.
 
 - [ ] User accounts
 - [ ] Roles and permissions
+- [ ] Controlled equipment-type correction with dedicated permission
+- [ ] Audit history for privileged equipment corrections
 - [ ] Backup and restore
 - [ ] Audit improvements
+<details>
+<summary><strong>Planned Permission-Controlled Actions</strong></summary>
+
+- `equipment.correct_equipment_type`
+  - Available only to authorized administrators or organization managers.
+  - Requires an explicit correction reason.
+  - Requires confirmation before applying the change.
+  - Records the previous type, new type, responsible user, date, and reason.
+  - Is not available through the standard equipment edit form.
+
+</details>
 
 </details>
 
@@ -115,6 +133,14 @@ and control measurement schedules.
 - [ ] Edit equipment
 - [ ] Delete equipment
 - [ ] Verify invalid slug returns 404
+- [ ] Verify customer site cannot be changed through the standard equipment edit form
+- [ ] Verify equipment type cannot be changed through the standard equipment edit form
+- [ ] Verify empty inspection interval uses the equipment-type default
+- [ ] Verify empty expected duration uses the equipment-type default
+- [ ] Verify duplicate inventory numbers are rejected
+- [ ] Verify multiple equipment records may have an empty inventory number
+- [ ] Verify equipment-type short name is required
+- [ ] Verify activity cannot start without an assigned qualified employee
 
 </details>
 
@@ -153,6 +179,9 @@ and control measurement schedules.
 - Related operations use transactions when needed.
 - URL parameters use TextChoices `.value`.
 - UI choices may be restricted by forms, but validation is performed in business logic.
+- Equipment ownership and type are fixed in the standard edit workflow.
+- Equipment statuses are changed only through controlled activity transitions.
+- Privileged corrections must use explicit permissions and audit history.
 - Delete operations always require confirmation.
 - Operator workflow and usability have priority over technical implementation details.
 - Django Admin is not used.

@@ -17,23 +17,23 @@ class EquipmentTypeBaseForm(forms.ModelForm):
             'is_active',
         )
         widgets = {
-            "name": forms.TextInput(attrs={"placeholder": "For example: Digital thermometer"},),
+            "name": forms.TextInput(attrs={"placeholder": translate("For example: Digital thermometer")},),
             "description": forms.Textarea(
                 attrs={
                     "rows": 5,
-                    "placeholder": "Describe the equipment type and its typical application.",
+                    "placeholder": translate("Describe the equipment type and its typical application."),
                 },
             ),
             "default_interval_value": forms.NumberInput(
                 attrs={
                     "min": 1,
-                    "placeholder": "For example: 12",
+                    "placeholder": translate("For example: 12"),
                 },
             ),
             "default_inspection_duration": forms.NumberInput(
                 attrs={
                     "min": 1,
-                    "placeholder": "For example: 60",
+                    "placeholder": translate("For example: 60"),
                 },
             ),
         }
@@ -51,6 +51,10 @@ class EquipmentTypeBaseForm(forms.ModelForm):
             "name": {
                 "required": translate("Enter the equipment-type name."),
                 "unique": translate("An equipment type with this name already exists."),
+            },
+            "short_name": {
+                "required": translate("Enter a short name for the equipment type."),
+                "unique": translate("An equipment type with this short name already exists."),
             },
             "specialty": {"required": translate("Select the required specialty.")},
             "default_interval_value": {
@@ -89,26 +93,26 @@ class EquipmentBaseForm(forms.ModelForm):
             'notes',
         )
         widgets = {
-            'model_name': forms.TextInput(attrs={'placeholder': 'For example: Model 100'}),
-            'serial_number': forms.TextInput(attrs={'placeholder': 'For example: SN-2026-001'}),
-            'inventory_number': forms.TextInput(attrs={'placeholder': 'For example: INV-001'}),
+            'model_name': forms.TextInput(attrs={'placeholder': translate('For example: Model 100')}),
+            'serial_number': forms.TextInput(attrs={'placeholder': translate('For example: SN-2026-001')}),
+            'inventory_number': forms.TextInput(attrs={'placeholder': translate('For example: INV-001')}),
             'image': forms.ClearableFileInput(attrs={"accept": "image/jpeg,image/png,image/webp"}),
             'inspection_interval_value': forms.NumberInput(
                 attrs={
                     'min': 1,
-                    'placeholder': 'Leave empty to use the equipment-type default',
+                    'placeholder': translate('Leave empty to use the equipment-type default'),
                 }
             ),
             'estimated_inspection_duration': forms.NumberInput(
                 attrs={
                     'min': 1,
-                    'placeholder': 'Leave empty to use the equipment-type default',
+                    'placeholder': translate('Leave empty to use the equipment-type default'),
                 },
             ),
             'notes': forms.Textarea(
                 attrs={
                     'rows': 5,
-                    'placeholder': 'Add relevant information about the equipment.',
+                    'placeholder': translate('Add relevant information about the equipment.'),
                 },
             ),
         }
@@ -121,8 +125,7 @@ class EquipmentBaseForm(forms.ModelForm):
             'image': translate('Upload a JPEG, PNG, or WebP image up to 5 MB. The image is optional.'),
             'inspection_interval_value': translate('Leave empty to use the default value from the equipment type.'),
             'inspection_interval_unit': translate('Leave empty to use the default unit from the equipment type.'),
-            'estimated_inspection_duration': translate(
-                'Leave empty to use the default duration from the equipment type.'),
+            'estimated_inspection_duration': translate('Leave empty to use the default duration from the equipment type.'),
             'notes': translate('Optional additional information.'),
         }
         error_messages = {
@@ -136,18 +139,25 @@ class EquipmentBaseForm(forms.ModelForm):
             'image': {'invalid_image': translate('Upload a valid JPEG, PNG, or WebP image.')},
         }
 
-class EquipmentCreateForm(EquipmentBaseForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['inspection_interval_value'].required = False
-        self.fields['inspection_interval_unit'].required = False
-        self.fields['estimated_inspection_duration'].required = False
+
+        default_fields = (
+            'inspection_interval_value',
+            'inspection_interval_unit',
+            'estimated_inspection_duration',
+        )
+        for field_name in default_fields:
+            self.fields[field_name].required = False
 
     def clean(self):
         cleaned_data = super().clean()
         equipment_type = cleaned_data.get('equipment_type')
 
-        if equipment_type is None:
+        if equipment_type is None and self.instance.pk:
+            equipment_type = self.instance.equipment_type
+
+        if equipment_type is None :
             return cleaned_data
 
         if not cleaned_data.get('inspection_interval_value'):
@@ -161,11 +171,16 @@ class EquipmentCreateForm(EquipmentBaseForm):
 
         return cleaned_data
 
+
+class EquipmentCreateForm(EquipmentBaseForm):
+    ...
+
 class EquipmentEditForm(EquipmentBaseForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.fields.pop('customer_site', None)
+        self.fields.pop('equipment_type', None)
 
 
 class CustomerSiteEquipmentCreateForm(EquipmentCreateForm):

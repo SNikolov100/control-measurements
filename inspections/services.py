@@ -105,11 +105,11 @@ def register_pending_inspection(inspection: Inspection) -> Inspection:
 
 def start_inspection(inspection) ->Inspection:
     if inspection.pk is None:
-        raise ValidationError(translate('The inspection must be saved before it can be started.'))
+        raise ValidationError(translate('The activity must be saved before it can be started.'))
 
     if not inspection.can_change_status_to(inspection.Status.IN_PROGRESS):
         raise ValidationError(
-            {'status': translate('The inspection cannot be started from its current status.')}
+            {'status': translate('The activity cannot be started from its current status.')}
         )
 
     another_activity_in_progress = (type(inspection).objects
@@ -127,14 +127,14 @@ def start_inspection(inspection) ->Inspection:
 
     if not assigned_employees.exists():
         raise ValidationError(
-            {'assigned_employees': translate('At least one employee must be assigned before the inspection can start.')}
+            {'assigned_employees': translate('At least one employee must be assigned before the activity can start.')}
         )
 
     inactive_employees = assigned_employees.filter(is_active=False)
 
     if inactive_employees.exists():
         raise ValidationError(
-            {'assigned_employees': translate('Inactive employees cannot be assigned to an inspection.')}
+            {'assigned_employees': translate('Inactive employees cannot be assigned to an activity.')}
         )
 
     required_specialty = inspection.equipment.equipment_type.specialty
@@ -143,7 +143,7 @@ def start_inspection(inspection) ->Inspection:
 
     if unqualified_employees.exists():
         raise ValidationError(
-            {'assigned_employees': translate('All assigned employees must have the equipment specialty.')}
+            {'assigned_employees': translate('All assigned employees must have the specialty required for this activity.')}
         )
 
     equipment = inspection.equipment
@@ -235,7 +235,7 @@ def complete_inspection(inspection, result='', result_notes='') -> Inspection:
 def cancel_inspection(inspection: Inspection,reason: str) -> Inspection:
     if not inspection.can_change_status_to(inspection.Status.CANCELLED):
         raise ValidationError({
-                'status': translate('The inspection cannot be cancelled from its current status.')
+                'status': translate('The activity cannot be cancelled from its current status.')
         })
 
     reason = reason.strip()

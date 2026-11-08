@@ -136,19 +136,8 @@ class Inspection(TimestampMixin):
         if self.actual_start and self.actual_end and (self.actual_start > self.actual_end):
             errors["actual_end"] = translate("Actual end cannot be earlier than actual start.")
 
-        result_required_types = {
-            self.InspectionType.CALIBRATION,
-            self.InspectionType.PERIODIC,
-            self.InspectionType.EXTRAORDINARY,
-            self.InspectionType.REINSPECTION,}
-
-        if (self.status == self.Status.COMPLETED
-            and self.inspection_type in result_required_types
-            and not self.result):
-            errors["result"] = translate("A completed inspection must have a result.")
-
-        if self.inspection_type == self.InspectionType.REPAIR and self.result:
-            errors["result"] = translate("Repair activities do not use an inspection result.")
+        if self.status == self.Status.COMPLETED and not self.result:
+            errors["result"] = translate("A completed activity must have a result.")
 
         if errors:
             raise ValidationError(errors)

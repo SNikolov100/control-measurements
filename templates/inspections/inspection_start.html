@@ -183,7 +183,7 @@
                     Assigned employees
                 </h3>
 
-                {% if inspection.assigned_employees.all %}
+                {% if inspection.assigned_employees.exists %}
                     <ul class="activity-employee-list">
                         {% for employee in inspection.assigned_employees.all %}
                             <li class="activity-employee-card">
@@ -216,19 +216,43 @@
                 {% csrf_token %}
 
                 <div class="form-actions">
-                    <button
-                        class="button button-success"
-                        type="submit"
+                    {% if inspection.assigned_employees.exists %}
+                        <button
+                            class="button button-success"
+                            type="submit"
+                        >
+                            Start activity
+                        </button>
+
+                        <a
+                            class="button"
+                            href="{% url 'inspections:assign' inspection.pk %}"
+                        >
+                            Change assignment
+                        </a>
+                    {% else %}
+                        <button
+                            class="button button-success button-disabled"
+                            type="button"
+                            disabled
+                            title="Assign at least one qualified employee before starting the activity."
+                        >
+                            Start activity
+                        </button>
+
+                        <a
+                            class="button button-primary"
+                            href="{% url 'inspections:assign' inspection.pk %}"
+                        >
+                            Assign employees
+                        </a>
+                    {% endif %}
+
+                    <a
+                        class="button"
+                        href="{% url 'inspections:list' %}"
                     >
-                        Start activity
-                    </button>
-
-                    <a class="button" href="{% url 'inspections:list' %}" >
                         Cancel
-                    </a>
-
-                    <a class="button" href="{% url 'inspections:assign' inspection.pk %}" >
-                        Change assignment
                     </a>
                 </div>
             </form>

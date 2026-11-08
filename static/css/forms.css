@@ -403,3 +403,21 @@
         padding: 16px;
     }
 }
+
+/*.button:disabled,*/
+/*.button[aria-disabled="true"] {*/
+/*    cursor: not-allowed;*/
+/*    opacity: 0.55;*/
+/*    filter: grayscale(25%);*/
+/*}*/
+
+/*button.button.button-success.button-disabled:disabled {*/
+/*    color: rgba(22, 101, 52, 0.5);*/
+/*    background-color: rgba(220, 252, 231, 0.3);*/
+/*    border-color: rgba(134, 239, 172, 0.4);*/
+/*    box-shadow: none;*/
+/*    cursor: not-allowed;*/
+/*    opacity: 0.65;*/
+/*    filter: none;*/
+/*    transform: none;*/
+/*

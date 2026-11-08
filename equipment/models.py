@@ -6,6 +6,7 @@ from django.core.validators import MinValueValidator
 from core.validators import validate_uploaded_image
 from uuid import uuid4
 from pathlib import Path
+from django.db.models import Q
 
 
 def equipment_image_upload_path(instance, filename):
@@ -195,6 +196,15 @@ class Equipment(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
             'equipment_type__name',
             'serial_number',
         )
+        constraints = (
+            models.UniqueConstraint(
+                fields=('inventory_number',),
+                condition=~Q(inventory_number=''),
+                name='unique_non_empty_equipment_inventory_number',
+                violation_error_message=translate('Another equipment record already uses this inventory number.')
+            ),
+        )
+
         verbose_name = translate('Equipment')
         verbose_name_plural = translate('Equipment')
 
