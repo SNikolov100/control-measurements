@@ -214,23 +214,14 @@
 
             <form method="post" novalidate>
                 {% csrf_token %}
-
+                {% if inspection.equipment.status == inspection.equipment.Status.UNDER_INSPECTION %}
+                    <div class="message message-warning">
+                        Another activity is already in progress for this equipment.
+                        Complete or cancel the current activity before starting this one.
+                    </div>
+                {% endif %}
                 <div class="form-actions">
-                    {% if inspection.assigned_employees.exists %}
-                        <button
-                            class="button button-success"
-                            type="submit"
-                        >
-                            Start activity
-                        </button>
-
-                        <a
-                            class="button"
-                            href="{% url 'inspections:assign' inspection.pk %}"
-                        >
-                            Change assignment
-                        </a>
-                    {% else %}
+                    {% if not inspection.assigned_employees.exists %}
                         <button
                             class="button button-success button-disabled"
                             type="button"
@@ -240,18 +231,35 @@
                             Start activity
                         </button>
 
-                        <a
-                            class="button button-primary"
-                            href="{% url 'inspections:assign' inspection.pk %}"
-                        >
+                        <a class="button button-primary" href="{% url 'inspections:assign' inspection.pk %}">
                             Assign employees
+                        </a>
+
+                    {% elif inspection.equipment.status == inspection.equipment.Status.UNDER_INSPECTION %}
+                        <button
+                            class="button button-success button-disabled"
+                            type="button"
+                            disabled
+                            title="Another activity is already in progress for this equipment."
+                        >
+                            Start activity
+                        </button>
+
+                        <a class="button" href="{% url 'inspections:assign' inspection.pk %}">
+                            Change assignment
+                        </a>
+
+                    {% else %}
+                        <button class="button button-success" type="submit">
+                            Start activity
+                        </button>
+
+                        <a class="button" href="{% url 'inspections:assign' inspection.pk %}">
+                            Change assignment
                         </a>
                     {% endif %}
 
-                    <a
-                        class="button"
-                        href="{% url 'inspections:list' %}"
-                    >
+                    <a class="button" href="{% url 'inspections:list' %}">
                         Cancel
                     </a>
                 </div>

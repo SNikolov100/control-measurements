@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static status_tags %}
 
 {% block title %}
     Equipment | Control Measurements
@@ -183,26 +183,7 @@
                                 </td>
 
                                 <td class="equipment-status">
-                                    {% if equipment.status == equipment.Status.IN_SERVICE %}
-                                        <span class="status-badge status-active">
-                                            {{ equipment.get_status_display }}
-                                        </span>
-
-                                    {% elif equipment.status == equipment.Status.UNDER_INSPECTION or equipment.status == equipment.Status.UNDER_REPAIR %}
-                                        <span class="status-badge status-in-progress">
-                                            {{ equipment.get_status_display }}
-                                        </span>
-
-                                    {% elif equipment.status == equipment.Status.DECOMMISSIONED %}
-                                        <span class="status-badge status-inactive">
-                                            {{ equipment.get_status_display }}
-                                        </span>
-
-                                    {% else %}
-                                        <span class="status-badge status-warning">
-                                            {{ equipment.get_status_display }}
-                                        </span>
-                                    {% endif %}
+                                    {% status_badge equipment.status equipment.get_status_display %}
                                 </td>
 
                                 <td class="table-actions">
@@ -215,9 +196,20 @@
                                             Edit
                                         </a>
 
-                                        <a class="button button-small button-primary" href="{% url 'inspections:create' equipment.slug %}" >
-                                            New activity
-                                        </a>
+                                        {% if equipment.status == equipment.Status.IN_SERVICE or equipment.status == equipment.Status.UNDER_REPAIR or equipment.status == equipment.Status.WAITING_REINSPECTION %}
+                                            <a class="button button-small button-primary" href="{% url 'inspections:create' equipment.slug %}">
+                                                New activity
+                                            </a>
+                                        {% else %}
+                                            <button
+                                                class="button button-small button-primary button-disabled"
+                                                type="button"
+                                                disabled
+                                                title="A new activity cannot be created while the equipment is in its current status."
+                                            >
+                                                New activity
+                                            </button>
+                                        {% endif %}
                                     </div>
                                 </td>
                             </tr>

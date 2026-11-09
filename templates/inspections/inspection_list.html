@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static status_tags %}
 
 {% block title %}
     Activities | Control Measurements
@@ -207,59 +207,13 @@
                                 </td>
 
                                 <td class="activity-status-column">
-                                    {% if inspection.status == inspection.Status.PENDING %}
-                                        <span
-                                            class="status-badge status-pending"
-                                        >
-                                            {{ inspection.get_status_display }}
-                                        </span>
-
-                                    {% elif inspection.status == inspection.Status.IN_PROGRESS %}
-                                        <span
-                                            class="status-badge status-in-progress"
-                                        >
-                                            {{ inspection.get_status_display }}
-                                        </span>
-
-                                    {% elif inspection.status == inspection.Status.COMPLETED %}
-                                        <span
-                                            class="status-badge status-completed"
-                                        >
-                                            {{ inspection.get_status_display }}
-                                        </span>
-
-                                    {% elif inspection.status == inspection.Status.CANCELLED %}
-                                        <span
-                                            class="status-badge status-cancelled"
-                                        >
-                                            {{ inspection.get_status_display }}
-                                        </span>
-
-                                    {% else %}
-                                        <span
-                                            class="status-badge status-neutral"
-                                        >
-                                            {{ inspection.get_status_display }}
-                                        </span>
-                                    {% endif %}
+                                    {% status_badge inspection.status inspection.get_status_display %}
                                 </td>
 
                                 <td>
                                     <div class="activity-result">
-                                        {% if inspection.result == inspection.Result.PASSED %}
-                                            <span
-                                                class="status-badge status-passed"
-                                            >
-                                                {{ inspection.get_result_display }}
-                                            </span>
-
-                                        {% elif inspection.result == inspection.Result.FAILED %}
-                                            <span
-                                                class="status-badge status-failed"
-                                            >
-                                                {{ inspection.get_result_display }}
-                                            </span>
-
+                                        {% if inspection.result %}
+                                            {% status_badge inspection.result inspection.get_result_display %}
                                         {% else %}
                                             <span class="activity-result-empty">
                                                 -
@@ -285,14 +239,7 @@
                                                 Assign
                                             </a>
 
-                                            {% if inspection.assigned_employees.exists %}
-                                                <a
-                                                    class="button button-success"
-                                                    href="{% url 'inspections:start' inspection.pk %}"
-                                                >
-                                                    Start
-                                                </a>
-                                            {% else %}
+                                            {% if not inspection.assigned_employees.exists %}
                                                 <button
                                                     class="button button-success button-disabled"
                                                     type="button"
@@ -301,6 +248,24 @@
                                                 >
                                                     Start
                                                 </button>
+
+                                            {% elif inspection.equipment.status == inspection.equipment.Status.UNDER_INSPECTION %}
+                                                <button
+                                                    class="button button-success button-disabled"
+                                                    type="button"
+                                                    disabled
+                                                    title="Another activity is already in progress for this equipment."
+                                                >
+                                                    Start
+                                                </button>
+
+                                            {% else %}
+                                                <a
+                                                    class="button button-success"
+                                                    href="{% url 'inspections:start' inspection.pk %}"
+                                                >
+                                                    Start
+                                                </a>
                                             {% endif %}
 
                                             <a

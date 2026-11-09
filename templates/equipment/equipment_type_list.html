@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static status_tags %}
 
 {% block title %}
     Equipment types | Control Measurements
@@ -148,13 +148,9 @@
 
                                 <td>
                                     {% if equipment_type.is_active %}
-                                        <span class="status-badge status-active">
-                                            Active
-                                        </span>
+                                        {% status_badge "active" %}
                                     {% else %}
-                                        <span class="status-badge status-inactive">
-                                            Inactive
-                                        </span>
+                                        {% status_badge "inactive" %}
                                     {% endif %}
                                 </td>
 

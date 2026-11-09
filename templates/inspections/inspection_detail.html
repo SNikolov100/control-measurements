@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static status_tags %}
 
 {% block title %}
     Activity details | Control Measurements
@@ -81,56 +81,56 @@
                     {{ inspection.equipment.serial_number }}
                 </span>
 
-                {% if inspection.status == inspection.Status.PENDING %}
-                    <span class="status-badge status-pending">
-                        {{ inspection.get_status_display }}
-                    </span>
+                {% status_badge inspection.status inspection.get_status_display %}
 
-                {% elif inspection.status == inspection.Status.IN_PROGRESS %}
-                    <span class="status-badge status-in-progress">
-                        {{ inspection.get_status_display }}
-                    </span>
-
-                {% elif inspection.status == inspection.Status.COMPLETED %}
-                    <span class="status-badge status-completed">
-                        {{ inspection.get_status_display }}
-                    </span>
-
-                {% elif inspection.status == inspection.Status.CANCELLED %}
-                    <span class="status-badge status-cancelled">
-                        {{ inspection.get_status_display }}
-                    </span>
-
-                {% else %}
-                    <span class="status-badge status-neutral">
-                        {{ inspection.get_status_display }}
-                    </span>
-                {% endif %}
-
-                {% if inspection.result == inspection.Result.PASSED %}
-                    <span class="status-badge status-passed">
-                        {{ inspection.get_result_display }}
-                    </span>
-
-                {% elif inspection.result == inspection.Result.FAILED %}
-                    <span class="status-badge status-failed">
-                        {{ inspection.get_result_display }}
-                    </span>
+                {% if inspection.result %}
+                    {% status_badge inspection.result inspection.get_result_display %}
                 {% endif %}
             </div>
         </div>
 
         <div class="page-actions">
             {% if inspection.status == inspection.Status.PENDING %}
-                <a class="button" href="{% url 'inspections:assign' inspection.pk %}" >
+                <a
+                    class="button"
+                    href="{% url 'inspections:assign' inspection.pk %}"
+                >
                     Assign employees
                 </a>
 
-                <a class="button button-success" href="{% url 'inspections:start' inspection.pk %}" >
-                    Start activity
-                </a>
+                {% if not inspection.assigned_employees.exists %}
+                    <button
+                        class="button button-success button-disabled"
+                        type="button"
+                        disabled
+                        title="Assign at least one qualified employee before starting the activity."
+                    >
+                        Start activity
+                    </button>
 
-                <a class="button button-danger" href="{% url 'inspections:cancel' inspection.pk %}" >
+                {% elif inspection.equipment.status == inspection.equipment.Status.UNDER_INSPECTION %}
+                    <button
+                        class="button button-success button-disabled"
+                        type="button"
+                        disabled
+                        title="Another activity is already in progress for this equipment."
+                    >
+                        Start activity
+                    </button>
+
+                {% else %}
+                    <a
+                        class="button button-success"
+                        href="{% url 'inspections:start' inspection.pk %}"
+                    >
+                        Start activity
+                    </a>
+                {% endif %}
+
+                <a
+                    class="button button-danger"
+                    href="{% url 'inspections:cancel' inspection.pk %}"
+                >
                     Cancel activity
                 </a>
             {% endif %}
@@ -210,7 +210,7 @@
                         Equipment details
                     </a>
 
-                    <a href=" {% url 'customers:site-details' inspection.equipment.customer_site.customer.slug inspection.equipment.customer_site.slug %}">
+                    <a href="{% url 'customers:site-details' inspection.equipment.customer_site.customer.slug inspection.equipment.customer_site.slug %}">
                         Customer-site details
                     </a>
                 </div>
@@ -309,26 +309,18 @@
 
                     <dt>Activity status</dt>
                     <dd>
-                        {{ inspection.get_status_display }}
+                        {% status_badge inspection.status inspection.get_status_display %}
                     </dd>
 
                     <dt>Equipment status</dt>
                     <dd>
-                        {{ inspection.equipment.get_status_display }}
+                        {% status_badge inspection.equipment.status inspection.equipment.get_status_display %}
                     </dd>
 
                     <dt>Result</dt>
                     <dd>
                         {% if inspection.result %}
-                            {% if inspection.result == inspection.Result.PASSED %}
-                                <span class="status-badge status-passed">
-                                    {{ inspection.get_result_display }}
-                                </span>
-                            {% else %}
-                                <span class="status-badge status-failed">
-                                    {{ inspection.get_result_display }}
-                                </span>
-                            {% endif %}
+                            {% status_badge inspection.result inspection.get_result_display %}
                         {% else %}
                             <span class="detail-value-muted">
                                 No result
@@ -351,7 +343,7 @@
                     </div>
                 </div>
 
-                {% if inspection.assigned_employees.all %}
+                {% if inspection.assigned_employees.exists %}
                     <ul class="activity-employee-list">
                         {% for employee in inspection.assigned_employees.all %}
                             <li class="activity-employee-card">

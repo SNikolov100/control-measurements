@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static status_tags %}
 
 {% block title %}
     {{ equipment.equipment_type.short_name }}
@@ -72,26 +72,8 @@
                     </span>
                 {% endif %}
 
-                {% if equipment.status == equipment.Status.IN_SERVICE %}
-                    <span class="status-badge status-active">
-                        {{ equipment.get_status_display }}
-                    </span>
+                {% status_badge equipment.status equipment.get_status_display %}
 
-                {% elif equipment.status == equipment.Status.UNDER_INSPECTION or equipment.status == equipment.Status.UNDER_REPAIR %}
-                    <span class="status-badge status-in-progress">
-                        {{ equipment.get_status_display }}
-                    </span>
-
-                {% elif equipment.status == equipment.Status.DECOMMISSIONED %}
-                    <span class="status-badge status-inactive">
-                        {{ equipment.get_status_display }}
-                    </span>
-
-                {% else %}
-                    <span class="status-badge status-warning">
-                        {{ equipment.get_status_display }}
-                    </span>
-                {% endif %}
             </div>
         </div>
 
@@ -100,9 +82,20 @@
                 Edit equipment
             </a>
 
-            <a class="button button-primary" href="{% url 'inspections:create' equipment.slug %}" >
-                New activity
-            </a>
+           {% if equipment.status == equipment.Status.IN_SERVICE or equipment.status == equipment.Status.UNDER_REPAIR or equipment.status == equipment.Status.WAITING_REINSPECTION %}
+                <a class="button button-primary" href="{% url 'inspections:create' equipment.slug %}">
+                    New activity
+                </a>
+            {% else %}
+                <button
+                    class="button button-primary button-disabled"
+                    type="button"
+                    disabled
+                    title="A new activity cannot be created while the equipment is in its current status."
+                >
+                    New activity
+                </button>
+            {% endif %}
         </div>
     </header>
     <section class="equipment-image-card">
@@ -284,13 +277,9 @@
                     <dt>Active</dt>
                     <dd>
                         {% if equipment.is_active %}
-                            <span class="status-badge status-active">
-                                Active
-                            </span>
+                            {% status_badge "active" %}
                         {% else %}
-                            <span class="status-badge status-inactive">
-                                Inactive
-                            </span>
+                            {% status_badge "inactive" %}
                         {% endif %}
                     </dd>
                 </dl>
@@ -376,29 +365,18 @@
                             <div class="history-entry-main">
                                 <div class="history-entry-transition">
                                     {% if history.previous_status %}
-                                        <span class="history-status">
-                                            {{ history.get_previous_status_display }}
-                                        </span>
+                                        {% status_badge history.previous_status history.get_previous_status_display %}
 
-                                        <span class="history-arrow">
+                                        <span
+                                            class="history-arrow"
+                                            aria-hidden="true"
+                                        >
                                             →
                                         </span>
                                     {% endif %}
 
-                                    <span class="history-status">
-                                        {{ history.get_new_status_display }}
-                                    </span>
+                                    {% status_badge history.new_status history.get_new_status_display %}
                                 </div>
-
-                                <p class="history-reason">
-                                    {{ history.reason }}
-                                </p>
-
-                                {% if history.notes %}
-                                    <p class="history-notes">
-                                        {{ history.notes|linebreaksbr }}
-                                    </p>
-                                {% endif %}
                             </div>
                         </article>
                     {% endfor %}

@@ -5,12 +5,14 @@ from equipment.models import Equipment
 from .forms import InspectionCreateForm, InspectionAssignmentForm, InspectionStartForm, InspectionCompleteForm, InspectionCancelForm
 from .models import Inspection
 from django.urls import reverse, reverse_lazy
-from .services import complete_inspection, start_inspection, cancel_inspection, register_pending_inspection
+from .services import cancel_inspection, complete_inspection, get_allowed_inspection_types, register_pending_inspection, start_inspection
 from .view_mixins import InspectionActionMixin
 from core.view_mixins import PaginationMixin, SearchMixin, StatusFilterMixin
 from django.utils.translation import gettext_lazy as translate
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from django.contrib import messages
+from django.shortcuts import redirect
 
 
 class InspectionListView(StatusFilterMixin, SearchMixin, PaginationMixin, ListView):
@@ -133,6 +135,11 @@ class InspectionCreateView(CreateView):
             ),
             slug=kwargs['equipment_slug'],
         )
+        allowed_activity_types = get_allowed_inspection_types(self.equipment)
+        if not allowed_activity_types:
+            messages.warning(request, translate( 'A new activity cannot be created while the equipment is in its current status.'),)
+
+            return redirect('equipment:detail', equipment_slug=self.equipment.slug,)
 
         return super().dispatch(request,*args,**kwargs,)
 
