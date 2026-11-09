@@ -42,6 +42,10 @@ and control measurement schedules.
 - [x] Equipment status is managed through activity transitions
 - [x] Equipment interval and duration defaults are inherited from the equipment type
 - [x] Inventory numbers are globally unique when provided
+- [x] Globally unique inventory numbers
+- [x] Fixed equipment type in the standard edit workflow
+- [x] Equipment-type defaults for inspection interval and duration
+- [x] Controlled activity creation based on equipment status
 
 </details>
 
@@ -63,6 +67,11 @@ and control measurement schedules.
 - [x] Completion workflow
 - [x] Cancellation workflow
 - [x] Status history
+- [x] Qualified employee validation before activity start
+- [x] Activity start protection for equipment already under inspection
+- [x] Controlled activity creation based on equipment status
+- [x] Repair and reinspection status transitions
+- [x] Reusable status badges with icons
 
 </details>
 
@@ -75,6 +84,11 @@ and control measurement schedules.
 - [ ] Advanced filtering
 - [ ] Final UI styling
 - [ ] Responsive review
+- [x] Reusable status badge template tag
+- [x] Status icons for equipment, activities, results, and history
+- [x] Disabled visual state for unavailable workflow actions
+- [ ] Navigation menu icons
+- [ ] HTML and CSS duplication review
 
 </details>
 
@@ -141,6 +155,13 @@ and control measurement schedules.
 - [ ] Verify multiple equipment records may have an empty inventory number
 - [ ] Verify equipment-type short name is required
 - [ ] Verify activity cannot start without an assigned qualified employee
+- [ ] Verify duplicate non-empty inventory numbers are rejected
+- [ ] Verify multiple equipment records may have an empty inventory number
+- [ ] Verify equipment type cannot be changed through the standard edit form
+- [ ] Verify customer site cannot be changed through the standard edit form
+- [ ] Verify empty interval and duration fields use equipment-type defaults
+- [ ] Verify `New activity` is disabled for equipment under inspection
+- [ ] Verify the direct activity-creation URL is rejected for an unavailable equipment status
 
 </details>
 
@@ -164,6 +185,12 @@ and control measurement schedules.
 - [ ] Cancel activity
 - [ ] Verify activity history
 - [ ] Verify redirects
+- [ ] Verify an activity cannot start without assigned employees
+- [ ] Verify an activity cannot start with inactive employees
+- [ ] Verify assigned employees have the required specialty
+- [ ] Verify another activity cannot start while one is already in progress
+- [ ] Verify unavailable actions are disabled in list and detail pages
+- [ ] Verify direct URLs cannot bypass workflow rules
 
 </details>
 

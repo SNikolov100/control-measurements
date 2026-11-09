@@ -28,6 +28,13 @@
 - Equipment-type short names are required and unique.
 - Validation messages were improved for operator use.
 - Placeholders were prepared for BG/EN translation.
+- Added globally unique non-empty inventory numbers.
+- Improved operator-facing validation for duplicate inventory numbers.
+- Prevented customer-site changes through the standard equipment edit form.
+- Prevented equipment-type changes through the standard equipment edit form.
+- Applied equipment-type defaults when interval or duration values are left empty.
+- Disabled new activity creation when the equipment status does not allow it.
+- Added direct URL protection for unavailable activity-creation workflows.
 
 ### Employees
 - Employee management completed.
@@ -47,6 +54,11 @@
 - Successful repairs move equipment to the repeat-inspection workflow.
 - Failed repairs keep equipment in the repair workflow.
 - User-facing terminology was standardized around activities.
+- Prevented activities from starting without assigned qualified employees.
+- Prevented another activity from starting while equipment is already under inspection.
+- Aligned repair results across models, forms, and services.
+- Added consistent equipment status transitions for repairs and reinspections.
+- Standardized user-facing terminology around activities.
 
 ### User Interface
 - Shared navigation menu added.
@@ -56,21 +68,24 @@
 - Disabled activity actions now use a clear visual state.
 - Equipment edit screens distinguish editable data from fixed registration data.
 - Fixed customer-site and equipment-type information is displayed without editable controls.
+- Added a reusable `status_badge` template tag.
+- Added status icons for equipment, activities, results, and status history.
+- Replaced repeated status conditions in templates with a shared component.
+- Added consistent disabled button styling for unavailable workflow actions.
+- Added warning messages when direct URLs attempt to bypass workflow restrictions.
 
 #### Remaining Work
 
-- Final review of equipment forms and translated field texts.
-- Reusable status badge template tag.
-- Status icons for equipment, activities, results, and history.
-- Consistent navigation-menu icons.
-- Advanced filters and sorting.
-- Calendar view for activity planning and tracking.
-- Custom user model and authentication.
-- Roles and permissions.
-- Controlled equipment-type correction with `equipment.correct_equipment_type`.
-- Audit history for privileged corrections.
-- Customized Django Admin.
-- Final BG/EN review.
-- Responsive review.
-- Final quality assurance and automated testing.
-- Deployment preparation.
+- Review HTML and CSS for duplicated markup and styling.
+- Extract suitable shared template components and CSS utilities.
+- Add consistent navigation-menu icons.
+- Add controlled equipment suspension and restoration workflows.
+- Add a controlled equipment decommission workflow.
+- Add the `equipment.correct_equipment_type` permission and audit workflow.
+- Add the custom user model and authentication.
+- Add roles and permissions.
+- Customize Django Admin.
+- Complete the final BG/EN review.
+- Add automated tests for workflow restrictions.
+- Complete responsive review and final UI styling.
+- Prepare the application for deployment.
