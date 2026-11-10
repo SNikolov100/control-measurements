@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
+{% load form_tags %}
+{% load status_tags %}
 
 {% block title %}
     {% if employee.is_active %}
@@ -8,12 +10,6 @@
         Activate employee
     {% endif %}
     | Control Measurements
-{% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/details.css' %}" >
-    <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
-    <link rel="stylesheet" href="{% static 'css/employees.css' %}" >
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -86,15 +82,7 @@
                         </p>
                     </div>
 
-                    {% if employee.is_active %}
-                        <span class="status-badge status-active">
-                            Active
-                        </span>
-                    {% else %}
-                        <span class="status-badge status-inactive">
-                            Inactive
-                        </span>
-                    {% endif %}
+                    {% status_badge employee.is_active %}
                 </div>
 
                 <dl class="detail-list">
@@ -209,28 +197,7 @@
                 {% csrf_token %}
 
                 <div class="form-fields">
-                    <div class="form-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.description.id_for_label }}"
-                        >
-                            Reason
-
-                            <span class="required-indicator">
-                                *
-                            </span>
-                        </label>
-
-                        {{ form.description.errors }}
-
-                        {{ form.description }}
-
-                        {% if form.description.help_text %}
-                            <p class="form-help">
-                                {{ form.description.help_text }}
-                            </p>
-                        {% endif %}
-                    </div>
+                    {% render_field form.description label="Reason" %}
                 </div>
 
                 <div class="form-actions">

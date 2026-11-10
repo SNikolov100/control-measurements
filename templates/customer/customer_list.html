@@ -1,12 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
+{% load status_tags %}
 
 {% block title %}
     Customers | Control Measurements
-{% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/tables.css' %}">
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -143,19 +140,7 @@
                                 </td>
 
                                 <td>
-                                    {% if customer.is_active %}
-                                        <span
-                                            class="status-badge status-active"
-                                        >
-                                            Active
-                                        </span>
-                                    {% else %}
-                                        <span
-                                            class="status-badge status-inactive"
-                                        >
-                                            Inactive
-                                        </span>
-                                    {% endif %}
+                                    {% status_badge customer.is_active %}
                                 </td>
 
                                 <td class="table-actions">

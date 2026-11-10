@@ -1,0 +1,42 @@
+{% if field %}
+    {% if is_checkbox or field.widget_type == 'checkboxinput' or field.field.widget.input_type == 'checkbox' %}
+        <div class="form-field{% if css_class %} {{ css_class }}{% endif %}">
+            {{ field.errors }}
+            <label class="form-checkbox-field" for="{{ field.id_for_label }}">
+                {{ field }}
+                <span class="form-checkbox-content">
+                    <span class="form-checkbox-label">
+                        {{ label|default:field.label }}
+                    </span>
+                    {% if field.help_text %}
+                        <span class="form-help">
+                            {{ field.help_text }}
+                        </span>
+                    {% endif %}
+                </span>
+            </label>
+        </div>
+    {% else %}
+        <div class="form-field{% if css_class %} {{ css_class }}{% endif %}">
+            <label class="form-label" for="{{ field.id_for_label }}">
+                {{ label|default:field.label }}
+                {% if field.field.required %}
+                    <span class="required-indicator">*</span>
+                {% else %}
+                    <span class="optional-indicator">
+                        {{ optional_label|default:"Optional" }}
+                    </span>
+                {% endif %}
+            </label>
+
+            {{ field.errors }}
+            {{ field }}
+
+            {% if field.help_text %}
+                <p class="form-help">
+                    {{ field.help_text }}
+                </p>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endif %}

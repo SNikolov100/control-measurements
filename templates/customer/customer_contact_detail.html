@@ -1,13 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
+{% load status_tags %}
 
 {% block title %}
     {{ contact.full_name }} | Control Measurements
-{% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/details.css' %}">
-    <link rel="stylesheet" href="{% static 'css/customers.css' %}">
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -72,20 +68,10 @@
                 {% endif %}
 
                 {% if contact.is_primary %}
-                    <span class="status-badge status-active">
-                        Primary contact
-                    </span>
+                    {% status_badge "primary" %}
                 {% endif %}
 
-                {% if contact.is_active %}
-                    <span class="status-badge status-active">
-                        Active
-                    </span>
-                {% else %}
-                    <span class="status-badge status-inactive">
-                        Inactive
-                    </span>
-                {% endif %}
+                {% status_badge contact.is_active %}
             </div>
         </div>
 
@@ -142,20 +128,10 @@
 
             <div class="action-group">
                 {% if contact.is_primary %}
-                    <span class="status-badge status-active">
-                        Primary contact
-                    </span>
+                    {% status_badge "primary" %}
                 {% endif %}
 
-                {% if contact.is_active %}
-                    <span class="status-badge status-active">
-                        Active
-                    </span>
-                {% else %}
-                    <span class="status-badge status-inactive">
-                        Inactive
-                    </span>
-                {% endif %}
+                {% status_badge contact.is_active %}
             </div>
 
             <a
@@ -289,39 +265,23 @@
                 <dt>Primary contact</dt>
                 <dd>
                     {% if contact.is_primary %}
-                        <span class="status-badge status-active">
-                            Yes
-                        </span>
+                        {% status_badge "yes" %}
                     {% else %}
-                        <span class="status-badge status-neutral">
-                            No
-                        </span>
+                        {% status_badge "no" %}
                     {% endif %}
                 </dd>
 
                 <dt>Active contact</dt>
                 <dd>
-                    {% if contact.is_active %}
-                        <span class="status-badge status-active">
-                            Active
-                        </span>
-                    {% else %}
-                        <span class="status-badge status-inactive">
-                            Inactive
-                        </span>
-                    {% endif %}
+                    {% status_badge contact.is_active %}
                 </dd>
 
                 <dt>Used in activities</dt>
                 <dd>
                     {% if contact.delivered_inspections.exists %}
-                        <span class="status-badge status-warning">
-                            Yes
-                        </span>
+                        {% status_badge "warning" "Yes" %}
                     {% else %}
-                        <span class="status-badge status-neutral">
-                            No
-                        </span>
+                        {% status_badge "no" %}
                     {% endif %}
                 </dd>
                 </dl>

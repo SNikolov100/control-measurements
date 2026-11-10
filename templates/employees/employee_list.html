@@ -1,13 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
+{% load status_tags %}
 
 {% block title %}
     Employees | Control Measurements
-{% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/tables.css' %}" >
-    <link rel="stylesheet" href="{% static 'css/employees.css' %}" >
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -40,10 +36,7 @@
         </div>
 
         <div class="page-actions">
-            <a
-                class="button button-primary"
-                href="{% url 'employees:create' %}"
-            >
+            <a class="button button-primary" href="{% url 'employees:create' %}">
                 Add employee
             </a>
         </div>
@@ -176,15 +169,7 @@
                                 </td>
 
                                 <td class="employee-status-column">
-                                    {% if employee.is_active %}
-                                        <span class="status-badge status-active">
-                                            Active
-                                        </span>
-                                    {% else %}
-                                        <span class="status-badge status-inactive">
-                                            Inactive
-                                        </span>
-                                    {% endif %}
+                                    {% status_badge employee.is_active %}
                                 </td>
 
                                 <td class="table-actions">
@@ -248,10 +233,7 @@
                     to control activities.
                 </p>
 
-                <a
-                    class="button button-primary"
-                    href="{% url 'employees:create' %}"
-                >
+                <a class="button button-primary" href="{% url 'employees:create' %}">
                     Add employee
                 </a>
             {% endif %}

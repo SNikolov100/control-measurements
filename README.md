@@ -89,6 +89,15 @@ and control measurement schedules.
 - [x] Disabled visual state for unavailable workflow actions
 - [ ] Navigation menu icons
 - [ ] HTML and CSS duplication review
+- [x] Unified CSS bundle
+- [x] Reusable form field component and template tag (`{% render_field %}`)
+- [x] Reusable status badge template tag with boolean and status support
+- [x] Production asset compression and cache busting (`WhiteNoise`)
+- [x] Cached template loading configuration
+- [ ] Shared quick filters component
+- [ ] Query optimization (N+1 queries prevention)
+
+
 
 </details>
 
@@ -214,6 +223,9 @@ and control measurement schedules.
 - Django Admin is not used.
 - Single-user operation is the current target.
 - Multi-user support may be added later.
+- Reusable UI elements (form fields, status badges, filters) are centralized in `templates/components/` and custom template tags.
+- Stylesheets are consolidated into a single application.
+- Static assets are compressed and version-hashed for production deployment.
 
 </details>
 
@@ -247,10 +259,11 @@ operators and testers:
 
 ## Requirements
 
-- Python 3.12+
+- Python 3.12+ (or 3.13)
 - pip
 - Git
 - SQLite (included with Python)
+- Dependencies: Django, Pillow, psycopg (if PostgreSQL is used), python-dotenv, sqlparse, WhiteNoise
 
 <details>
 <summary><strong>Quick Start</strong></summary>

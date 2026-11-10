@@ -1,14 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
+{% load form_tags %}
+{% load status_tags %}
 
 {% block title %}
     Cancel activity | Control Measurements
-{% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/details.css' %}" >
-    <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
-    <link rel="stylesheet" href="{% static 'css/inspections.css' %}" >
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -115,19 +111,7 @@
                         </p>
                     </div>
 
-                    {% if inspection.status == inspection.Status.PENDING %}
-                        <span class="status-badge status-pending">
-                            {{ inspection.get_status_display }}
-                        </span>
-                    {% elif inspection.status == inspection.Status.IN_PROGRESS %}
-                        <span class="status-badge status-in-progress">
-                            {{ inspection.get_status_display }}
-                        </span>
-                    {% else %}
-                        <span class="status-badge status-neutral">
-                            {{ inspection.get_status_display }}
-                        </span>
-                    {% endif %}
+                    {% status_badge inspection.status inspection.get_status_display %}
                 </div>
 
                 <dl class="detail-list">
@@ -204,28 +188,7 @@
                 {% csrf_token %}
 
                 <div class="form-fields">
-                    <div class="form-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.reason.id_for_label }}"
-                        >
-                            Cancellation reason
-
-                            <span class="required-indicator">
-                                *
-                            </span>
-                        </label>
-
-                        {{ form.reason.errors }}
-
-                        {{ form.reason }}
-
-                        {% if form.reason.help_text %}
-                            <p class="form-help">
-                                {{ form.reason.help_text }}
-                            </p>
-                        {% endif %}
-                    </div>
+                    {% render_field form.reason label="Cancellation reason" %}
                 </div>
 
                 <div class="form-actions">

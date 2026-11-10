@@ -1,14 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
+{% load status_tags %}
 
 {% block title %}
     {{ site.name }} | Control Measurements
-{% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/details.css' %}">
-    <link rel="stylesheet" href="{% static 'css/tables.css' %}">
-    <link rel="stylesheet" href="{% static 'css/customers.css' %}">
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -83,15 +78,7 @@
                         </p>
                     </div>
 
-                    {% if customer.is_active %}
-                        <span class="status-badge status-active">
-                            Active
-                        </span>
-                    {% else %}
-                        <span class="status-badge status-inactive">
-                            Inactive
-                        </span>
-                    {% endif %}
+                    {% status_badge customer.is_active %}
                 </div>
 
                 <dl class="detail-list">
@@ -160,15 +147,7 @@
                         </p>
                     </div>
 
-                    {% if site.is_active %}
-                        <span class="status-badge status-active">
-                            Active
-                        </span>
-                    {% else %}
-                        <span class="status-badge status-inactive">
-                            Inactive
-                        </span>
-                    {% endif %}
+                    {% status_badge site.is_active %}
                 </div>
 
                 <dl class="detail-list">
@@ -281,20 +260,10 @@
                                         </h3>
 
                                         {% if contact.is_primary %}
-                                            <span class="status-badge status-active">
-                                                Primary
-                                            </span>
+                                            {% status_badge "primary" %}
                                         {% endif %}
 
-                                        {% if contact.is_active %}
-                                            <span class="status-badge status-active">
-                                                Active
-                                            </span>
-                                        {% else %}
-                                            <span class="status-badge status-inactive">
-                                                Inactive
-                                            </span>
-                                        {% endif %}
+                                        {% status_badge contact.is_active %}
                                     </div>
 
                                     <div class="contact-card-meta">
@@ -433,31 +402,7 @@
                                         </td>
 
                                         <td>
-                                            {% if equipment.status == equipment.Status.IN_SERVICE %}
-                                                <span
-                                                    class="status-badge status-active"
-                                                >
-                                                    {{ equipment.get_status_display }}
-                                                </span>
-                                            {% elif equipment.status == equipment.Status.UNDER_INSPECTION or equipment.status == equipment.Status.UNDER_REPAIR %}
-                                                <span
-                                                    class="status-badge status-in-progress"
-                                                >
-                                                    {{ equipment.get_status_display }}
-                                                </span>
-                                            {% elif equipment.status == equipment.Status.DECOMMISSIONED %}
-                                                <span
-                                                    class="status-badge status-inactive"
-                                                >
-                                                    {{ equipment.get_status_display }}
-                                                </span>
-                                            {% else %}
-                                                <span
-                                                    class="status-badge status-warning"
-                                                >
-                                                    {{ equipment.get_status_display }}
-                                                </span>
-                                            {% endif %}
+                                            {% status_badge equipment.status equipment.get_status_display %}
                                         </td>
 
                                         <td class="table-actions">
@@ -536,24 +481,15 @@
             class="context-navigation"
             aria-label="Customer site navigation"
         >
-            <a
-                class="button"
-                href="{% url 'customers:details' customer.slug %}"
-            >
+            <a class="button" href="{% url 'customers:details' customer.slug %}">
                 Back to customer
             </a>
 
-            <a
-                class="button"
-                href="{% url 'customers:list' %}"
-            >
+            <a class="button" href="{% url 'customers:list' %}">
                 All customers
             </a>
 
-            <a
-                class="button"
-                href="{% url 'core:home' %}"
-            >
+            <a class="button" href="{% url 'core:home' %}">
                 Home
             </a>
         </nav>

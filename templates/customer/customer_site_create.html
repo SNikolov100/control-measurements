@@ -1,13 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
+{% load status_tags %}
 
 {% block title %}
     Add customer site | Control Measurements
-{% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/details.css' %}">
-    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -65,15 +61,7 @@
                     </p>
                 </div>
 
-                {% if customer.is_active %}
-                    <span class="status-badge status-active">
-                        Active
-                    </span>
-                {% else %}
-                    <span class="status-badge status-inactive">
-                        Inactive
-                    </span>
-                {% endif %}
+                {% status_badge customer.is_active %}
             </div>
 
             <dl class="detail-list">

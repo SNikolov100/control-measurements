@@ -1,16 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
+{% load status_tags %}
 
 {% block title %}
     Start activity | Control Measurements
-{% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/details.css' %}" >
-
-    <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
-
-    <link rel="stylesheet" href="{% static 'css/inspections.css' %}" >
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -118,9 +111,7 @@
                         </p>
                     </div>
 
-                    <span class="status-badge status-pending">
-                        {{ inspection.get_status_display }}
-                    </span>
+                    {% status_badge inspection.status inspection.get_status_display %}
                 </div>
 
                 <dl class="detail-list">

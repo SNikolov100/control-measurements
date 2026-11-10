@@ -1,25 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
+{% load form_tags %}
+{% load status_tags %}
 
 {% block title %}
     New activity | Control Measurements
-{% endblock %}
-
-{% block extra_css %}
-    <link
-        rel="stylesheet"
-        href="{% static 'css/details.css' %}"
-    >
-
-    <link
-        rel="stylesheet"
-        href="{% static 'css/forms.css' %}"
-    >
-
-    <link
-        rel="stylesheet"
-        href="{% static 'css/inspections.css' %}"
-    >
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -99,23 +84,7 @@
                         </p>
                     </div>
 
-                    {% if equipment.status == equipment.Status.IN_SERVICE %}
-                        <span class="status-badge status-active">
-                            {{ equipment.get_status_display }}
-                        </span>
-                    {% elif equipment.status == equipment.Status.UNDER_INSPECTION or equipment.status == equipment.Status.UNDER_REPAIR %}
-                        <span class="status-badge status-in-progress">
-                            {{ equipment.get_status_display }}
-                        </span>
-                    {% elif equipment.status == equipment.Status.DECOMMISSIONED %}
-                        <span class="status-badge status-inactive">
-                            {{ equipment.get_status_display }}
-                        </span>
-                    {% else %}
-                        <span class="status-badge status-warning">
-                            {{ equipment.get_status_display }}
-                        </span>
-                    {% endif %}
+                    {% status_badge equipment.status equipment.get_status_display %}
                 </div>
 
                 <dl class="detail-list">
@@ -136,20 +105,22 @@
                     <dt>Serial number</dt>
                     <dd>{{ equipment.serial_number }}</dd>
 
-                    <dt>Inventory number</dt>
+                    <dt>Customer</dt>
                     <dd>
-                        {% if equipment.inventory_number %}
-                            {{ equipment.inventory_number }}
+                        {% if equipment.customer_site.customer.short_name %}
+                            {{ equipment.customer_site.customer.short_name }}
                         {% else %}
-                            <span class="detail-value-muted">
-                                Not provided
-                            </span>
+                            {{ equipment.customer_site.customer.company_name }}
                         {% endif %}
                     </dd>
 
-                    <dt>Specialty</dt>
+                    <dt>Site</dt>
                     <dd>
-                        {{ equipment.equipment_type.specialty.name }}
+                        {% if equipment.customer_site.short_name %}
+                            {{ equipment.customer_site.short_name }}
+                        {% else %}
+                            {{ equipment.customer_site.name }}
+                        {% endif %}
                     </dd>
                 </dl>
             </section>
@@ -158,46 +129,54 @@
                 <div class="detail-card-header">
                     <div>
                         <h2 class="detail-card-title">
-                            Customer location
+                            Interval defaults
                         </h2>
 
                         <p class="detail-card-description">
-                            The customer and site are determined
-                            automatically from the equipment.
+                            Default inspection parameters derived from
+                            the equipment or equipment type.
                         </p>
                     </div>
                 </div>
 
                 <dl class="detail-list">
-                    <dt>Customer</dt>
+                    <dt>Required specialty</dt>
                     <dd>
-                        {{ equipment.customer_site.customer.company_name }}
+                        <span class="specialty-badge">
+                            {% if equipment.equipment_type.specialty.short_name %}
+                                {{ equipment.equipment_type.specialty.short_name }}
+                            {% else %}
+                                {{ equipment.equipment_type.specialty.name }}
+                            {% endif %}
+                        </span>
                     </dd>
 
-                    <dt>Customer site</dt>
+                    <dt>Inspection interval</dt>
                     <dd>
-                        {{ equipment.customer_site.name }}
+                        {% if equipment.inspection_interval_value and equipment.inspection_interval_unit %}
+                            {{ equipment.inspection_interval_value }}
+                            {{ equipment.get_inspection_interval_unit_display }}
+                        {% else %}
+                            {{ equipment.equipment_type.default_interval_value }}
+                            {{ equipment.equipment_type.get_default_interval_unit_display }}
+                        {% endif %}
                     </dd>
 
-                    <dt>City</dt>
+                    <dt>Estimated duration</dt>
                     <dd>
-                        {{ equipment.customer_site.effective_city|default:"Not provided" }}
-                    </dd>
-
-                    <dt>Address</dt>
-                    <dd>
-                        {{ equipment.customer_site.effective_address|default:"Not provided" }}
+                        {% if equipment.estimated_inspection_duration %}
+                            {{ equipment.estimated_inspection_duration }}
+                            minutes
+                        {% elif equipment.equipment_type.default_inspection_duration %}
+                            {{ equipment.equipment_type.default_inspection_duration }}
+                            minutes
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not configured
+                            </span>
+                        {% endif %}
                     </dd>
                 </dl>
-
-                <div class="context-navigation">
-                    <a
-                        class="button button-small"
-                        href="{% url 'customers:site-details' equipment.customer_site.customer.slug equipment.customer_site.slug %}"
-                    >
-                        Customer-site details
-                    </a>
-                </div>
             </section>
         </div>
 
@@ -223,127 +202,12 @@
                 {% csrf_token %}
 
                 <div class="form-fields">
-                    <div class="form-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.inspection_type.id_for_label }}"
-                        >
-                            Activity type
-
-                            <span class="required-indicator">*</span>
-                        </label>
-
-                        {{ form.inspection_type.errors }}
-                        {{ form.inspection_type }}
-
-                        <p class="form-help">
-                            Select the work that must be performed
-                            for this equipment.
-                        </p>
-                    </div>
-
-                    <div class="form-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.received_at.id_for_label }}"
-                        >
-                            Received at
-
-                            <span class="required-indicator">*</span>
-                        </label>
-
-                        {{ form.received_at.errors }}
-                        {{ form.received_at }}
-
-                        <p class="form-help">
-                            Date and time when the equipment was
-                            received for processing.
-                        </p>
-                    </div>
-
-                    <div class="form-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.due_date.id_for_label }}"
-                        >
-                            Due date
-
-                            <span class="optional-indicator">
-                                Optional
-                            </span>
-                        </label>
-
-                        {{ form.due_date.errors }}
-                        {{ form.due_date }}
-
-                        <p class="form-help">
-                            Planned deadline for completing the
-                            activity.
-                        </p>
-                    </div>
-
-                    <div class="form-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.planned_start.id_for_label }}"
-                        >
-                            Planned start
-
-                            <span class="optional-indicator">
-                                Optional
-                            </span>
-                        </label>
-
-                        {{ form.planned_start.errors }}
-                        {{ form.planned_start }}
-
-                        <p class="form-help">
-                            Planned date and time for starting the
-                            activity.
-                        </p>
-                    </div>
-
-                    <div class="form-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.estimated_duration.id_for_label }}"
-                        >
-                            Estimated duration in minutes
-
-                            <span class="optional-indicator">
-                                Uses the equipment default when empty
-                            </span>
-                        </label>
-
-                        {{ form.estimated_duration.errors }}
-                        {{ form.estimated_duration }}
-
-                        <p class="form-help">
-                            Leave empty to use the estimated duration
-                            configured for this equipment.
-                        </p>
-                    </div>
-
-                    <div class="form-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.notes.id_for_label }}"
-                        >
-                            Notes
-
-                            <span class="optional-indicator">
-                                Required when opening a repair
-                            </span>
-                        </label>
-
-                        {{ form.notes.errors }}
-                        {{ form.notes }}
-
-                        <p class="form-help">
-                            Describe the reported issue, requested
-                            work, or other useful initial information.
-                        </p>
-                    </div>
+                    {% render_field form.inspection_type label="Activity type" %}
+                    {% render_field form.received_at %}
+                    {% render_field form.due_date %}
+                    {% render_field form.planned_start %}
+                    {% render_field form.estimated_duration label="Estimated duration in minutes" optional_label="Uses the equipment default when empty" %}
+                    {% render_field form.notes optional_label="Required when opening a repair" %}
                 </div>
 
                 <div class="confirmation-panel">

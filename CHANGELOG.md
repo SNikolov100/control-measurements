@@ -74,18 +74,26 @@
 - Added consistent disabled button styling for unavailable workflow actions.
 - Added warning messages when direct URLs attempt to bypass workflow restrictions.
 
+### Frontend & Performance Optimizations
+- Consolidated CSS files into a single unified stylesheet
+- Configured WhiteNoise with `CompressedManifestStaticFilesStorage` for automatic Gzip/Brotli compression and long-term cache-busting hashes.
+- Enabled Django's `cached.Loader` for production environments (`DEBUG=False`) to compile and cache templates in memory.
+- Created reusable form field component and template tag.
+- Refactored forms to use `{% render_field %}`.
+- Extended and standardized `{% status_badge %}`, unified status presentation, and replaced all hardcoded status badge HTML.
+- Configured `DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'` in `settings.py`.
+
 #### Remaining Work
 
-- Review HTML and CSS for duplicated markup and styling.
-- Extract suitable shared template components and CSS utilities.
 - Add consistent navigation-menu icons.
 - Add controlled equipment suspension and restoration workflows.
 - Add a controlled equipment decommission workflow.
 - Add the `equipment.correct_equipment_type` permission and audit workflow.
-- Add the custom user model and authentication.
-- Add roles and permissions.
 - Customize Django Admin.
 - Complete the final BG/EN review.
 - Add automated tests for workflow restrictions.
 - Complete responsive review and final UI styling.
 - Prepare the application for deployment.
+- Extract shared quick filter bar component.
+- Add custom user model, authentication, roles, and permissions.
+- Complete responsive review and final UI styling.

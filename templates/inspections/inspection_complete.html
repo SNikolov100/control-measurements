@@ -1,14 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
+{% load form_tags %}
+{% load status_tags %}
 
 {% block title %}
     Complete activity | Control Measurements
-{% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/details.css' %}" >
-    <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
-    <link rel="stylesheet" href="{% static 'css/inspections.css' %}" >
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -116,9 +112,7 @@
                         </p>
                     </div>
 
-                    <span class="status-badge status-in-progress">
-                        {{ inspection.get_status_display }}
-                    </span>
+                    {% status_badge inspection.status inspection.get_status_display %}
                 </div>
 
                 <dl class="detail-list">
@@ -178,63 +172,13 @@
                 {% csrf_token %}
 
                 <div class="form-fields">
-                    <div class="form-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.result.id_for_label }}"
-                        >
-                            {% if inspection.inspection_type == inspection.InspectionType.REPAIR %}
-                                Repair result
-                            {% else %}
-                                Activity result
-                            {% endif %}
-
-                            <span class="required-indicator">
-                                *
-                            </span>
-                        </label>
-
-                        {{ form.result.errors }}
-                        {{ form.result }}
-
-                        {% if form.result.help_text %}
-                            <p class="form-help">
-                                {{ form.result.help_text }}
-                            </p>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.result_notes.id_for_label }}"
-                        >
-                            {% if inspection.inspection_type == inspection.InspectionType.REPAIR %}
-                                Repair work and outcome
-                            {% else %}
-                                Result notes
-                            {% endif %}
-
-                            {% if inspection.inspection_type == inspection.InspectionType.REPAIR %}
-                                <span class="required-indicator">
-                                    *
-                                </span>
-                            {% else %}
-                                <span class="optional-indicator">
-                                    Required for an unsuccessful result
-                                </span>
-                            {% endif %}
-                        </label>
-
-                        {{ form.result_notes.errors }}
-                        {{ form.result_notes }}
-
-                        {% if form.result_notes.help_text %}
-                            <p class="form-help">
-                                {{ form.result_notes.help_text }}
-                            </p>
-                        {% endif %}
-                    </div>
+                    {% if inspection.inspection_type == inspection.InspectionType.REPAIR %}
+                        {% render_field form.result label="Repair result" %}
+                        {% render_field form.result_notes label="Repair work and outcome" %}
+                    {% else %}
+                        {% render_field form.result label="Activity result" %}
+                        {% render_field form.result_notes label="Result notes" optional_label="Required for an unsuccessful result" %}
+                    {% endif %}
                 </div>
 
                 {% if inspection.inspection_type == inspection.InspectionType.REPAIR %}
@@ -262,10 +206,7 @@
                         Complete activity
                     </button>
 
-                    <a
-                        class="button"
-                        href="{% url 'inspections:list' %}"
-                    >
+                    <a class="button" href="{% url 'inspections:list' %}">
                         Cancel
                     </a>
                 </div>

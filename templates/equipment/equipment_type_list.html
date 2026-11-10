@@ -5,11 +5,6 @@
     Equipment types | Control Measurements
 {% endblock %}
 
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/tables.css' %}">
-    <link rel="stylesheet" href="{% static 'css/equipment.css' %}">
-{% endblock %}
-
 {% block breadcrumbs %}
     <nav class="breadcrumbs" aria-label="Breadcrumb">
         <ol class="breadcrumbs-list">
@@ -147,11 +142,7 @@
                                 </td>
 
                                 <td>
-                                    {% if equipment_type.is_active %}
-                                        {% status_badge "active" %}
-                                    {% else %}
-                                        {% status_badge "inactive" %}
-                                    {% endif %}
+                                    {% status_badge equipment_type.is_active %}
                                 </td>
 
                                 <td class="table-actions">
@@ -189,10 +180,7 @@
                     Try another name, description, or specialty.
                 </p>
 
-                <a
-                    class="button"
-                    href="{% url 'equipment:types-list' %}?page_size={{ current_page_size }}"
-                >
+                <a class="button" href="{% url 'equipment:types-list' %}?page_size={{ current_page_size }}">
                     Clear search
                 </a>
             {% else %}
@@ -203,10 +191,7 @@
                     concrete equipment.
                 </p>
 
-                <a
-                    class="button button-primary"
-                    href="{% url 'equipment:type-create' %}"
-                >
+                <a class="button button-primary" href="{% url 'equipment:type-create' %}">
                     Add equipment type
                 </a>
             {% endif %}

@@ -1,13 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
+{% load form_tags %}
 
 {% block title %}
     Add employee | Control Measurements
-{% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
-    <link rel="stylesheet" href="{% static 'css/employees.css' %}" >
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -70,156 +66,13 @@
                 {% csrf_token %}
 
                 <div class="form-fields">
-                    <div class="form-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.full_name.id_for_label }}"
-                        >
-                            Full name
-
-                            <span class="required-indicator">
-                                *
-                            </span>
-                        </label>
-
-                        {{ form.full_name.errors }}
-                        {{ form.full_name }}
-
-                        {% if form.full_name.help_text %}
-                            <p class="form-help">
-                                {{ form.full_name.help_text }}
-                            </p>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.position.id_for_label }}"
-                        >
-                            Position
-
-                            <span class="optional-indicator">
-                                Optional
-                            </span>
-                        </label>
-
-                        {{ form.position.errors }}
-                        {{ form.position }}
-
-                        {% if form.position.help_text %}
-                            <p class="form-help">
-                                {{ form.position.help_text }}
-                            </p>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.phone.id_for_label }}"
-                        >
-                            Phone
-
-                            <span class="optional-indicator">
-                                Optional
-                            </span>
-                        </label>
-
-                        {{ form.phone.errors }}
-                        {{ form.phone }}
-
-                        {% if form.phone.help_text %}
-                            <p class="form-help">
-                                {{ form.phone.help_text }}
-                            </p>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.email.id_for_label }}"
-                        >
-                            Email
-
-                            <span class="optional-indicator">
-                                Optional
-                            </span>
-                        </label>
-
-                        {{ form.email.errors }}
-                        {{ form.email }}
-
-                        {% if form.email.help_text %}
-                            <p class="form-help">
-                                {{ form.email.help_text }}
-                            </p>
-                        {% endif %}
-                    </div>
-                    <div class="form-field employee-photo-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.photo.id_for_label }}"
-                        >
-                            Employee photo
-
-                            <span class="optional-indicator">
-                                Optional
-                            </span>
-                        </label>
-
-                        {{ form.photo.errors }}
-                        {{ form.photo }}
-
-                        {% if form.photo.help_text %}
-                            <p class="form-help">
-                                {{ form.photo.help_text }}
-                            </p>
-                        {% endif %}
-                    </div>
-                    <div class="form-field">
-                        <label
-                            class="form-label"
-                            for="{{ form.notes.id_for_label }}"
-                        >
-                            Notes
-
-                            <span class="optional-indicator">
-                                Optional
-                            </span>
-                        </label>
-
-                        {{ form.notes.errors }}
-                        {{ form.notes }}
-
-                        {% if form.notes.help_text %}
-                            <p class="form-help">
-                                {{ form.notes.help_text }}
-                            </p>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-field employee-specialty-grid">
-                        <span class="form-label">
-                            Specialties
-
-                            <span class="optional-indicator">
-                                Optional
-                            </span>
-
-                        </span>
-
-                        {{ form.specialties.errors }}
-
-                        {% if form.specialties.help_text %}
-                            <p class="employee-specialty-help">
-                                {{ form.specialties.help_text }}
-                            </p>
-                        {% endif %}
-
-                        {{ form.specialties }}
-                    </div>
+                    {% render_field form.full_name %}
+                    {% render_field form.position %}
+                    {% render_field form.phone %}
+                    {% render_field form.email %}
+                    {% render_field form.photo css_class="employee-photo-field" %}
+                    {% render_field form.notes %}
+                    {% render_field form.specialties label="Specialties" css_class="employee-specialty-grid" %}
                 </div>
 
                 <div class="confirmation-panel">

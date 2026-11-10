@@ -7,12 +7,6 @@
     | Control Measurements
 {% endblock %}
 
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/details.css' %}" >
-
-    <link rel="stylesheet" href="{% static 'css/equipment.css' %}" >
-{% endblock %}
-
 {% block breadcrumbs %}
     <nav class="breadcrumbs" aria-label="Breadcrumb">
         <ol class="breadcrumbs-list">
@@ -276,11 +270,7 @@
 
                     <dt>Active</dt>
                     <dd>
-                        {% if equipment.is_active %}
-                            {% status_badge "active" %}
-                        {% else %}
-                            {% status_badge "inactive" %}
-                        {% endif %}
+                        {% status_badge equipment.is_active %}
                     </dd>
                 </dl>
             </section>
@@ -300,7 +290,7 @@
 
                 <dl class="detail-list">
                     <dt>Status</dt>
-                    <dd>{{ equipment.get_status_display }}</dd>
+                    <dd>{% status_badge equipment.status equipment.get_status_display %}</dd>
 
                     <dt>Created</dt>
                     <dd>{{ equipment.created_at }}</dd>

@@ -1,14 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
+{% load status_tags %}
 
 {% block title %}
     Edit equipment | Control Measurements
-{% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/details.css' %}" >
-    <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
-    <link rel="stylesheet" href="{% static 'css/equipment.css' %}" >
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -64,9 +59,7 @@
                     </p>
                 </div>
 
-                <span class="status-badge status-neutral">
-                    {{ equipment.get_status_display }}
-                </span>
+                {% status_badge equipment.status equipment.get_status_display %}
             </div>
 
             <dl class="detail-list">

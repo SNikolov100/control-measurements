@@ -1,20 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
+{% load status_tags %}
 
 {% block title %}
     {{ employee.full_name }} | Control Measurements
-{% endblock %}
-
-{% block extra_css %}
-    <link
-        rel="stylesheet"
-        href="{% static 'css/details.css' %}"
-    >
-
-    <link
-        rel="stylesheet"
-        href="{% static 'css/employees.css' %}"
-    >
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -58,15 +47,7 @@
                     </span>
                 {% endif %}
 
-                {% if employee.is_active %}
-                    <span class="status-badge status-active">
-                        Active
-                    </span>
-                {% else %}
-                    <span class="status-badge status-inactive">
-                        Inactive
-                    </span>
-                {% endif %}
+                {% status_badge employee.is_active %}
             </div>
         </div>
 
@@ -136,10 +117,7 @@
                 {% endif %}
             </p>
 
-            <a
-                class="button button-small"
-                href="{% url 'employees:edit' employee.pk %}"
-            >
+            <a class="button button-small" href="{% url 'employees:edit' employee.pk %}">
                 {% if employee.photo %}
                     Replace photo
                 {% else %}
@@ -181,15 +159,7 @@
 
                     <dt>Status</dt>
                     <dd>
-                        {% if employee.is_active %}
-                            <span class="status-badge status-active">
-                                Active
-                            </span>
-                        {% else %}
-                            <span class="status-badge status-inactive">
-                                Inactive
-                            </span>
-                        {% endif %}
+                        {% status_badge employee.is_active %}
                     </dd>
 
                     <dt>Created</dt>
@@ -352,17 +322,11 @@
             class="context-navigation"
             aria-label="Employee navigation"
         >
-            <a
-                class="button"
-                href="{% url 'employees:list' %}"
-            >
+            <a class="button" href="{% url 'employees:list' %}">
                 Back to employees
             </a>
 
-            <a
-                class="button"
-                href="{% url 'core:home' %}"
-            >
+            <a class="button" href="{% url 'core:home' %}">
                 Home
             </a>
         </nav>

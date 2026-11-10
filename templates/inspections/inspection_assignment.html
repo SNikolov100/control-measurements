@@ -1,14 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
+{% load form_tags %}
+{% load status_tags %}
 
 {% block title %}
     Assign employees | Control Measurements
-{% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/details.css' %}" >
-    <link rel="stylesheet" href="{% static 'css/forms.css' %}" >
-    <link rel="stylesheet" href="{% static 'css/inspections.css' %}" >
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -115,9 +111,7 @@
                         </p>
                     </div>
 
-                    <span class="status-badge status-pending">
-                        {{ inspection.get_status_display }}
-                    </span>
+                    {% status_badge inspection.status inspection.get_status_display %}
                 </div>
 
                 <dl class="detail-list">
@@ -166,28 +160,7 @@
                     {% endif %}
 
                     <div class="form-fields">
-                        <div class="form-field">
-                            <label
-                                class="form-label"
-                                for="{{ form.assigned_employees.id_for_label }}"
-                            >
-                                Assigned employees
-
-                                <span class="optional-indicator">
-                                    Optional until the activity is started
-                                </span>
-                            </label>
-
-                            {{ form.assigned_employees.errors }}
-
-                            {{ form.assigned_employees }}
-
-                            {% if form.assigned_employees.help_text %}
-                                <p class="form-help">
-                                    {{ form.assigned_employees.help_text }}
-                                </p>
-                            {% endif %}
-                        </div>
+                        {% render_field form.assigned_employees optional_label="Optional until the activity is started" %}
                     </div>
 
                     <div class="form-actions">
