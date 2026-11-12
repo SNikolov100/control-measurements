@@ -51,37 +51,7 @@
 
         {% include "shared/search_form.html" with search_placeholder="Search activities" %}
 
-        <div
-            class="quick-filters"
-            aria-label="Activity status filters"
-        >
-            {% for status_filter in status_filters %}
-                {% if status_filter.value %}
-                    <a
-                        class=" quick-filter
-                            {% if current_status_filter == status_filter.value %}
-                                quick-filter-active
-                            {% endif %}
-                        "
-                        href="?{% if status_filter_query %}{{ status_filter_query }}&amp;{% endif %}status={{ status_filter.value }}"
-                    >
-                        {{ status_filter.label }}
-                    </a>
-                {% else %}
-                    <a
-                        class="
-                            quick-filter
-                            {% if not current_status_filter %}
-                                quick-filter-active
-                            {% endif %}
-                        "
-                        href="?{% if status_filter_query %}{{ status_filter_query }}{% endif %}"
-                    >
-                        {{ status_filter.label }}
-                    </a>
-                {% endif %}
-            {% endfor %}
-        </div>
+        {% include "shared/quick_filters.html" with filters=status_filters current_filter=current_status_filter preserved_query=status_filter_query aria_label="Activity status filters" only %}
     </section>
 
     {% if search_query or current_status_filter %}

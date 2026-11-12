@@ -2,6 +2,26 @@
 
 ## Current Development Phase
 
+## [Unreleased]
+
+### In progress
+- Development of user registration and account approval workflow.
+- Implementation of user profile completion.
+- Planned administrative approval for employee records.
+
+### Changed
+- Updated `AppUser` with registration statuses: `PENDING`, `APPROVED`, `REJECTED`.
+- Moved first, middle and last name fields into `Profile`.
+- Added a one-to-one relationship between `AppUser` and `Employee`.
+- Made first name, middle name, last name and phone required in the profile model.
+
+### Removed
+- Automatic profile creation through Django signals.
+
+### Notes
+- Development branch: `feature/user-registration`.
+- Changes are under development and not yet merged into `main`.
+----
 ### Core
 - Base models and reusable mixins implemented.
 - Company and system settings implemented.

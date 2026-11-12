@@ -5,6 +5,8 @@ from core.model_mixins import AutoSlugMixin, TimestampMixin, TextNormalizationMi
 from core.validators import phone_validator, validate_uploaded_image
 from pathlib import Path
 from uuid import uuid4
+from django.conf import settings
+
 
 def employee_photo_upload_path(instance, filename):
     file_extension = Path(filename).suffix.lower()
@@ -16,6 +18,14 @@ class Employee(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
     lowercase_fields = ('email',)
     titlecase_fields = ('full_name',)
 
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='employee',
+        null=True,
+        blank=True,
+        verbose_name=translate('User account'),
+    )
     full_name = models.CharField(
         max_length=100,
         verbose_name=translate('Full name'),

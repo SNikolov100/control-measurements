@@ -45,6 +45,7 @@ PROJECT_APPS = [
     'equipment',
     'employees',
     'inspections',
+    'accounts',
 ]
 
 INSTALLED_APPS = [
@@ -55,6 +56,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ] + PROJECT_APPS
+
+AUTH_USER_MODEL = 'accounts.AppUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

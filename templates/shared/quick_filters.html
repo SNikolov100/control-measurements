@@ -1,0 +1,11 @@
+<nav class="quick-filters" aria-label="{{ aria_label }}">
+    {% for filter in filters %}
+        <a
+            class="quick-filter{% if filter.value == current_filter %} quick-filter-active{% endif %}"
+            href="?{% if preserved_query %}{{ preserved_query }}{% endif %}{% if filter.value %}{% if preserved_query %}&amp;{% endif %}{{ parameter_name|default:'status'|urlencode }}={{ filter.value|urlencode }}{% endif %}"
+            {% if filter.value == current_filter %}aria-current="page"{% endif %}
+        >
+            {{ filter.label }}
+        </a>
+    {% endfor %}
+</nav>

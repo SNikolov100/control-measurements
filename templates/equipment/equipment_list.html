@@ -58,24 +58,7 @@
 
         {% include "shared/search_form.html" with search_placeholder="Search equipment" %}
 
-        <nav
-            class="quick-filters"
-            aria-label="Equipment status filters"
-        >
-            {% for status_filter in status_filters %}
-                <a
-                    class="
-                        quick-filter
-                        {% if status_filter.value == current_status_filter %}
-                            quick-filter-active
-                        {% endif %}
-                    "
-                    href="?{% if status_filter_query %}{{ status_filter_query }}&amp;{% endif %}{% if status_filter.value %}status={{ status_filter.value }}{% endif %}"
-                >
-                    {{ status_filter.label }}
-                </a>
-            {% endfor %}
-        </nav>
+        {% include "shared/quick_filters.html" with filters=status_filters current_filter=current_status_filter preserved_query=status_filter_query aria_label="Equipment status filters" only %}
     </section>
         {% if search_query or current_status_filter %}
             <p class="search-result-summary">

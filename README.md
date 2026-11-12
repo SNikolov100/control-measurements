@@ -3,11 +3,19 @@
 Control Measurements is a Django application for managing customers,
 equipment, employees, inspections, calibrations, repairs,
 and control measurement schedules.
-
-
 ---
-
 # Development Status
+
+The project is under active development.
+
+Current development branch:
+`feature/user-registration`
+
+Work in progress:
+- User registration and account approval
+- User profile management
+- Employee record approval and linking
+- Access control based on registration status
 
 <details>
 <summary><strong>Core Structure</strong></summary>
