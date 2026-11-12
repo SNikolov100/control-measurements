@@ -11,11 +11,14 @@ def profile_photo_upload_path(instance, filename):
     return f'profiles/{uuid4().hex}{file_extension}'
 
 
-class AppUser(AbstractUser):
+class AppUser(TextNormalizationMixin, AbstractUser):
+    strip_fields = ('username',)
+    lowercase_fields = ('email',)
+
     class RegistrationStatus(models.TextChoices):
-        PENDING = "pending", "Pending"
-        APPROVED = "approved", "Approved"
-        REJECTED = "rejected", "Rejected"
+        PENDING = 'pending', 'Pending'
+        APPROVED = 'approved', 'Approved'
+        REJECTED = 'rejected', 'Rejected'
 
     email = models.EmailField(
         unique=True,
