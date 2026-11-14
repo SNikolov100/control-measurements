@@ -6,6 +6,7 @@ from core.validators import phone_validator, validate_uploaded_image
 from pathlib import Path
 from uuid import uuid4
 from django.conf import settings
+from .choices import EmployeeHistoryEventType, EmployeeRequestStatus
 
 
 def employee_photo_upload_path(instance, filename):
@@ -109,13 +110,7 @@ class Employee(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
         verbose_name_plural = translate("Employees")
 
 class EmployeeHistory(models.Model):
-    class EventType(models.TextChoices):
-        CREATED = "created", translate("Created")
-        UPDATED = "updated", translate("Updated")
-        SPECIALTY_ADDED = ("specialty_added",translate("Specialty added"),)
-        SPECIALTY_REMOVED = ("specialty_removed",translate("Specialty removed"),)
-        ACTIVATED = "activated", translate("Activated")
-        DEACTIVATED = "deactivated", translate("Deactivated")
+    EventType = EmployeeHistoryEventType
 
     employee = models.ForeignKey(
         "Employee",
@@ -147,3 +142,56 @@ class EmployeeHistory(models.Model):
         ordering = ("-changed_at",)
         verbose_name = translate("Employee history")
         verbose_name_plural = translate("Employee histories")
+
+
+
+class EmployeeRequest(models.Model):
+    Status = EmployeeRequestStatus
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='employee_requests',
+        verbose_name=translate('User'),
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        default=Status.PENDING,
+    )
+    employee = models.ForeignKey(
+        'Employee',
+        on_delete=models.PROTECT,
+        related_name='account_requests',
+        null=True,
+        blank=True,
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+    reviewed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name='reviewed_employee_requests',
+        null=True,
+        blank=True,
+    )
+    review_note = models.TextField(
+        blank=True,
+    )
+
+    def __str__(self):
+        return f"{self.user} - {self.get_status_display()}"
+
+    class Meta:
+        ordering = ('-created_at',)
+        constraints = [models.UniqueConstraint(
+                fields=['user'],
+                condition=models.Q(status='pending'),
+                name='unique_pending_employee_req',
+            ),
+        ]

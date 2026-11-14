@@ -281,17 +281,30 @@
                     Clear search and filters
                 </a>
             {% else %}
+
                 <h2>No activities</h2>
 
-                <p>
-                    Activities are created from a specific equipment
-                    item. Open a customer site or the equipment registry
-                    to create the first activity.
-                </p>
+                {% if perms.equipment.view_equipment %}
 
-                <a class="button" href="{% url 'equipment:list' %}">
-                    Open equipment registry
-                </a>
+                    <p>
+                        Activities are created from a specific equipment
+                        item. Open the equipment registry to create
+                        the first activity.
+                    </p>
+
+                    <a class="button" href="{% url 'equipment:list' %}">
+                        Open equipment registry
+                    </a>
+
+                {% else %}
+
+                    <p>
+                        No control activities have been registered yet.
+                        Activities will appear here when they are created
+                        by authorized users.
+                    </p>
+
+                {% endif %}
             {% endif %}
         </section>
     {% endif %}

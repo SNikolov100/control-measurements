@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-    {% if request.access_state == "ready" %}
+    {% if request.access_state == "ready" and request.user.is_superuser %}
         <header class="page-header">
             <div>
                 <h1 class="page-title">
@@ -159,8 +159,21 @@
             </div>
         </section>
 
-    {% elif request.access_state == "pending" %}
+    {% elif request.access_state == "ready" %}
+         <section class="card">
+            <h2>Welcome</h2>
 
+            <p>
+                Your employee account has been approved.
+            </p>
+
+            <p>
+                Access to your assigned activities
+                will be available in the employee workspace.
+            </p>
+        </section>
+
+    {% elif request.access_state == "pending" %}
         <section class="card">
             <h2>Registration pending</h2>
             <p>

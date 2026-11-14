@@ -13,9 +13,12 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.shortcuts import redirect
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
-class InspectionListView(StatusFilterMixin, SearchMixin, PaginationMixin, ListView):
+class InspectionListView(PermissionRequiredMixin, StatusFilterMixin, SearchMixin, PaginationMixin, ListView):
+    permission_required = 'inspections.view_inspection'
+    raise_exception = True
     model = Inspection
     template_name = 'inspections/inspection_list.html'
     context_object_name = 'inspections'
@@ -120,7 +123,9 @@ class InspectionListView(StatusFilterMixin, SearchMixin, PaginationMixin, ListVi
 
 
 
-class InspectionCreateView(CreateView):
+class InspectionCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'inspections.add_inspection'
+    raise_exception = True
     model = Inspection
     form_class = InspectionCreateForm
     template_name = 'inspections/inspection_create.html'

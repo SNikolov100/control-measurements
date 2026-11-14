@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Pending Employee Requests | Control Measurements
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">Home</a>
+            </li>
+            <li aria-current="page">
+                Pending employee requests
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+    <div>
+        <h1 class="page-title">Pending employee requests</h1>
+        <p class="page-description">
+            Review requests for employee account linking.
+        </p>
+    </div>
+</header>
+
+{% if employee_requests %}
+
+<section class="table-card">
+    <div class="table-scroll">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Full name</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Requested at</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for employee_request in employee_requests %}
+                    <tr>
+                        <td>
+                            {{ employee_request.user.profile.get_full_name|default:"Profile missing" }}
+                        </td>
+
+                        <td>
+                            {{ employee_request.user.username }}
+                        </td>
+
+                        <td>
+                            {{ employee_request.user.email }}
+                        </td>
+
+                        <td>
+                            {{ employee_request.created_at|date:"d.m.Y H:i" }}
+                        </td>
+
+                        <td>
+                            {{ employee_request.get_status_display }}
+                        </td>
+                        <td>
+                            <a class="button button-small" href="{% url 'employees:review-request' employee_request.pk %}">
+                                Review
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+{% include "shared/pagination.html" %}
+
+{% else %}
+
+<section class="empty-state">
+    <h2>No pending employee requests</h2>
+    <p>
+        There are currently no requests awaiting review.
+    </p>
+</section>
+
+{% endif %}
+
+{% endblock %}

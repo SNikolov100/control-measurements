@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Review Employee Request | Control Measurements
+{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+    <div>
+        <h1 class="page-title">
+            Review employee request #{{ employee_request.pk }}
+        </h1>
+
+        <p class="page-description">
+            Review the user information before linking an employee record.
+        </p>
+    </div>
+</header>
+
+<section class="card">
+    <h2>Account information</h2>
+
+    <p>
+        <strong>Username:</strong>
+        {{ employee_request.user.username }}
+    </p>
+
+    <p>
+        <strong>Email:</strong>
+        {{ employee_request.user.email }}
+    </p>
+
+    <p>
+        <strong>Account status:</strong>
+        {{ employee_request.user.get_registration_status_display }}
+    </p>
+</section>
+
+<section class="card">
+    <h2>Personal profile</h2>
+
+    <p>
+        <strong>Full name:</strong>
+        {{ employee_request.user.profile.get_full_name }}
+    </p>
+
+    <p>
+        <strong>Phone:</strong>
+        {{ employee_request.user.profile.phone }}
+    </p>
+</section>
+
+<section class="card">
+    <h2>Request information</h2>
+
+    <p>
+        <strong>Status:</strong>
+        {{ employee_request.get_status_display }}
+    </p>
+
+    <p>
+        <strong>Created:</strong>
+        {{ employee_request.created_at|date:"d.m.Y H:i" }}
+    </p>
+</section>
+
+<section class="card">
+    <h2>Administrator decision</h2>
+
+    <p>
+        Select how this account should be linked
+        to an employee record.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        {% for field in form %}
+            <div class="form-field">
+                {{ field.label_tag }}
+                {{ field }}
+
+                {% if field.help_text %}
+                    <p>{{ field.help_text }}</p>
+                {% endif %}
+
+                {{ field.errors }}
+            </div>
+        {% endfor %}
+
+        <p>
+            For a new employee, select Create and choose a role.
+            For an existing employee, select Link, the employee,
+            and a role. Rejection requires a note.
+        </p>
+
+        <button
+            type="submit"
+            class="button button-primary"
+        >
+            Submit decision
+        </button>
+    </form>
+</section>
+
+<div class="page-actions">
+    <a class="button" href="{% url 'employees:pending-requests' %}">
+        Back to requests
+    </a>
+</div>
+
+{% endblock %}

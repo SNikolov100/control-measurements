@@ -1,6 +1,9 @@
 from django import forms
 from .models import Employee
 from django.utils.translation import gettext_lazy as translate
+from accounts.roles import GROUP_EMPLOYEE, GROUP_OPERATOR
+from .choices import EmployeeRequestAction
+from accounts.roles import UserRole
 
 class EmployeeBaseForm(forms.ModelForm):
     class Meta:
@@ -83,3 +86,52 @@ class EmployeeActivityStatusForm(forms.Form):
         help_text= translate('Enter the reason for activating or deactivating the employee.'),
         error_messages={'required': translate("Enter the reason for changing the employee's active status."),}
     )
+
+
+
+class EmployeeRequestReviewForm(forms.Form):
+    action = forms.ChoiceField(
+        choices=EmployeeRequestAction.choices,
+        widget=forms.RadioSelect,
+        label=translate('Decision'),
+    )
+    employee = forms.ModelChoiceField(
+        queryset=Employee.objects.none(),
+        required=False,
+        label=translate('Existing employee'),
+    )
+    role = forms.ChoiceField(
+        choices=[("", "---------"), *UserRole.choices],
+        required=False,
+        label=translate('User role'),
+    )
+    review_note = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 3}),
+        label=translate('Review note'),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['employee'].queryset = (Employee.objects
+            .filter(user__isnull=True, is_active=True)
+            .order_by('full_name')
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        action = cleaned_data.get('action')
+        employee = cleaned_data.get('employee')
+        role = cleaned_data.get('role')
+        note = cleaned_data.get('review_note', '')
+
+        if action == EmployeeRequestAction.LINK and not employee:
+            self.add_error('employee', translate('Select an existing employee.'),)
+
+        if action in {EmployeeRequestAction.LINK, EmployeeRequestAction.CREATE,} and not role:
+            self.add_error('role', translate('Select a user role.'),)
+
+        if action == EmployeeRequestAction.REJECT and not note.strip():
+            self.add_error("review_note", translate("Enter a reason for rejection."),)
+
+        return cleaned_data

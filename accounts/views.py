@@ -1,3 +1,4 @@
+from django.db import transaction
 from .access import get_access_state
 from .models import Profile
 from django.contrib import messages
@@ -14,6 +15,7 @@ from .forms import AppUserRegistrationForm, ProfileForm
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as translate
 from .forms import AppUserLoginForm
+from employees.services import ensure_employee_request
 
 AppUser = get_user_model()
 class AppUserRegistrationView(FormView):
@@ -85,7 +87,10 @@ class ProfileCreateView(UserPassesTestMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
-        response = super().form_valid(form)
+        with transaction.atomic():
+            response = super().form_valid(form)
+            ensure_employee_request(self.request.user)
+
         messages.success(self.request, translate('Your profile was saved successfully.'))
         return response
 

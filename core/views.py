@@ -1,16 +1,19 @@
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView, FormView, ListView
 from .forms import (SpecialtyCreateForm, SpecialtyEditForm,
                     SpecialtyDeleteForm, CompanySettingsForm,
                     SystemSettingsForm)
-
 from .models import Specialty, CompanySettings, SystemSettings
 from .view_mixins import SingleRecordFormViewMixin, ConfirmedDeleteMixin, PaginationMixin, SearchMixin
+from accounts.access import get_access_state
 
 def home(request: HttpRequest) -> HttpResponse:
-    return render(request,"core/home.html")
+    access_state = get_access_state(request.user)
+    if access_state == 'ready' and not request.user.is_superuser and request.user.has_perm('inspections.view_inspection'):
+        return redirect('inspections:list')
+    return render(request, 'core/home.html')
 
 class SpecialtyListView(SearchMixin, PaginationMixin, ListView):
     model = Specialty

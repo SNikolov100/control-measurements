@@ -51,30 +51,32 @@
             </div>
         </div>
 
-        <div class="page-actions">
-            <a
-                class="button"
-                href="{% url 'employees:edit' employee.pk %}"
-            >
-                Edit employee
-            </a>
+        {% if perms.employees.change_employee %}
+            <div class="page-actions">
+                <a
+                    class="button"
+                    href="{% url 'employees:edit' employee.pk %}"
+                >
+                    Edit employee
+                </a>
 
-            {% if employee.is_active %}
-                <a
-                    class="button button-danger"
-                    href="{% url 'employees:activity-status' employee.pk %}"
-                >
-                    Deactivate employee
-                </a>
-            {% else %}
-                <a
-                    class="button button-success"
-                    href="{% url 'employees:activity-status' employee.pk %}"
-                >
-                    Activate employee
-                </a>
-            {% endif %}
-        </div>
+                {% if employee.is_active %}
+                    <a
+                        class="button button-danger"
+                        href="{% url 'employees:activity-status' employee.pk %}"
+                    >
+                        Deactivate employee
+                    </a>
+                {% else %}
+                    <a
+                        class="button button-success"
+                        href="{% url 'employees:activity-status' employee.pk %}"
+                    >
+                        Activate employee
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
     </header>
 
     <section class="employee-profile-card">
@@ -117,13 +119,15 @@
                 {% endif %}
             </p>
 
-            <a class="button button-small" href="{% url 'employees:edit' employee.pk %}">
-                {% if employee.photo %}
-                    Replace photo
-                {% else %}
-                    Add photo
-                {% endif %}
-            </a>
+            {% if perms.employees.change_employee %}
+                <a class="button button-small" href="{% url 'employees:edit' employee.pk %}">
+                    {% if employee.photo %}
+                        Replace photo
+                    {% else %}
+                        Add photo
+                    {% endif %}
+                </a>
+            {% endif %}
         </div>
     </section>
 
