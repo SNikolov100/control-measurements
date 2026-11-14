@@ -1,5 +1,26 @@
-<h2>Registration submitted</h2>
+{% extends "base.html" %}
 
-<p>
-    Your account is awaiting administrator approval.
-</p>
+{% block title %}
+    Registration pending | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <section class="card">
+        <h1>Registration submitted</h1>
+
+        <p>
+            Your account has been created successfully
+            and is awaiting administrator approval.
+        </p>
+
+        <p>
+            You will be notified when your
+            registration is approved.
+        </p>
+
+        <a href="{% url 'accounts:login' %}">
+            Go to login
+        </a>
+
+    </section>
+{% endblock %}

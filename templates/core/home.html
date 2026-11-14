@@ -5,156 +5,200 @@
 {% endblock %}
 
 {% block content %}
-    <header class="page-header">
-        <div>
-            <h1 class="page-title">
-                Control Measurements
-            </h1>
+    {% if request.access_state == "ready" %}
+        <header class="page-header">
+            <div>
+                <h1 class="page-title">
+                    Control Measurements
+                </h1>
 
-            <p class="page-description">
-                Manage customers, equipment, employees,
-                control activities, results, and history
-                from one workspace.
+                <p class="page-description">
+                    Manage customers, equipment, employees,
+                    control activities, results, and history
+                    from one workspace.
+                </p>
+            </div>
+        </header>
+
+        <section aria-labelledby="main-sections-heading">
+            <h2
+                id="main-sections-heading"
+                class="section-heading"
+            >
+                Main sections
+            </h2>
+
+            <div class="card-grid">
+                <a
+                    class="card quick-link"
+                    href="{% url 'customers:list' %}"
+                >
+                    <h3 class="card-title">Customers</h3>
+
+                    <p class="card-description">
+                        Manage customers, sites, responsible
+                        contacts, and site equipment.
+                    </p>
+
+                    <span class="quick-link-label">
+                        Open customers
+                    </span>
+                </a>
+
+                <a
+                    class="card quick-link"
+                    href="{% url 'equipment:list' %}"
+                >
+                    <h3 class="card-title">Equipment</h3>
+
+                    <p class="card-description">
+                        Browse the equipment registry, serial
+                        numbers, statuses, and histories.
+                    </p>
+
+                    <span class="quick-link-label">
+                        Open equipment registry
+                    </span>
+                </a>
+
+                <a
+                    class="card quick-link"
+                    href="{% url 'employees:list' %}"
+                >
+                    <h3 class="card-title">Employees</h3>
+
+                    <p class="card-description">
+                        Manage employees, qualifications,
+                        availability, and employee history.
+                    </p>
+
+                    <span class="quick-link-label">
+                        Open employees
+                    </span>
+                </a>
+
+                <a
+                    class="card quick-link"
+                    href="{% url 'inspections:list' %}"
+                >
+                    <h3 class="card-title">Activities</h3>
+
+                    <p class="card-description">
+                        Assign, start, complete, and cancel
+                        equipment activities.
+                    </p>
+
+                    <span class="quick-link-label">
+                        Open activities
+                    </span>
+                </a>
+            </div>
+        </section>
+
+        <section
+            class="section-block"
+            aria-labelledby="settings-heading"
+        >
+            <h2
+                id="settings-heading"
+                class="section-heading"
+            >
+                Configuration
+            </h2>
+
+            <div class="card-grid">
+                <a
+                    class="card quick-link"
+                    href="{% url 'core:company-settings' %}"
+                >
+                    <h3 class="card-title">Our company</h3>
+
+                    <p class="card-description">
+                        Maintain the company contact and
+                        identification information.
+                    </p>
+
+                    <span class="quick-link-label">
+                        Open company settings
+                    </span>
+                </a>
+
+                <a
+                    class="card quick-link"
+                    href="{% url 'core:system-settings' %}"
+                >
+                    <h3 class="card-title">
+                        System settings
+                    </h3>
+
+                    <p class="card-description">
+                        Configure working time and general
+                        application behaviour.
+                    </p>
+
+                    <span class="quick-link-label">
+                        Open system settings
+                    </span>
+                </a>
+
+                <a
+                    class="card quick-link"
+                    href="{% url 'core:specialty-list' %}"
+                >
+                    <h3 class="card-title">Specialties</h3>
+
+                    <p class="card-description">
+                        Manage the specialties used by equipment
+                        types and employees.
+                    </p>
+
+                    <span class="quick-link-label">
+                        Open specialties
+                    </span>
+                </a>
+            </div>
+        </section>
+
+    {% elif request.access_state == "pending" %}
+
+        <section class="card">
+            <h2>Registration pending</h2>
+            <p>
+                Your registration is awaiting administrator approval.
             </p>
-        </div>
-    </header>
+        </section>
 
-    <section aria-labelledby="main-sections-heading">
-        <h2
-            id="main-sections-heading"
-            class="section-heading"
-        >
-            Main sections
-        </h2>
+    {% elif request.access_state == "rejected" %}
 
-        <div class="card-grid">
-            <a
-                class="card quick-link"
-                href="{% url 'customers:list' %}"
-            >
-                <h3 class="card-title">Customers</h3>
+        <section class="card">
+            <h2>Registration rejected</h2>
+            <p>
+                Your account registration has not been approved.
+            </p>
+        </section>
 
-                <p class="card-description">
-                    Manage customers, sites, responsible
-                    contacts, and site equipment.
-                </p>
-
-                <span class="quick-link-label">
-                    Open customers
-                </span>
+    {% elif request.access_state == "profile_required" %}
+        <section class="card">
+            <h2>Profile required</h2>
+            <p>
+                Your account has been approved.
+                Please complete your personal profile.
+            </p>
+            <a href="{% url 'accounts:profile_create' %}">
+                Complete profile
             </a>
+        </section>
 
-            <a
-                class="card quick-link"
-                href="{% url 'equipment:list' %}"
-            >
-                <h3 class="card-title">Equipment</h3>
+    {% elif request.access_state == "employee_pending" %}
 
-                <p class="card-description">
-                    Browse the equipment registry, serial
-                    numbers, statuses, and histories.
-                </p>
+        <section class="card">
+            <h2>Employee record pending</h2>
+            <p>
+                Your profile has been completed.
+                Your employee record is awaiting
+                administrator approval.
+            </p>
+        </section>
 
-                <span class="quick-link-label">
-                    Open equipment registry
-                </span>
-            </a>
-
-            <a
-                class="card quick-link"
-                href="{% url 'employees:list' %}"
-            >
-                <h3 class="card-title">Employees</h3>
-
-                <p class="card-description">
-                    Manage employees, qualifications,
-                    availability, and employee history.
-                </p>
-
-                <span class="quick-link-label">
-                    Open employees
-                </span>
-            </a>
-
-            <a
-                class="card quick-link"
-                href="{% url 'inspections:list' %}"
-            >
-                <h3 class="card-title">Activities</h3>
-
-                <p class="card-description">
-                    Assign, start, complete, and cancel
-                    equipment activities.
-                </p>
-
-                <span class="quick-link-label">
-                    Open activities
-                </span>
-            </a>
-        </div>
-    </section>
-
-    <section
-        class="section-block"
-        aria-labelledby="settings-heading"
-    >
-        <h2
-            id="settings-heading"
-            class="section-heading"
-        >
-            Configuration
-        </h2>
-
-        <div class="card-grid">
-            <a
-                class="card quick-link"
-                href="{% url 'core:company-settings' %}"
-            >
-                <h3 class="card-title">Our company</h3>
-
-                <p class="card-description">
-                    Maintain the company contact and
-                    identification information.
-                </p>
-
-                <span class="quick-link-label">
-                    Open company settings
-                </span>
-            </a>
-
-            <a
-                class="card quick-link"
-                href="{% url 'core:system-settings' %}"
-            >
-                <h3 class="card-title">
-                    System settings
-                </h3>
-
-                <p class="card-description">
-                    Configure working time and general
-                    application behaviour.
-                </p>
-
-                <span class="quick-link-label">
-                    Open system settings
-                </span>
-            </a>
-
-            <a
-                class="card quick-link"
-                href="{% url 'core:specialty-list' %}"
-            >
-                <h3 class="card-title">Specialties</h3>
-
-                <p class="card-description">
-                    Manage the specialties used by equipment
-                    types and employees.
-                </p>
-
-                <span class="quick-link-label">
-                    Open specialties
-                </span>
-            </a>
-        </div>
-    </section>
+    {% endif %}
 {% endblock %}

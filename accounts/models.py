@@ -5,6 +5,9 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as translate
 from django.db import models
 from core.model_mixins import TextNormalizationMixin
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from .validators import validate_username_no_at
+from django.db.models.functions import Lower
 
 def profile_photo_upload_path(instance, filename):
     file_extension = Path(filename).suffix.lower()
@@ -20,8 +23,15 @@ class AppUser(TextNormalizationMixin, AbstractUser):
         APPROVED = 'approved', 'Approved'
         REJECTED = 'rejected', 'Rejected'
 
-    email = models.EmailField(
+    username = models.CharField(
+        max_length=50,
         unique=True,
+        validators=[UnicodeUsernameValidator(), validate_username_no_at],
+        help_text=translate('50 characters or fewer. Letters, digits and ./+/-/_ only.'),
+        error_messages={'unique': translate('A user with that username already exists.')},
+        verbose_name=translate('Username'),
+    )
+    email = models.EmailField(
         verbose_name=translate('Email address'),
     )
     first_name = None
@@ -31,6 +41,12 @@ class AppUser(TextNormalizationMixin, AbstractUser):
         choices=RegistrationStatus.choices,
         default=RegistrationStatus.PENDING,
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(Lower("email"), name="accounts_email_ci_unique",),
+            models.CheckConstraint(condition=~models.Q(username__contains="@"), name="accounts_username_no_at",),
+        ]
 
 
 class Profile(TextNormalizationMixin, models.Model):
@@ -75,7 +91,6 @@ class Profile(TextNormalizationMixin, models.Model):
         null=True,
         verbose_name=translate('Profile photo'),
     )
-
     titlecase_fields = ('first_name','middle_name', 'last_name')
 
     def get_full_name(self):

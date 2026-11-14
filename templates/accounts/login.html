@@ -1,9 +1,29 @@
-<h2>Login</h2>
+{% extends "base.html" %}
 
-<form method="post">
-    {% csrf_token %}
+{% block title %}
+    Login | Control Measurements
+{% endblock %}
 
-    {{ form.as_p }}
+{% block content %}
 
-    <button type="submit">Login</button>
-</form>
+    <section class="card">
+        <h1>Login</h1>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            {% if next %}
+                <input type="hidden"
+                       name="next"
+                       value="{{ next }}">
+            {% endif %}
+
+            <button type="submit">
+                Login
+            </button>
+        </form>
+    </section>
+
+{% endblock %}

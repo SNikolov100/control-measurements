@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}
+    Complete profile | Control Measurements
+{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+    <div>
+        <h1 class="page-title">
+            Complete your profile
+        </h1>
+
+        <p class="page-description">
+            Please enter your personal information.
+            Fields marked as required must be completed.
+        </p>
+    </div>
+</header>
+
+<section class="card">
+
+    <form method="post"
+          enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">
+            Save profile
+        </button>
+
+    </form>
+
+</section>
+
+{% endblock %}

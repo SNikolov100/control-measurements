@@ -3,6 +3,8 @@ from django.contrib.auth.forms import BaseUserCreationForm
 from django import forms
 from django.utils.translation import gettext_lazy as translate
 from uuid import uuid4
+from accounts.models import Profile
+from django.contrib.auth.forms import AuthenticationForm
 
 AppUser = get_user_model()
 
@@ -38,9 +40,13 @@ class AppUserRegistrationForm(BaseUserCreationForm):
 
         if username:
             username = username.strip().lower()
-            if AppUser.objects.filter(username__iexact=username).exists():
-                self.add_error('username', translate('This username is already taken.'))
-            cleaned_data['username'] = username
+            if username:
+                if "@" in username:
+                    self.add_error('username', translate("Username cannot contain '@'."))
+
+                elif AppUser.objects.filter(username__iexact=username).exists():
+                    self.add_error('username', translate('This username is already taken.'))
+                cleaned_data['username'] = username
 
         return cleaned_data
 
@@ -58,5 +64,43 @@ class AppUserRegistrationForm(BaseUserCreationForm):
 
         return user
 
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = (
+            'first_name',
+            'middle_name',
+            'last_name',
+            'phone',
+            'date_of_birth',
+            'address',
+            'photo',
+        )
+        widgets = {
+            'first_name': forms.TextInput(attrs={'autocomplete': 'given-name'}),
+            'middle_name': forms.TextInput(attrs={'autocomplete': 'additional-name'}),
+            'last_name': forms.TextInput(attrs={'autocomplete': 'family-name'}),
+            'phone': forms.TextInput(attrs={
+                    'placeholder': '+359 888 123 456',
+                    'autocomplete': 'tel',
+                }
+            ),
+            'date_of_birth': forms.DateInput(
+                attrs={'type': 'date', 'autocomplete': 'bday'},
+                format="%Y-%m-%d"
+            ),
+            'address': forms.Textarea(attrs={'autocomplete': 'street-address'}),
+        }
 
+        error_messages = {
+            'first_name': {'required': translate('Enter your first name.')},
+            'middle_name': {'required': translate('Enter your middle name.')},
+            'last_name': {'required': translate('Enter your last name.')},
+            'phone': {'required': translate('Enter your phone number.')},
+        }
 
+class AppUserLoginForm(AuthenticationForm):
+    username = forms.CharField(
+        label=translate("Email or username"),
+        widget=forms.TextInput(attrs={"autocomplete": "username", "autofocus": True}),
+    )

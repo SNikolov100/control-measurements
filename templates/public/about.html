@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}
+    About us | Control Measurements
+{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <h1>
+        {% if company %}
+            {{ company.company_name }}
+        {% else %}
+            About us
+        {% endif %}
+    </h1>
+
+    <h2>Our company</h2>
+
+    <p>
+        Information about our company's activities
+        and services will be published here.
+    </p>
+
+    <a href="{% url 'public:contacts' %}">
+        Contact us
+    </a>
+</section>
+
+{% endblock %}
