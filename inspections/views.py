@@ -1,3 +1,4 @@
+from core.view_mixins import PermissionAwareSuccessMixin
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, FormView
@@ -14,7 +15,7 @@ from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.contrib.auth.mixins import PermissionRequiredMixin
-
+from .access import filter_inspections_for_user
 
 class InspectionListView(PermissionRequiredMixin, StatusFilterMixin, SearchMixin, PaginationMixin, ListView):
     permission_required = 'inspections.view_inspection'
@@ -48,8 +49,8 @@ class InspectionListView(PermissionRequiredMixin, StatusFilterMixin, SearchMixin
     def get_status_filters(self):
         filters = super().get_status_filters()
         filters.append({
-                "value": self.overdue_filter,
-                "label": translate("Overdue"),
+                'value': self.overdue_filter,
+                'label': translate('Overdue'),
         })
         return filters
 
@@ -73,37 +74,18 @@ class InspectionListView(PermissionRequiredMixin, StatusFilterMixin, SearchMixin
             )
             .prefetch_related('assigned_employees')
         )
-        return queryset_result
+        return filter_inspections_for_user(queryset_result, self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         current_status_filter = self.get_status_filter()
-
         status_filters = (
-            {
-                'value': '',
-                'label': 'All',
-            },
-            {
-                'value': Inspection.Status.PENDING.value,
-                'label': Inspection.Status.PENDING.label,
-            },
-            {
-                'value': Inspection.Status.IN_PROGRESS.value,
-                'label': Inspection.Status.IN_PROGRESS.label,
-            },
-            {
-                'value': Inspection.Status.COMPLETED.value,
-                'label': Inspection.Status.COMPLETED.label,
-            },
-            {
-                'value': Inspection.Status.CANCELLED.value,
-                'label': Inspection.Status.CANCELLED.label,
-            },
-            {
-                'value': self.overdue_filter,
-                'label': translate('Overdue'),
-            },
+            {'value': '', 'label': 'All'},
+            {'value': Inspection.Status.PENDING.value, 'label': Inspection.Status.PENDING.label},
+            {'value': Inspection.Status.IN_PROGRESS.value, 'label': Inspection.Status.IN_PROGRESS.label},
+            {'value': Inspection.Status.COMPLETED.value, 'label': Inspection.Status.COMPLETED.label},
+            {'value': Inspection.Status.CANCELLED.value, 'label': Inspection.Status.CANCELLED.label},
+            {'value': self.overdue_filter, 'label': translate('Overdue')},
         )
         current_status_label = ''
         for status_filter in status_filters:
@@ -112,18 +94,18 @@ class InspectionListView(PermissionRequiredMixin, StatusFilterMixin, SearchMixin
                 break
 
         context['current_status_filter'] = current_status_filter
-        context["current_status_label"] = current_status_label
-        context["status_filters"] = status_filters
+        context['current_status_label'] = current_status_label
+        context['status_filters'] = status_filters
         filter_parameters = self.request.GET.copy()
         filter_parameters.pop('page', None)
         filter_parameters.pop(self.status_parameter,None)
-        context["status_filter_query"] = filter_parameters.urlencode()
+        context['status_filter_query'] = filter_parameters.urlencode()
 
         return context
 
 
 
-class InspectionCreateView(PermissionRequiredMixin, CreateView):
+class InspectionCreateView(PermissionAwareSuccessMixin, PermissionRequiredMixin, CreateView):
     permission_required = 'inspections.add_inspection'
     raise_exception = True
     model = Inspection
@@ -142,9 +124,11 @@ class InspectionCreateView(PermissionRequiredMixin, CreateView):
         )
         allowed_activity_types = get_allowed_inspection_types(self.equipment)
         if not allowed_activity_types:
-            messages.warning(request, translate( 'A new activity cannot be created while the equipment is in its current status.'),)
+            messages.warning(request, translate('A new activity cannot be created while the equipment is in its current status.'),)
 
-            return redirect('equipment:detail', equipment_slug=self.equipment.slug,)
+            if request.user.has_perm('equipment.view_equipment'):
+                return redirect('equipment:detail', equipment_slug=self.equipment.slug)
+            return redirect('core:home')
 
         return super().dispatch(request,*args,**kwargs,)
 
@@ -169,7 +153,7 @@ class InspectionCreateView(PermissionRequiredMixin, CreateView):
         except ValidationError as error:
             self.object = None
 
-            if hasattr(error, "message_dict"):
+            if hasattr(error, 'message_dict'):
                 for messages in error.message_dict.values():
                     for message in messages:
                         form.add_error(None, message)
@@ -181,13 +165,13 @@ class InspectionCreateView(PermissionRequiredMixin, CreateView):
 
         return response
 
-    def get_success_url(self):
+    def get_preferred_success_url(self):
         customer_site = self.equipment.customer_site
         customer_slug = customer_site.customer.slug
         site_slug = customer_site.slug
         return reverse('customers:site-details',kwargs={'customer_slug': customer_slug ,'site_slug': site_slug})
 
-class InspectionAssignmentView(UpdateView):
+class InspectionAssignmentView(PermissionAwareSuccessMixin, UpdateView):
     model = Inspection
     form_class = InspectionAssignmentForm
     template_name = 'inspections/inspection_assignment.html'
@@ -195,18 +179,11 @@ class InspectionAssignmentView(UpdateView):
     success_url = reverse_lazy('inspections:list')
 
     def get_queryset(self):
-        return (super()
-            .get_queryset()
-            .filter(status=Inspection.Status.PENDING)
-            .select_related(
-                'equipment',
-                'equipment__equipment_type',
-                'equipment__equipment_type__specialty',
-            )
-            .prefetch_related(
-                'assigned_employees',
-            )
+        queryset = (super().get_queryset().filter(status=Inspection.Status.PENDING)
+            .select_related('equipment', 'equipment__equipment_type', 'equipment__equipment_type__specialty')
+            .prefetch_related('assigned_employees')
         )
+        return filter_inspections_for_user(queryset, self.request.user)
 
 class InspectionDetailView(DetailView):
     model = Inspection
@@ -214,8 +191,7 @@ class InspectionDetailView(DetailView):
     context_object_name = 'inspection'
 
     def get_queryset(self):
-        return (super()
-            .get_queryset()
+        queryset = (super().get_queryset()
             .select_related(
                 'equipment',
                 'equipment__equipment_type',
@@ -224,20 +200,19 @@ class InspectionDetailView(DetailView):
                 'equipment__customer_site__customer',
                 'customer_contact',
             )
-            .prefetch_related(
-                'assigned_employees',
-            )
+            .prefetch_related('assigned_employees')
         )
+        return filter_inspections_for_user(queryset, self.request.user)
 
 
-class InspectionStartView(InspectionActionMixin, FormView):
+class InspectionStartView(PermissionAwareSuccessMixin, InspectionActionMixin, FormView):
     form_class = InspectionStartForm
     template_name = 'inspections/inspection_start.html'
 
     def execute_action(self, form):
         start_inspection(self.inspection)
 
-class InspectionCompleteView(InspectionActionMixin, FormView):
+class InspectionCompleteView(PermissionAwareSuccessMixin, InspectionActionMixin, FormView):
     form_class = InspectionCompleteForm
     template_name = 'inspections/inspection_complete.html'
 
@@ -251,7 +226,7 @@ class InspectionCompleteView(InspectionActionMixin, FormView):
         result_notes = form.cleaned_data['result_notes']
         complete_inspection(self.inspection, result= result, result_notes= result_notes,)
 
-class InspectionCancelView(InspectionActionMixin, FormView):
+class InspectionCancelView(PermissionAwareSuccessMixin, InspectionActionMixin, FormView):
     form_class = InspectionCancelForm
     template_name = 'inspections/inspection_cancel.html'
 

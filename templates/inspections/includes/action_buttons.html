@@ -1,0 +1,33 @@
+{% if show_details %}
+    {% url 'inspections:details' inspection.pk as details_url %}
+    {% include "components/action_link.html" with allowed=perms.inspections.view_inspection url=details_url label="Details" css_class="button-small" only %}
+{% endif %}
+
+{% if inspection.status == inspection.Status.PENDING %}
+
+    {% url 'inspections:assign' inspection.pk as assign_url %}
+    {% include "components/action_link.html" with allowed=perms.inspections.assign_inspection url=assign_url label="Assign employees" css_class="button-small" only %}
+
+    {% url 'inspections:start' inspection.pk as start_url %}
+
+    {% if not inspection.assigned_employees.exists %}
+        {% include "components/action_link.html" with allowed=perms.inspections.start_inspection label="Start" css_class="button-small button-success" disabled_reason="Assign at least one qualified employee before starting the activity." only %}
+
+    {% elif inspection.equipment.status == inspection.equipment.Status.UNDER_INSPECTION %}
+        {% include "components/action_link.html" with allowed=perms.inspections.start_inspection label="Start" css_class="button-small button-success" disabled_reason="Another activity is already in progress for this equipment." only %}
+
+    {% else %}
+        {% include "components/action_link.html" with allowed=perms.inspections.start_inspection url=start_url label="Start" css_class="button-small button-success" only %}
+    {% endif %}
+
+{% endif %}
+
+{% if inspection.status == inspection.Status.IN_PROGRESS %}
+    {% url 'inspections:complete' inspection.pk as complete_url %}
+    {% include "components/action_link.html" with allowed=perms.inspections.complete_inspection url=complete_url label="Complete" css_class="button-small button-success" only %}
+{% endif %}
+
+{% if inspection.status == inspection.Status.PENDING or inspection.status == inspection.Status.IN_PROGRESS %}
+    {% url 'inspections:cancel' inspection.pk as cancel_url %}
+    {% include "components/action_link.html" with allowed=perms.inspections.cancel_inspection url=cancel_url label="Cancel" css_class="button-small button-danger" only %}
+{% endif %}

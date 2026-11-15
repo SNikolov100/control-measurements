@@ -2,10 +2,8 @@ from django import template
 
 register = template.Library()
 
-
 @register.inclusion_tag('components/form_field.html')
 def render_field(field, label=None, optional_label=None, css_class=None, is_checkbox=None):
-
     if field is None:
         return {'field': None}
 

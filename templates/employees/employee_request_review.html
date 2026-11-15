@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load form_tags %}
 {% block title %}
     Review Employee Request | Control Measurements
 {% endblock %}
@@ -65,44 +65,83 @@
     </p>
 </section>
 
-<section class="card">
-    <h2>Administrator decision</h2>
+<section class="form-card">
+    <div class="form-card-header">
+        <h2 class="form-card-title">Administrator decision</h2>
+        <p class="form-card-description">
+            Select how this account should be linked
+            to an employee record.
+        </p>
+    </div>
 
-    <p>
-        Select how this account should be linked
-        to an employee record.
-    </p>
-
-    <form method="post">
+    <form method="post" id="employee-review-form" novalidate>
         {% csrf_token %}
 
-        {{ form.non_field_errors }}
+        <div class="form-fields">
+            {% render_field form.action %}
+            {% render_field form.employee %}
+            {% render_field form.role %}
+            {% render_field form.review_note %}
+        </div>
 
-        {% for field in form %}
-            <div class="form-field">
-                {{ field.label_tag }}
-                {{ field }}
+        {% if form.non_field_errors %}
+            <section id="review-error-panel"
+                     class="review-error-panel"
+                     aria-labelledby="review-error-title">
 
-                {% if field.help_text %}
-                    <p>{{ field.help_text }}</p>
+                <h2 id="review-error-title">
+                    {% if form.show_name_confirmation %}
+                        Confirm employee identity
+                    {% else %}
+                        Please check the information
+                    {% endif %}
+                </h2>
+
+                <div class="review-error-messages" role="alert">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                {% if form.show_name_confirmation %}
+                    <label class="review-confirmation"
+                           for="{{ form.confirm_name_difference.id_for_label }}">
+                        {{ form.confirm_name_difference }}
+                        <span>
+                            I have checked both names and confirm
+                            that they refer to the same person.
+                            <small>
+                                The existing employee name will be preserved.
+                            </small>
+                        </span>
+                    </label>
+
+                    {{ form.confirm_name_difference.errors }}
                 {% endif %}
 
-                {{ field.errors }}
-            </div>
-        {% endfor %}
+                <div class="form-actions">
+                    {% if form.show_name_confirmation %}
+                        <button type="submit"
+                                class="button button-primary">
+                            Confirm and link account
+                        </button>
+                    {% endif %}
 
-        <p>
-            For a new employee, select Create and choose a role.
-            For an existing employee, select Link, the employee,
-            and a role. Rejection requires a note.
-        </p>
+                    <button type="button"
+                            class="button"
+                            id="review-error-close"
+                            hidden>
+                        Back to review
+                    </button>
+                </div>
+            </section>
+        {% endif %}
 
-        <button
-            type="submit"
-            class="button button-primary"
-        >
-            Submit decision
-        </button>
+        <div class="form-actions">
+            <button type="submit" class="button button-primary">
+                Submit decision
+            </button>
+        </div>
     </form>
 </section>
 
@@ -112,4 +151,55 @@
     </a>
 </div>
 
+{% endblock %}
+{% block extra_js %}
+<script>
+    (() => {
+        const panel = document.getElementById("review-error-panel");
+        const form = document.getElementById("employee-review-form");
+
+        if (!panel || !form) {
+            return;
+        }
+
+        const dialog = document.createElement("dialog");
+
+        if (typeof dialog.showModal !== "function") {
+            return;
+        }
+
+        dialog.className = "review-error-dialog";
+        dialog.setAttribute("aria-labelledby", "review-error-title");
+
+        // Keep the checkbox and submit button inside the original form.
+        form.appendChild(dialog);
+        dialog.appendChild(panel);
+
+        const closeButton = document.getElementById("review-error-close");
+        closeButton.hidden = false;
+
+        const closeReviewDialog = () => {
+            const checkbox = dialog.querySelector(
+                'input[name="confirm_name_difference"]'
+            );
+
+            if (checkbox) {
+                checkbox.checked = false;
+            }
+
+            dialog.close();
+            form.querySelector('button[type="submit"]').focus();
+        };
+
+        closeButton.addEventListener("click", closeReviewDialog);
+
+        dialog.addEventListener("cancel", (event) => {
+            event.preventDefault();
+            closeReviewDialog();
+        });
+
+        dialog.showModal();
+        closeButton.focus();
+    })();
+</script>
 {% endblock %}

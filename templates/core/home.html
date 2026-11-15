@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load access_tags %}
 
 {% block title %}
     Home | Control Measurements
 {% endblock %}
 
 {% block content %}
-    {% if request.access_state == "ready" and request.user.is_superuser %}
+    {% if request.access_state == "ready" %}
         <header class="page-header">
             <div>
                 <h1 class="page-title">
@@ -29,7 +30,7 @@
             </h2>
 
             <div class="card-grid">
-                <a
+                {% if_can_access 'customers:list' %}<a
                     class="card quick-link"
                     href="{% url 'customers:list' %}"
                 >
@@ -43,9 +44,9 @@
                     <span class="quick-link-label">
                         Open customers
                     </span>
-                </a>
+                </a>{% endif_can_access %}
 
-                <a
+                {% if_can_access 'equipment:list' %}<a
                     class="card quick-link"
                     href="{% url 'equipment:list' %}"
                 >
@@ -59,9 +60,9 @@
                     <span class="quick-link-label">
                         Open equipment registry
                     </span>
-                </a>
+                </a>{% endif_can_access %}
 
-                <a
+                {% if_can_access 'employees:list' %}<a
                     class="card quick-link"
                     href="{% url 'employees:list' %}"
                 >
@@ -75,9 +76,9 @@
                     <span class="quick-link-label">
                         Open employees
                     </span>
-                </a>
+                </a>{% endif_can_access %}
 
-                <a
+                {% if_can_access 'inspections:list' %}<a
                     class="card quick-link"
                     href="{% url 'inspections:list' %}"
                 >
@@ -91,7 +92,15 @@
                     <span class="quick-link-label">
                         Open activities
                     </span>
-                </a>
+                </a>{% endif_can_access %}
+            </div>
+            <div class="page-actions">
+                {% if not perms.customers.view_customer %}{% if_can_access 'customers:create' %}<a class="button" href="{% url 'customers:create' %}">Add customer</a>{% endif_can_access %}{% endif %}
+                {% if not perms.equipment.view_equipment %}{% if_can_access 'equipment:create' %}<a class="button" href="{% url 'equipment:create' %}">Add equipment</a>{% endif_can_access %}{% endif %}
+                {% if not perms.employees.view_employee %}{% if_can_access 'employees:create' %}<a class="button" href="{% url 'employees:create' %}">Add employee</a>{% endif_can_access %}{% endif %}
+                {% if_can_access 'equipment:types-list' %}<a class="button" href="{% url 'equipment:types-list' %}">Equipment types</a>{% endif_can_access %}
+                {% if not perms.equipment.view_equipmenttype %}{% if_can_access 'equipment:type-create' %}<a class="button" href="{% url 'equipment:type-create' %}">Add equipment type</a>{% endif_can_access %}{% endif %}
+                {% if not perms.core.view_specialty %}{% if_can_access 'core:specialty-create' %}<a class="button" href="{% url 'core:specialty-create' %}">Add specialty</a>{% endif_can_access %}{% endif %}
             </div>
         </section>
 
@@ -107,7 +116,7 @@
             </h2>
 
             <div class="card-grid">
-                <a
+                {% if_can_access 'core:company-settings' %}<a
                     class="card quick-link"
                     href="{% url 'core:company-settings' %}"
                 >
@@ -121,9 +130,9 @@
                     <span class="quick-link-label">
                         Open company settings
                     </span>
-                </a>
+                </a>{% endif_can_access %}
 
-                <a
+                {% if_can_access 'core:system-settings' %}<a
                     class="card quick-link"
                     href="{% url 'core:system-settings' %}"
                 >
@@ -139,9 +148,9 @@
                     <span class="quick-link-label">
                         Open system settings
                     </span>
-                </a>
+                </a>{% endif_can_access %}
 
-                <a
+                {% if_can_access 'core:specialty-list' %}<a
                     class="card quick-link"
                     href="{% url 'core:specialty-list' %}"
                 >
@@ -155,22 +164,8 @@
                     <span class="quick-link-label">
                         Open specialties
                     </span>
-                </a>
+                </a>{% endif_can_access %}
             </div>
-        </section>
-
-    {% elif request.access_state == "ready" %}
-         <section class="card">
-            <h2>Welcome</h2>
-
-            <p>
-                Your employee account has been approved.
-            </p>
-
-            <p>
-                Access to your assigned activities
-                will be available in the employee workspace.
-            </p>
         </section>
 
     {% elif request.access_state == "pending" %}

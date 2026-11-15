@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load access_tags %}
 {% load static %}
 
 {% block title %}
@@ -15,15 +16,19 @@
             </li>
 
             <li>
-                <a href="{% url 'customers:list' %}">
+                {% if_can_access 'customers:list' %}<a href="{% url 'customers:list' %}">
                     Customers
-                </a>
+                </a>{% else %}<span>
+                    Customers
+                </span>{% endif_can_access %}
             </li>
 
             <li>
-                <a href="{% url 'customers:details' customer.slug %}">
+                {% if_can_access 'customers:details' %}<a href="{% url 'customers:details' customer.slug %}">
                     {{ customer.short_name|default:customer.company_name }}
-                </a>
+                </a>{% else %}<span>
+                    {{ customer.short_name|default:customer.company_name }}
+                </span>{% endif_can_access %}
             </li>
 
             <li aria-current="page">
@@ -81,9 +86,9 @@
                             Save changes
                         </button>
 
-                        <a class="button" href="{% url 'customers:list' %}" >
+                        {% if_can_access 'customers:list' %}<a class="button" href="{% url 'customers:list' %}" >
                             Return without saving
-                        </a>
+                        </a>{% endif_can_access %}
                     </div>
                 </form>
             </section>

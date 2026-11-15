@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load access_tags %}
 {% load static %}
 
 {% block title %}
@@ -15,9 +16,11 @@
             </li>
 
             <li>
-                <a href="{% url 'equipment:list' %}">
+                {% if_can_access 'equipment:list' %}<a href="{% url 'equipment:list' %}">
                     Equipment
-                </a>
+                </a>{% else %}<span>
+                    Equipment
+                </span>{% endif_can_access %}
             </li>
 
             <li aria-current="page">
@@ -72,9 +75,9 @@
                             Save equipment
                         </button>
 
-                        <a class="button" href="{% url 'equipment:list' %}">
+                        {% if_can_access 'equipment:list' %}<a class="button" href="{% url 'equipment:list' %}">
                             Return without saving
-                        </a>
+                        </a>{% endif_can_access %}
                     </div>
                 </form>
             </section>

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load access_tags %}
 {% load static %}
 {% load status_tags %}
 
@@ -34,12 +35,12 @@
         </div>
 
         <div class="page-actions">
-            <a
+            {% if_can_access 'customers:create' %}<a
                 class="button button-primary"
                 href="{% url 'customers:create' %}"
             >
                 Add customer
-            </a>
+            </a>{% endif_can_access %}
         </div>
     </header>
     <section class="list-tools">
@@ -145,26 +146,26 @@
 
                                 <td class="table-actions">
                                     <div class="action-group">
-                                        <a
+                                        {% if_can_access 'customers:details' %}<a
                                             class="button button-small"
                                             href="{% url 'customers:details' customer.slug %}"
                                         >
                                             Details
-                                        </a>
+                                        </a>{% endif_can_access %}
 
-                                        <a
+                                        {% if_can_access 'customers:edit' %}<a
                                             class="button button-small"
                                             href="{% url 'customers:edit' customer.slug %}"
                                         >
                                             Edit
-                                        </a>
+                                        </a>{% endif_can_access %}
 
-                                        <a
+                                        {% if_can_access 'customers:site-create' %}<a
                                             class="button button-small button-primary"
                                             href="{% url 'customers:site-create' customer.slug %}"
                                         >
                                             Add site
-                                        </a>
+                                        </a>{% endif_can_access %}
                                     </div>
                                 </td>
                             </tr>
@@ -184,9 +185,9 @@
                     <strong>{{ search_query }}</strong>.
                 </p>
 
-                <a class="button" href="{% url 'customers:list' %}?page_size={{ current_page_size }}">
+                {% if_can_access 'customers:list' %}<a class="button" href="{% url 'customers:list' %}?page_size={{ current_page_size }}">
                     Clear search
-                </a>
+                </a>{% endif_can_access %}
             {% else %}
                 <h2>No customers</h2>
 
@@ -195,9 +196,9 @@
                     sites, contacts, and equipment.
                 </p>
 
-                <a class="button button-primary" href="{% url 'customers:create' %}">
+                {% if_can_access 'customers:create' %}<a class="button button-primary" href="{% url 'customers:create' %}">
                     Add customer
-                </a>
+                </a>{% endif_can_access %}
             {% endif %}
         </section>
     {% endif %}

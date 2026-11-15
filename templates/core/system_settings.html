@@ -60,22 +60,22 @@
 
                     {% include "core/includes/system_settings_fields.html" %}
 
-                    <div class="confirmation-panel">
+                    {% if can_edit_settings %}<div class="confirmation-panel">
                         Only one system-settings record is allowed.
                         Saving this form updates the existing record
                         when one already exists.
-                    </div>
+                    </div>{% else %}<p class="confirmation-panel">Read-only access. You do not have permission to change these settings.</p>{% endif %}
 
                     <div class="form-actions">
-                        <button
+                        {% if can_edit_settings %}<button
                             class="button button-primary"
                             type="submit"
                         >
                             Save system settings
-                        </button>
+                        </button>{% endif %}
 
                         <a class="button" href="{% url 'core:home' %}">
-                            Return without saving
+                            Return to home
                         </a>
                     </div>
                 </form>

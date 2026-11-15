@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load access_tags %}
 {% load static %}
 {% load form_tags %}
 {% load status_tags %}
@@ -17,35 +18,51 @@
             </li>
 
             <li>
-                <a href="{% url 'customers:list' %}">
+                {% if_can_access 'customers:list' %}<a href="{% url 'customers:list' %}">
                     Customers
-                </a>
+                </a>{% else %}<span>
+                    Customers
+                </span>{% endif_can_access %}
             </li>
 
             <li>
-                <a href="{% url 'customers:details' equipment.customer_site.customer.slug %}" >
+                {% if_can_access 'customers:details' %}<a href="{% url 'customers:details' equipment.customer_site.customer.slug %}" >
                     {% if equipment.customer_site.customer.short_name %}
                         {{ equipment.customer_site.customer.short_name }}
                     {% else %}
                         {{ equipment.customer_site.customer.company_name }}
                     {% endif %}
-                </a>
+                </a>{% else %}<span>
+                    {% if equipment.customer_site.customer.short_name %}
+                        {{ equipment.customer_site.customer.short_name }}
+                    {% else %}
+                        {{ equipment.customer_site.customer.company_name }}
+                    {% endif %}
+                </span>{% endif_can_access %}
             </li>
 
             <li>
-                <a href="{% url 'customers:site-details' equipment.customer_site.customer.slug equipment.customer_site.slug %}" >
+                {% if_can_access 'customers:site-details' %}<a href="{% url 'customers:site-details' equipment.customer_site.customer.slug equipment.customer_site.slug %}" >
                     {% if equipment.customer_site.short_name %}
                         {{ equipment.customer_site.short_name }}
                     {% else %}
                         {{ equipment.customer_site.name }}
                     {% endif %}
-                </a>
+                </a>{% else %}<span>
+                    {% if equipment.customer_site.short_name %}
+                        {{ equipment.customer_site.short_name }}
+                    {% else %}
+                        {{ equipment.customer_site.name }}
+                    {% endif %}
+                </span>{% endif_can_access %}
             </li>
 
             <li>
-                <a href="{% url 'equipment:detail' equipment.slug %}">
+                {% if_can_access 'equipment:detail' %}<a href="{% url 'equipment:detail' equipment.slug %}">
                     {{ equipment.serial_number }}
-                </a>
+                </a>{% else %}<span>
+                    {{ equipment.serial_number }}
+                </span>{% endif_can_access %}
             </li>
 
             <li aria-current="page">
@@ -224,13 +241,15 @@
                         Save activity
                     </button>
 
-                    <a class="button" href="{% url 'equipment:list' %}" >
+                    {% if_can_access 'equipment:list' %}<a class="button" href="{% url 'equipment:list' %}" >
                         Cancel
-                    </a>
+                    </a>{% endif_can_access %}
 
-                    <a href="{% url 'customers:site-details' equipment.customer_site.customer.slug equipment.customer_site.slug %}">
+                    {% if_can_access 'customers:site-details' %}<a href="{% url 'customers:site-details' equipment.customer_site.customer.slug equipment.customer_site.slug %}">
                         Back to customer site
-                    </a>
+                    </a>{% else %}<span>
+                        Back to customer site
+                    </span>{% endif_can_access %}
                 </div>
             </form>
         </section>

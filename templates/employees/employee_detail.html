@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load access_tags %}
 {% load static %}
 {% load status_tags %}
 
@@ -16,9 +17,11 @@
             </li>
 
             <li>
-                <a href="{% url 'employees:list' %}">
+                {% if_can_access 'employees:list' %}<a href="{% url 'employees:list' %}">
                     Employees
-                </a>
+                </a>{% else %}<span>
+                    Employees
+                </span>{% endif_can_access %}
             </li>
 
             <li aria-current="page">
@@ -53,27 +56,27 @@
 
         {% if perms.employees.change_employee %}
             <div class="page-actions">
-                <a
+                {% if_can_access 'employees:edit' %}<a
                     class="button"
                     href="{% url 'employees:edit' employee.pk %}"
                 >
                     Edit employee
-                </a>
+                </a>{% endif_can_access %}
 
                 {% if employee.is_active %}
-                    <a
+                    {% if_can_access 'employees:activity-status' %}<a
                         class="button button-danger"
                         href="{% url 'employees:activity-status' employee.pk %}"
                     >
                         Deactivate employee
-                    </a>
+                    </a>{% endif_can_access %}
                 {% else %}
-                    <a
+                    {% if_can_access 'employees:activity-status' %}<a
                         class="button button-success"
                         href="{% url 'employees:activity-status' employee.pk %}"
                     >
                         Activate employee
-                    </a>
+                    </a>{% endif_can_access %}
                 {% endif %}
             </div>
         {% endif %}
@@ -120,13 +123,13 @@
             </p>
 
             {% if perms.employees.change_employee %}
-                <a class="button button-small" href="{% url 'employees:edit' employee.pk %}">
+                {% if_can_access 'employees:edit' %}<a class="button button-small" href="{% url 'employees:edit' employee.pk %}">
                     {% if employee.photo %}
                         Replace photo
                     {% else %}
                         Add photo
                     {% endif %}
-                </a>
+                </a>{% endif_can_access %}
             {% endif %}
         </div>
     </section>
@@ -326,9 +329,9 @@
             class="context-navigation"
             aria-label="Employee navigation"
         >
-            <a class="button" href="{% url 'employees:list' %}">
+            {% if_can_access 'employees:list' %}<a class="button" href="{% url 'employees:list' %}">
                 Back to employees
-            </a>
+            </a>{% endif_can_access %}
 
             <a class="button" href="{% url 'core:home' %}">
                 Home

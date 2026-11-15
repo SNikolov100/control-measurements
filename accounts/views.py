@@ -50,16 +50,14 @@ class PendingRegistrationsView(UserPassesTestMixin, ListView):
 @login_required
 @require_POST
 def registration_decision(request, pk, action):
-
     if not request.user.is_superuser:
         raise PermissionDenied
 
     statuses = {
-        "approve": AppUser.RegistrationStatus.APPROVED,
-        "reject": AppUser.RegistrationStatus.REJECTED,
+        'approve': AppUser.RegistrationStatus.APPROVED,
+        'reject': AppUser.RegistrationStatus.REJECTED,
     }
     status = statuses.get(action)
-
     if status is None:
         raise Http404
 
@@ -70,11 +68,11 @@ def registration_decision(request, pk, action):
     ).update(registration_status=status)
 
     if updated:
-        messages.success(request, translate(f"Registration successfully {status}."))
+        messages.success(request, translate(f'Registration successfully {status}.'))
     else:
-        messages.warning(request, translate("Registration not found or already processed."))
+        messages.warning(request, translate('Registration not found or already processed.'))
 
-    return redirect("accounts:pending_registrations")
+    return redirect('accounts:pending_registrations')
 
 class ProfileCreateView(UserPassesTestMixin, CreateView):
     model = Profile

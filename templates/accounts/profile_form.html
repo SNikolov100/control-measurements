@@ -1,35 +1,82 @@
 {% extends "base.html" %}
+{% load form_tags %}
+
 {% block title %}
     Complete profile | Control Measurements
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">Home</a>
+            </li>
+            <li aria-current="page">
+                Complete profile
+            </li>
+        </ol>
+    </nav>
 {% endblock %}
 
 {% block content %}
 
 <header class="page-header">
     <div>
-        <h1 class="page-title">
-            Complete your profile
-        </h1>
-
+        <h1 class="page-title">Complete your profile</h1>
         <p class="page-description">
-            Please enter your personal information.
-            Fields marked as required must be completed.
+            Enter your personal information to continue
+            with your employee account registration.
         </p>
     </div>
 </header>
 
-<section class="card">
+<div class="form-layout form-container">
+    <section class="form-card">
+        <div class="form-card-header">
+            <h2 class="form-card-title">Personal information</h2>
+            <p class="form-card-description">
+                Fields marked with an asterisk (*) are required.
+            </p>
+        </div>
 
-    <form method="post"
-          enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">
-            Save profile
-        </button>
+        <form method="post"
+              enctype="multipart/form-data"
+              novalidate>
+            {% csrf_token %}
 
-    </form>
+            {% if form.non_field_errors %}
+                <div class="form-non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
 
-</section>
+            {% for hidden_field in form.hidden_fields %}
+                {{ hidden_field }}
+                {{ hidden_field.errors }}
+            {% endfor %}
+
+            <div class="form-fields">
+                {% render_field form.first_name %}
+                {% render_field form.middle_name %}
+                {% render_field form.last_name %}
+                {% render_field form.phone %}
+                {% render_field form.date_of_birth %}
+                {% render_field form.address %}
+                {% render_field form.photo css_class="employee-photo-field" %}
+            </div>
+
+            <div class="form-actions">
+                <button class="button button-primary"
+                        type="submit">
+                    Save profile
+                </button>
+
+                <a class="button" href="{% url 'core:home' %}">
+                    Back to home
+                </a>
+            </div>
+        </form>
+    </section>
+</div>
 
 {% endblock %}

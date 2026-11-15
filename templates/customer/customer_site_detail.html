@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load access_tags %}
 {% load static %}
 {% load status_tags %}
 
@@ -16,15 +17,19 @@
             </li>
 
             <li>
-                <a href="{% url 'customers:list' %}">
+                {% if_can_access 'customers:list' %}<a href="{% url 'customers:list' %}">
                     Customers
-                </a>
+                </a>{% else %}<span>
+                    Customers
+                </span>{% endif_can_access %}
             </li>
 
             <li>
-                <a href="{% url 'customers:details' customer.slug %}">
+                {% if_can_access 'customers:details' %}<a href="{% url 'customers:details' customer.slug %}">
                     {{ customer.short_name|default:customer.company_name }}
-                </a>
+                </a>{% else %}<span>
+                    {{ customer.short_name|default:customer.company_name }}
+                </span>{% endif_can_access %}
             </li>
 
             <li aria-current="page">
@@ -48,19 +53,19 @@
         </div>
 
         <div class="page-actions">
-            <a
+            {% if_can_access 'customers:site-edit' %}<a
                 class="button"
                 href="{% url 'customers:site-edit' customer.slug site.slug %}"
             >
                 Edit site
-            </a>
+            </a>{% endif_can_access %}
 
-            <a
+            {% if_can_access 'customers:contact-create' %}<a
                 class="button button-primary"
                 href="{% url 'customers:contact-create' customer.slug site.slug %}"
             >
                 Add responsible contact
-            </a>
+            </a>{% endif_can_access %}
         </div>
     </header>
 
@@ -126,12 +131,12 @@
                 </dl>
 
                 <div class="context-navigation">
-                    <a
+                    {% if_can_access 'customers:details' %}<a
                         class="button button-small"
                         href="{% url 'customers:details' customer.slug %}"
                     >
                         Customer details
-                    </a>
+                    </a>{% endif_can_access %}
                 </div>
             </section>
 
@@ -209,12 +214,12 @@
                     </p>
                 </div>
 
-                <a
+                {% if_can_access 'customers:contact-create' %}<a
                     class="button button-primary"
                     href="{% url 'customers:contact-create' customer.slug site.slug %}"
                 >
                     Add responsible contact
-                </a>
+                </a>{% endif_can_access %}
             </div>
 
             {% if site.contacts.all %}
@@ -230,7 +235,7 @@
                         >
                             <div class="contact-card-main">
                                 {% if contact.photo %}
-                                    <a
+                                    {% if_can_access 'customers:contact-details' %}<a
                                         class="contact-avatar"
                                         href="{% url 'customers:contact-details' customer.slug site.slug contact.pk %}"
                                         aria-label="Open details for {{ contact.full_name }}"
@@ -240,9 +245,15 @@
                                             src="{{ contact.photo.url }}"
                                             alt=""
                                         >
-                                    </a>
+                                    </a>{% else %}<span>
+                                        <img
+                                            class="contact-avatar-image"
+                                            src="{{ contact.photo.url }}"
+                                            alt=""
+                                        >
+                                    </span>{% endif_can_access %}
                                 {% else %}
-                                    <a
+                                    {% if_can_access 'customers:contact-details' %}<a
                                         class="contact-avatar"
                                         href="{% url 'customers:contact-details' customer.slug site.slug contact.pk %}"
                                         aria-label="Open details for {{ contact.full_name }}"
@@ -250,7 +261,11 @@
                                         <span aria-hidden="true">
                                             {{ contact.full_name|slice:":1"|upper }}
                                         </span>
-                                    </a>
+                                    </a>{% else %}<span>
+                                        <span aria-hidden="true">
+                                            {{ contact.full_name|slice:":1"|upper }}
+                                        </span>
+                                    </span>{% endif_can_access %}
                                 {% endif %}
 
                                 <div class="contact-card-content">
@@ -286,26 +301,26 @@
                             </div>
 
                             <div class="contact-card-actions">
-                                <a
+                                {% if_can_access 'customers:contact-details' %}<a
                                     class="button button-small"
                                     href="{% url 'customers:contact-details' customer.slug site.slug contact.pk %}"
                                 >
                                     Details
-                                </a>
+                                </a>{% endif_can_access %}
 
-                                <a
+                                {% if_can_access 'customers:contact-edit' %}<a
                                     class="button button-small"
                                     href="{% url 'customers:contact-edit' customer.slug site.slug contact.pk %}"
                                 >
                                     Edit
-                                </a>
+                                </a>{% endif_can_access %}
 
-                                <a
+                                {% if_can_access 'customers:contact-delete' %}<a
                                     class="button button-small button-danger"
                                     href="{% url 'customers:contact-delete' customer.slug site.slug contact.pk %}"
                                 >
                                     Delete
-                                </a>
+                                </a>{% endif_can_access %}
                             </div>
                         </article>
                     {% endfor %}
@@ -319,12 +334,12 @@
                         over equipment for an activity.
                     </p>
 
-                    <a
+                    {% if_can_access 'customers:contact-create' %}<a
                         class="button button-primary"
                         href="{% url 'customers:contact-create' customer.slug site.slug %}"
                     >
                         Add responsible contact
-                    </a>
+                    </a>{% endif_can_access %}
                 </div>
             {% endif %}
         </section>
@@ -341,12 +356,12 @@
                     </p>
                 </div>
 
-                <a
+                {% if_can_access 'customers:site-equipment-create' %}<a
                     class="button button-primary"
                     href="{% url 'customers:site-equipment-create' customer.slug site.slug %}"
                 >
                     Add equipment
-                </a>
+                </a>{% endif_can_access %}
             </div>
 
             {% if site.equipment_items.all %}
@@ -407,23 +422,25 @@
 
                                         <td class="table-actions">
                                             <div class="action-group">
-                                                <a href="{% url 'equipment:detail' equipment.slug %}">
+                                                {% if_can_access 'equipment:detail' %}<a href="{% url 'equipment:detail' equipment.slug %}">
                                                     Details
-                                                </a>
+                                                </a>{% else %}<span>
+                                                    Details
+                                                </span>{% endif_can_access %}
 
-                                                <a
+                                                {% if_can_access 'equipment:edit' %}<a
                                                     class="button button-small"
                                                     href="{% url 'equipment:edit' equipment.slug %}"
                                                 >
                                                     Edit
-                                                </a>
+                                                </a>{% endif_can_access %}
 
-                                                <a
+                                                {% if_can_access 'inspections:create' %}<a
                                                     class="button button-small button-primary"
                                                     href="{% url 'inspections:create' equipment.slug %}"
                                                 >
                                                     New activity
-                                                </a>
+                                                </a>{% endif_can_access %}
                                             </div>
                                         </td>
                                     </tr>
@@ -441,12 +458,12 @@
                         customer site.
                     </p>
 
-                    <a
+                    {% if_can_access 'customers:site-equipment-create' %}<a
                         class="button button-primary"
                         href="{% url 'customers:site-equipment-create' customer.slug site.slug %}"
                     >
                         Add equipment
-                    </a>
+                    </a>{% endif_can_access %}
                 </div>
             {% endif %}
         </section>
@@ -481,13 +498,13 @@
             class="context-navigation"
             aria-label="Customer site navigation"
         >
-            <a class="button" href="{% url 'customers:details' customer.slug %}">
+            {% if_can_access 'customers:details' %}<a class="button" href="{% url 'customers:details' customer.slug %}">
                 Back to customer
-            </a>
+            </a>{% endif_can_access %}
 
-            <a class="button" href="{% url 'customers:list' %}">
+            {% if_can_access 'customers:list' %}<a class="button" href="{% url 'customers:list' %}">
                 All customers
-            </a>
+            </a>{% endif_can_access %}
 
             <a class="button" href="{% url 'core:home' %}">
                 Home

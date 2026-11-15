@@ -11,7 +11,7 @@ from .choices import EmployeeHistoryEventType, EmployeeRequestStatus
 
 def employee_photo_upload_path(instance, filename):
     file_extension = Path(filename).suffix.lower()
-    return "employees/"f"{uuid4().hex}{file_extension}"
+    return 'employees/'f'{uuid4().hex}{file_extension}'
 
 
 class Employee(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
@@ -51,10 +51,10 @@ class Employee(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
         verbose_name=translate('Notes'),
     )
     specialties = models.ManyToManyField(
-        "core.Specialty",
+        'core.Specialty',
         blank=True,
-        related_name="employees",
-        verbose_name=translate("Specialties"),
+        related_name='employees',
+        verbose_name=translate('Specialties'),
     )
     is_active = models.BooleanField(
         default=True,
@@ -65,7 +65,7 @@ class Employee(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
         validators=[validate_uploaded_image],
         blank=True,
         null=True,
-        verbose_name=translate("Employee photo"),
+        verbose_name=translate('Employee photo'),
     )
 
     def _change_activity_status(self, *, is_active,event_type, description="",):
@@ -99,49 +99,46 @@ class Employee(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
 
     def build_slug(self):
         name_slug = slugify(self.full_name,allow_unicode=True,)
-        return f"{self.pk}-{name_slug}"
+        return f'{self.pk}-{name_slug}'
 
     def __str__(self):
         return self.full_name
 
     class Meta:
-        ordering = ("full_name",)
-        verbose_name = translate("Employee")
-        verbose_name_plural = translate("Employees")
+        ordering = ('full_name',)
+        verbose_name = translate('Employee')
+        verbose_name_plural = translate('Employees')
 
 class EmployeeHistory(models.Model):
     EventType = EmployeeHistoryEventType
 
     employee = models.ForeignKey(
-        "Employee",
+        'Employee',
         on_delete=models.PROTECT,
-        related_name="history",
-        verbose_name=translate("Employee"),
+        related_name='history',
+        verbose_name=translate('Employee'),
     )
     event_type = models.CharField(
         max_length=30,
         choices=EventType.choices,
-        verbose_name=translate("Event type"),
+        verbose_name=translate('Event type'),
     )
     description = models.TextField(
         blank=True,
-        verbose_name=translate("Description"),
+        verbose_name=translate('Description'),
     )
     changed_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=translate("Changed at"),
+        verbose_name=translate('Changed at'),
     )
 
     def __str__(self):
-        return (
-            f"{self.employee} - "
-            f"{self.get_event_type_display()}"
-        )
+        return f'{self.employee} - {self.get_event_type_display()}'
 
     class Meta:
-        ordering = ("-changed_at",)
-        verbose_name = translate("Employee history")
-        verbose_name_plural = translate("Employee histories")
+        ordering = ('-changed_at',)
+        verbose_name = translate('Employee history')
+        verbose_name_plural = translate('Employee histories')
 
 
 
@@ -185,7 +182,7 @@ class EmployeeRequest(models.Model):
     )
 
     def __str__(self):
-        return f"{self.user} - {self.get_status_display()}"
+        return f'{self.user} - {self.get_status_display()}'
 
     class Meta:
         ordering = ('-created_at',)

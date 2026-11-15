@@ -1,4 +1,5 @@
 {% extends "shared/delete_confirm_base.html" %}
+{% load access_tags %}
 
 {% block delete_page_title %}
     Delete equipment type
@@ -74,15 +75,15 @@
 {% endblock %}
 
 {% block delete_blocked_action %}
-    <a
+    {% if_can_access 'equipment:types-list' %}<a
         class="button"
         href="{% url 'equipment:types-list' %}"
     >
         Return to equipment types
-    </a>
+    </a>{% endif_can_access %}
 {% endblock %}
 {% block delete_cancel_action %}
-    <a class="button" href="{% url 'equipment:types-list' %}">
+    {% if_can_access 'equipment:types-list' %}<a class="button" href="{% url 'equipment:types-list' %}">
         Return without deleting
-    </a>
+    </a>{% endif_can_access %}
 {% endblock %}

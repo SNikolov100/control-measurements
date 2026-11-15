@@ -17,54 +17,54 @@ class EquipmentTypeBaseForm(forms.ModelForm):
             'is_active',
         )
         widgets = {
-            "name": forms.TextInput(attrs={"placeholder": translate("For example: Digital thermometer")},),
-            "description": forms.Textarea(
+            'name': forms.TextInput(attrs={'placeholder': translate('For example: Digital thermometer')},),
+            'description': forms.Textarea(
                 attrs={
-                    "rows": 5,
-                    "placeholder": translate("Describe the equipment type and its typical application."),
+                    'rows': 5,
+                    'placeholder': translate('Describe the equipment type and its typical application.'),
                 },
             ),
-            "default_interval_value": forms.NumberInput(
+            'default_interval_value': forms.NumberInput(
                 attrs={
-                    "min": 1,
-                    "placeholder": translate("For example: 12"),
+                    'min': 1,
+                    'placeholder': translate('For example: 12'),
                 },
             ),
-            "default_inspection_duration": forms.NumberInput(
+            'default_inspection_duration': forms.NumberInput(
                 attrs={
-                    "min": 1,
-                    "placeholder": translate("For example: 60"),
+                    'min': 1,
+                    'placeholder': translate('For example: 60'),
                 },
             ),
         }
         help_texts = {
-            "name": translate("Enter the full name of the equipment type."),
-            "short_name": translate("Enter a shorter name for registers and activities."),
-            "specialty": translate("Select the specialty required for this type of equipment."),
-            "description": translate("Optional description of the equipment type."),
-            "default_interval_value": translate("Default interval used when registering equipment of this type."),
-            "default_interval_unit": translate("Select the unit for the default inspection interval."),
-            "default_inspection_duration": translate("Default estimated activity duration in minutes."),
-            "is_active": translate("Inactive equipment types remain visible but should not be used for new equipment registrations."),
+            'name': translate('Enter the full name of the equipment type.'),
+            'short_name': translate('Enter a shorter name for registers and activities.'),
+            'specialty': translate('Select the specialty required for this type of equipment.'),
+            'description': translate('Optional description of the equipment type.'),
+            'default_interval_value': translate('Default interval used when registering equipment of this type.'),
+            'default_interval_unit': translate('Select the unit for the default inspection interval.'),
+            'default_inspection_duration': translate('Default estimated activity duration in minutes.'),
+            'is_active': translate('Inactive equipment types remain visible but should not be used for new equipment registrations.'),
         }
         error_messages = {
-            "name": {
-                "required": translate("Enter the equipment-type name."),
-                "unique": translate("An equipment type with this name already exists."),
+            'name': {
+                'required': translate('Enter the equipment-type name.'),
+                'unique': translate('An equipment type with this name already exists.'),
             },
-            "short_name": {
-                "required": translate("Enter a short name for the equipment type."),
-                "unique": translate("An equipment type with this short name already exists."),
+            'short_name': {
+                'required': translate('Enter a short name for the equipment type.'),
+                'unique': translate('An equipment type with this short name already exists.'),
             },
-            "specialty": {"required": translate("Select the required specialty.")},
-            "default_interval_value": {
-                "required": translate("Enter the default inspection interval."),
-                "invalid": translate("Enter a valid default inspection interval."),
+            'specialty': {'required': translate('Select the required specialty.')},
+            'default_interval_value': {
+                'required': translate('Enter the default inspection interval.'),
+               ' "invalid"': translate('Enter a valid default inspection interval.'),
             },
-            "default_interval_unit": {"required": translate("Select the default interval unit."),},
-            "default_inspection_duration": {
-                "required": translate("Enter the default activity duration."),
-                "invalid": translate("Enter a valid duration in minutes."),
+            'default_interval_unit': {'required': translate('Select the default interval unit.'),},
+            'default_inspection_duration': {
+                'required': translate('Enter the default activity duration.'),
+                'invalid': translate('Enter a valid duration in minutes.'),
             },
         }
 
@@ -96,7 +96,7 @@ class EquipmentBaseForm(forms.ModelForm):
             'model_name': forms.TextInput(attrs={'placeholder': translate('For example: Model 100')}),
             'serial_number': forms.TextInput(attrs={'placeholder': translate('For example: SN-2026-001')}),
             'inventory_number': forms.TextInput(attrs={'placeholder': translate('For example: INV-001')}),
-            'image': forms.ClearableFileInput(attrs={"accept": "image/jpeg,image/png,image/webp"}),
+            'image': forms.ClearableFileInput(attrs={'accept': 'image/jpeg,image/png,image/webp'}),
             'inspection_interval_value': forms.NumberInput(
                 attrs={
                     'min': 1,

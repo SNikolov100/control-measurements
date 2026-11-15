@@ -1,71 +1,143 @@
+{% extends "base.html" %}
 
-{% if messages %}
-    {% for message in messages %}
-        <p>{{ message }}</p>
-    {% endfor %}
-{% endif %}
+{% block title %}
+    Pending Registrations | Control Measurements
+{% endblock %}
 
-<h2>Pending registrations</h2>
+{% block breadcrumbs %}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumbs-list">
+            <li>
+                <a href="{% url 'core:home' %}">Home</a>
+            </li>
+            <li aria-current="page">
+                Pending registrations
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+    <div>
+        <h1 class="page-title">Pending registrations</h1>
+        <p class="page-description">
+            Review and approve or reject new account registrations.
+        </p>
+    </div>
+</header>
 
 {% if pending_users %}
-    <table>
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Registration date</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
 
-        <tbody>
-            {% for user in pending_users %}
-                <tr>
-                    <td>{{ user.username }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.date_joined }}</td>
+    <section class="table-card">
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Username</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Registration date</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
 
-                    <td>
-                        <form method="post"
-                              action="{% url 'accounts:registration_decision' user.pk 'approve' %}">
-                            {% csrf_token %}
-                            <button type="submit">
-                                Approve
-                            </button>
-                        </form>
+                <tbody>
+                    {% for pending_user in pending_users %}
+                        <tr>
+                            <td>{{ pending_user.username }}</td>
+                            <td>{{ pending_user.email }}</td>
+                            <td>
+                                {{ pending_user.date_joined|date:"d.m.Y H:i" }}
+                            </td>
+                            <td class="table-actions">
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    <form
+                                        method="post"
+                                        action="{% url 'accounts:registration_decision' pending_user.pk 'approve' %}"
+                                        style="margin: 0;"
+                                    >
+                                        {% csrf_token %}
+                                        <button
+                                            type="submit"
+                                            class="button button-small button-success"
+                                        >
+                                            Approve
+                                        </button>
+                                    </form>
 
-                        <form method="post"
-                              action="{% url 'accounts:registration_decision' user.pk 'reject' %}">
-                            {% csrf_token %}
-                            <button type="submit">
-                                Reject
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                                    <form
+                                        method="post"
+                                        action="{% url 'accounts:registration_decision' pending_user.pk 'reject' %}"
+                                        style="margin: 0;"
+                                    >
+                                        {% csrf_token %}
+                                        <button
+                                            type="submit"
+                                            class="button button-small button-danger"
+                                        >
+                                            Reject
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
 
     {% if is_paginated %}
-        <nav>
-            {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}">
-                    Previous
-                </a>
-            {% endif %}
+        <div class="pagination-panel">
+            <div class="pagination-summary">
+                Showing
+                <strong>{{ page_obj.start_index }}</strong>
+                to
+                <strong>{{ page_obj.end_index }}</strong>
+                of
+                <strong>{{ paginator.count }}</strong>
+                records
+            </div>
 
-            Page {{ page_obj.number }}
-            of {{ page_obj.paginator.num_pages }}
+            <nav class="pagination-navigation" aria-label="Pagination">
+                <div class="pagination-links">
+                    {% if page_obj.has_previous %}
+                        <a
+                            class="pagination-link"
+                            href="?page={{ page_obj.previous_page_number }}"
+                        >
+                            Previous
+                        </a>
+                    {% endif %}
 
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}">
-                    Next
-                </a>
-            {% endif %}
-        </nav>
+                    <span class="pagination-link pagination-link-current"
+                          aria-current="page">
+                        {{ page_obj.number }} / {{ paginator.num_pages }}
+                    </span>
+
+                    {% if page_obj.has_next %}
+                        <a
+                            class="pagination-link"
+                            href="?page={{ page_obj.next_page_number }}"
+                        >
+                            Next
+                        </a>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
     {% endif %}
 
 {% else %}
-    <p>No pending registrations.</p>
+
+    <section class="empty-state">
+        <h2>No pending registrations</h2>
+        <p>
+            There are currently no account registrations awaiting approval.
+        </p>
+    </section>
+
 {% endif %}
+
+{% endblock %}

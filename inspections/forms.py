@@ -17,7 +17,7 @@ class InspectionBaseForm(forms.ModelForm):
             'notes',
         )
         widgets = {
-            "received_at": forms.DateTimeInput(
+            'received_at': forms.DateTimeInput(
                 attrs={'type': 'datetime-local',},
                 format='%Y-%m-%dT%H:%M',
             ),
@@ -45,9 +45,9 @@ class InspectionBaseForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["received_at"].input_formats = ["%Y-%m-%dT%H:%M"]
-        self.fields["due_date"].input_formats = ["%Y-%m-%d"]
-        self.fields["planned_start"].input_formats = ["%Y-%m-%dT%H:%M"]
+        self.fields['received_at'].input_formats = ["%Y-%m-%dT%H:%M"]
+        self.fields['due_date'].input_formats = ["%Y-%m-%d"]
+        self.fields['planned_start'].input_formats = ["%Y-%m-%dT%H:%M"]
 
 
 class InspectionCreateForm(InspectionBaseForm):
@@ -60,7 +60,7 @@ class InspectionCreateForm(InspectionBaseForm):
         if equipment is not None:
             self.instance.equipment = equipment
             allowed_inspection_types = set(get_allowed_inspection_types(equipment))
-            self.fields["inspection_type"].choices = tuple(
+            self.fields['inspection_type'].choices = tuple(
                 choice
                 for choice in Inspection.InspectionType.choices
                 if choice[0] in allowed_inspection_types
@@ -126,21 +126,15 @@ class InspectionCompleteForm(forms.Form):
         if inspection and inspection.inspection_type == Inspection.InspectionType.REPAIR:
             self.fields['result'].label = translate('Repair result')
             self.fields['result'].choices = (
-                (
-                    Inspection.Result.PASSED.value, translate('Repair completed successfully'),
-                ),
-                (
-                    Inspection.Result.FAILED.value, translate('Repair unsuccessful'),
-                ),
+                (Inspection.Result.PASSED.value, translate('Repair completed successfully'),),
+                (Inspection.Result.FAILED.value, translate('Repair unsuccessful'),),
             )
             self.fields['result_notes'].widget.attrs.update(
                 {'placeholder': 'Describe the repair work performed, replaced components, adjustments, and the reason if the repair was unsuccessful.'}
             )
         else:
             self.fields['result'].label = translate('Inspection result')
-            self.fields['result_notes'].widget.attrs.update(
-                {'placeholder': 'Add final findings or describe the reason for a failed result.'}
-            )
+            self.fields['result_notes'].widget.attrs.update({'placeholder': 'Add final findings or describe the reason for a failed result.'})
 
     def clean(self):
         cleaned_data = super().clean()

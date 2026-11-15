@@ -1,0 +1,16 @@
+{% if allowed %}
+    {% if disabled_reason %}
+        <button
+            type="button"
+            class="button {{ css_class }} button-disabled"
+            disabled
+            title="{{ disabled_reason }}"
+        >
+            {{ label }}
+        </button>
+    {% else %}
+        <a href="{{ url }}" class="button {{ css_class }}">
+            {{ label }}
+        </a>
+    {% endif %}
+{% endif %}

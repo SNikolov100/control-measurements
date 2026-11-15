@@ -1,54 +1,31 @@
 from django import forms
 from .models import Employee
-from django.utils.translation import gettext_lazy as translate
-from accounts.roles import GROUP_EMPLOYEE, GROUP_OPERATOR
+from django.contrib.auth.models import Group
 from .choices import EmployeeRequestAction
-from accounts.roles import UserRole
+from django.utils.translation import gettext_lazy as translate
 
 class EmployeeBaseForm(forms.ModelForm):
     class Meta:
         model = Employee
-        fields = (
-            'full_name',
-            'position',
-            'phone',
-            'email',
-            'photo',
-            'notes',
-            'specialties',
-        )
+        fields = ('full_name', 'position', 'phone', 'email', 'photo', 'notes', 'specialties')
         widgets = {
             'full_name': forms.TextInput(
-                attrs={
-                    'placeholder': 'For example: Ivan Ivanov',
-                    'autocomplete': 'name',
-                },
+                attrs={'placeholder': translate('For example: Ivan Ivanov'), 'autocomplete': 'name'},
             ),
             'position': forms.TextInput(
-                attrs={'placeholder': 'For example: Laboratory technician'},
+                attrs={'placeholder': translate('For example: Laboratory technician')},
             ),
             'phone': forms.TextInput(
-                attrs={
-                    'placeholder': 'For example: +359 888 123 456',
-                    'autocomplete': 'tel',
-                },
+                attrs={'placeholder': translate('For example: +359 888 123 456'), 'autocomplete': 'tel'},
             ),
             'email': forms.EmailInput(
-                attrs={
-                    'placeholder': 'For example: employee@example.com',
-                    'autocomplete': 'email',
-                },
+                attrs={'placeholder': translate('For example: employee@example.com'), 'autocomplete': 'email'},
             ),
             'photo': forms.ClearableFileInput(
-                attrs={
-                    "accept": 'image/jpeg,image/png,image/webp',
-                },
+                attrs={"accept": 'image/jpeg,image/png,image/webp'},
             ),
             'notes': forms.Textarea(
-                attrs={
-                    'rows': 5,
-                    'placeholder': 'Add relevant information about the employee.',
-                },
+                attrs={'rows': 5, 'placeholder': translate('Add relevant information about the employee.')},
             ),
             'specialties': forms.CheckboxSelectMultiple(),
         }
@@ -100,10 +77,10 @@ class EmployeeRequestReviewForm(forms.Form):
         required=False,
         label=translate('Existing employee'),
     )
-    role = forms.ChoiceField(
-        choices=[("", "---------"), *UserRole.choices],
+    role = forms.ModelChoiceField(
+        queryset=Group.objects.order_by('name'),
         required=False,
-        label=translate('User role'),
+        label=translate('Permission group'),
     )
     review_note = forms.CharField(
         required=False,
@@ -132,6 +109,11 @@ class EmployeeRequestReviewForm(forms.Form):
             self.add_error('role', translate('Select a user role.'),)
 
         if action == EmployeeRequestAction.REJECT and not note.strip():
-            self.add_error("review_note", translate("Enter a reason for rejection."),)
+            self.add_error('review_note', translate('Enter a reason for rejection.'),)
 
         return cleaned_data
+
+    confirm_name_difference = forms.BooleanField(required=False,
+        label=translate('I confirm that the different names refer to the same person.'),
+        help_text=translate('Use only after checking a reported name difference. The existing employee name will be preserved.'),
+    )

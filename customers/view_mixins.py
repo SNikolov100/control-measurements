@@ -24,7 +24,7 @@ class CustomerSiteParentMixin(CustomerParentMixin):
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        customer_site = CustomerSite.objects.select_related("customer",)
+        customer_site = CustomerSite.objects.select_related('customer',)
         self.site = get_object_or_404(
             customer_site,
             slug=kwargs[self.site_url_kwarg],
@@ -39,6 +39,6 @@ class CustomerSiteParentMixin(CustomerParentMixin):
     def get_success_url(self):
         return reverse('customers:site-details',kwargs={
                 'customer_slug': self.customer.slug,
-                "site_slug": self.site.slug,
+                'site_slug': self.site.slug,
                 },
         )

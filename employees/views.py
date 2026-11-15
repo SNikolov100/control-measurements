@@ -1,3 +1,4 @@
+from core.view_mixins import PermissionAwareSuccessMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, ListView, UpdateView, DetailView, FormView
@@ -29,16 +30,16 @@ class EmployeeListView(SearchMixin, PaginationMixin, ListView):
     search_distinct = True
 
     def get_queryset(self):
-        queryset_result = super().get_queryset().prefetch_related("specialties")
+        queryset_result = super().get_queryset().prefetch_related('specialties')
         return queryset_result
 
-class EmployeeCreateView(CreateView):
+class EmployeeCreateView(PermissionAwareSuccessMixin, CreateView):
     model = Employee
     form_class = EmployeeCreateForm
     template_name = 'employees/employee_create.html'
     success_url = reverse_lazy('employees:list')
 
-class EmployeeEditView(UpdateView):
+class EmployeeEditView(PermissionAwareSuccessMixin, UpdateView):
     model = Employee
     form_class = EmployeeEditForm
     template_name = 'employees/employee_edit.html'
@@ -54,7 +55,7 @@ class EmployeeDetailView(DetailView):
         queryset_result = super().get_queryset().prefetch_related('specialties', 'history')
         return queryset_result
 
-class EmployeeActivityStatusView(FormView):
+class EmployeeActivityStatusView(PermissionAwareSuccessMixin, FormView):
     form_class = EmployeeActivityStatusForm
     template_name = 'employees/employee_activity_status.html'
 
@@ -77,7 +78,7 @@ class EmployeeActivityStatusView(FormView):
 
         return super().form_valid(form)
 
-    def get_success_url(self):
+    def get_preferred_success_url(self):
         return reverse('employees:list')
 
 class PendingEmployeeRequestsView(UserPassesTestMixin, PaginationMixin, ListView):
@@ -96,7 +97,7 @@ class PendingEmployeeRequestsView(UserPassesTestMixin, PaginationMixin, ListView
             .order_by('created_at')
         )
 
-class EmployeeRequestReviewView(UserPassesTestMixin, FormView):
+class EmployeeRequestReviewView(PermissionAwareSuccessMixin, UserPassesTestMixin, FormView):
     form_class = EmployeeRequestReviewForm
     template_name = 'employees/employee_request_review.html'
     success_url = reverse_lazy('employees:pending-requests')
@@ -122,9 +123,11 @@ class EmployeeRequestReviewView(UserPassesTestMixin, FormView):
                 role=form.cleaned_data['role'],
                 employee=form.cleaned_data['employee'],
                 note=form.cleaned_data['review_note'],
+                confirm_name_difference=form.cleaned_data['confirm_name_difference'],
             )
 
         except ValidationError as error:
+            form.show_name_confirmation = getattr(error, 'code', None) == 'name_mismatch'
             for message in error.messages:
                 form.add_error(None, message)
             return self.form_invalid(form)

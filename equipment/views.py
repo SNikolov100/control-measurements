@@ -1,3 +1,4 @@
+from core.view_mixins import PermissionAwareSuccessMixin
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView
 from .forms import (EquipmentTypeEditForm,
                     EquipmentTypeCreateForm,
@@ -27,28 +28,27 @@ class EquipmentTypeListView(SearchMixin, PaginationMixin, ListView):
     def get_queryset(self):
         return super().get_queryset().select_related('specialty')
 
-class EquipmentTypeCreateView(CreateView):
+class EquipmentTypeCreateView(PermissionAwareSuccessMixin, CreateView):
     model = EquipmentType
     form_class = EquipmentTypeCreateForm
     template_name = 'equipment/equipment_type_create.html'
     success_url = reverse_lazy('equipment:types-list')
 
-class EquipmentTypeEditView(UpdateView):
+class EquipmentTypeEditView(PermissionAwareSuccessMixin, UpdateView):
     model = EquipmentType
     form_class = EquipmentTypeEditForm
     template_name = 'equipment/equipment_type_edit.html'
     context_object_name = "equipment_type"
     success_url = reverse_lazy('equipment:types-list')
 
-class EquipmentTypeDeleteView(ConfirmedDeleteMixin, DeleteView):
+class EquipmentTypeDeleteView(PermissionAwareSuccessMixin, ConfirmedDeleteMixin, DeleteView):
     model = EquipmentType
     form_class = EquipmentTypeDeleteForm
     context_object_name = 'equipment_type'
     template_name = 'equipment/equipment_type_delete.html'
     success_url = reverse_lazy('equipment:types-list')
     deletion_error_message = (
-        'This equipment type cannot be deleted because concrete equipment items use it. '
-        'Deactivate the equipment type instead.'
+        translate('This equipment type cannot be deleted because concrete equipment items use it. Deactivate the equipment type instead.')
     )
 
     def is_deletion_blocked(self):
@@ -77,20 +77,20 @@ class EquipmentListView(StatusFilterMixin, SearchMixin, PaginationMixin, ListVie
 
     def get_queryset(self):
         queryset_result = super().get_queryset().select_related(
-                "customer_site",
-                "customer_site__customer",
-                "equipment_type",
-                "equipment_type__specialty",
+                'customer_site',
+                'customer_site__customer',
+                'equipment_type',
+                'equipment_type__specialty',
                 )
         return queryset_result
 
-class EquipmentCreateView(EquipmentRegistrationMixin, CreateView):
+class EquipmentCreateView(PermissionAwareSuccessMixin, EquipmentRegistrationMixin, CreateView):
     model = Equipment
     form_class = EquipmentCreateForm
     template_name = 'equipment/equipment_create.html'
     success_url = reverse_lazy('equipment:list')
 
-class EquipmentEditView(UpdateView):
+class EquipmentEditView(PermissionAwareSuccessMixin, UpdateView):
     model = Equipment
     form_class = EquipmentEditForm
     context_object_name = 'equipment'
@@ -98,11 +98,11 @@ class EquipmentEditView(UpdateView):
     slug_field = 'slug'
     slug_url_kwarg = 'equipment_slug'
 
-    def get_success_url(self):
+    def get_preferred_success_url(self):
         customer_site = self.object.customer_site
-        return reverse("customers:site-details",kwargs={
-                "customer_slug": customer_site.customer.slug,
-                "site_slug": customer_site.slug,
+        return reverse('customers:site-details',kwargs={
+                'customer_slug': customer_site.customer.slug,
+                'site_slug': customer_site.slug,
             },
         )
 
@@ -115,12 +115,10 @@ class EquipmentDetailView(DetailView):
 
     def get_queryset(self):
         return (super().get_queryset().select_related(
-                "customer_site",
-                "customer_site__customer",
-                "equipment_type",
-                "equipment_type__specialty",
+                'customer_site',
+                'customer_site__customer',
+                'equipment_type',
+                'equipment_type__specialty',
             )
-            .prefetch_related(
-                "status_history",
-            )
+            .prefetch_related('status_history')
         )

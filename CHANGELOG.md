@@ -1,119 +1,37 @@
 # Changelog
 
-## Current Development Phase
-
 ## [Unreleased]
 
-### In progress
-- Development of user registration and account approval workflow.
-- Implementation of user profile completion.
-- Planned administrative approval for employee records.
+### Added
+
+- Account registration with a required email address and optional username. Users can sign in with either credential.
+- Registration approval and rejection, followed by personal profile completion for approved accounts.
+- Employee link requests that let a superuser link an account to an existing employee record or create a new one and select an existing permission group.
+- Public About and Contacts pages.
+- Separate permissions for inspection creation, assignment, start, completion, cancellation, and access to all inspections.
+- Automated checks for permission changes, direct request authorization, inspection assignments, and employee linking.
 
 ### Changed
-- Updated `AppUser` with registration statuses: `PENDING`, `APPROVED`, `REJECTED`.
-- Moved first, middle and last name fields into `Profile`.
-- Added a one-to-one relationship between `AppUser` and `Employee`.
-- Made first name, middle name, last name and phone required in the profile model.
+
+- Centralized route permissions so navigation, action buttons, and middleware apply the same access rules. Group permissions are managed through Django Admin.
+- Scoped inspections to the current employee's assignments unless the user has permission to see all inspections. Operators with the appropriate permissions can start and finish work assigned to employees without accounts.
+- Allowed company and system settings to be viewed with read-only access while requiring change permissions to save them.
+- Updated registration and profile screens and displayed the signed-in username in the navigation.
+
+### Fixed
+
+- Blocked employee linking when the account and employee email addresses differ. Filled an empty employee email from the account and required explicit confirmation for a name mismatch.
+- Made employee search case-insensitive for Cyrillic text on SQLite.
+- Hid actions that users lack permission to perform and returned users to Home when they could save a change but could not open the usual destination.
 
 ### Removed
-- Automatic profile creation through Django signals.
 
-### Notes
-- Development branch: `feature/user-registration`.
-- Changes are under development and not yet merged into `main`.
-----
-### Core
-- Base models and reusable mixins implemented.
-- Company and system settings implemented.
-- BG/EN localization infrastructure added.
+- Automatic profile creation through Django signals. Approved users complete their profiles through the application.
 
-### Customers
-- Customer management completed.
-- Customer sites management completed.
-- Customer contacts management completed.
-- Slug URLs implemented.
+## Earlier development
 
-### Equipment
-- Equipment register completed.
-- Equipment type management completed.
-- Equipment image support added.
-- Slug URLs implemented.
-- Customer-site ownership is fixed after equipment registration.
-- Equipment type is fixed in the standard edit workflow.
-- Equipment status is managed through controlled activity transitions.
-- Inspection interval and expected duration use equipment-type defaults when left empty.
-- Equipment defaults now work consistently during both creation and editing.
-- Inventory numbers are globally unique when provided.
-- Multiple equipment records may remain without an inventory number.
-- Equipment-type short names are required and unique.
-- Validation messages were improved for operator use.
-- Placeholders were prepared for BG/EN translation.
-- Added globally unique non-empty inventory numbers.
-- Improved operator-facing validation for duplicate inventory numbers.
-- Prevented customer-site changes through the standard equipment edit form.
-- Prevented equipment-type changes through the standard equipment edit form.
-- Applied equipment-type defaults when interval or duration values are left empty.
-- Disabled new activity creation when the equipment status does not allow it.
-- Added direct URL protection for unavailable activity-creation workflows.
-
-### Employees
-- Employee management completed.
-- Employee image support added.
-- Specialty assignment implemented.
-
-### Activities
-- Activity lifecycle implemented.
-- Assignment workflow implemented.
-- Start workflow implemented.
-- Completion workflow implemented.
-- Cancellation workflow implemented.
-- History tracking implemented.
-- Activity start actions are disabled when no employees are assigned.
-- Server-side validation prevents activities from starting without qualified active employees.
-- Repair completion results were aligned across models, forms, and services.
-- Successful repairs move equipment to the repeat-inspection workflow.
-- Failed repairs keep equipment in the repair workflow.
-- User-facing terminology was standardized around activities.
-- Prevented activities from starting without assigned qualified employees.
-- Prevented another activity from starting while equipment is already under inspection.
-- Aligned repair results across models, forms, and services.
-- Added consistent equipment status transitions for repairs and reinspections.
-- Standardized user-facing terminology around activities.
-
-### User Interface
-- Shared navigation menu added.
-- Confirmation pages implemented.
-- Custom 404 page added.
-- Redirect workflow optimized for operators.
-- Disabled activity actions now use a clear visual state.
-- Equipment edit screens distinguish editable data from fixed registration data.
-- Fixed customer-site and equipment-type information is displayed without editable controls.
-- Added a reusable `status_badge` template tag.
-- Added status icons for equipment, activities, results, and status history.
-- Replaced repeated status conditions in templates with a shared component.
-- Added consistent disabled button styling for unavailable workflow actions.
-- Added warning messages when direct URLs attempt to bypass workflow restrictions.
-
-### Frontend & Performance Optimizations
-- Consolidated CSS files into a single unified stylesheet
-- Configured WhiteNoise with `CompressedManifestStaticFilesStorage` for automatic Gzip/Brotli compression and long-term cache-busting hashes.
-- Enabled Django's `cached.Loader` for production environments (`DEBUG=False`) to compile and cache templates in memory.
-- Created reusable form field component and template tag.
-- Refactored forms to use `{% render_field %}`.
-- Extended and standardized `{% status_badge %}`, unified status presentation, and replaced all hardcoded status badge HTML.
-- Configured `DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'` in `settings.py`.
-
-#### Remaining Work
-
-- Add consistent navigation-menu icons.
-- Add controlled equipment suspension and restoration workflows.
-- Add a controlled equipment decommission workflow.
-- Add the `equipment.correct_equipment_type` permission and audit workflow.
-- Customize Django Admin.
-- Complete the final BG/EN review.
-- Add automated tests for workflow restrictions.
-- Complete responsive review and final UI styling.
-- Prepare the application for deployment.
-- Extract shared quick filter bar component.
-- Add custom user model, authentication, roles, and permissions.
-- Complete responsive review and final UI styling.
+- Added company and system settings, reusable models and mixins, and Bulgarian and English localization infrastructure.
+- Added customer, site, and contact management, along with employee records, photos, and specialty assignment.
+- Added the equipment register, equipment types, images, and equipment-type defaults for inspection intervals and expected durations. Enforced uniqueness for supplied inventory numbers and kept the customer site and equipment type fixed in standard editing.
+- Added activity creation, assignment, start, completion, cancellation, and status history. Applied equipment status and employee qualification checks and defined transitions for repairs and reinspections.
+- Added shared navigation, confirmation pages, a custom 404 page, reusable form fields and status badges, and a single stylesheet. Configured WhiteNoise and cached template loading for production settings.

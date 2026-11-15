@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load access_tags %}
 {% load static status_tags %}
 
 {% block title %}
@@ -15,35 +16,51 @@
             </li>
 
             <li>
-                <a href="{% url 'customers:list' %}">
+                {% if_can_access 'customers:list' %}<a href="{% url 'customers:list' %}">
                     Customers
-                </a>
+                </a>{% else %}<span>
+                    Customers
+                </span>{% endif_can_access %}
             </li>
 
             <li>
-                <a href="{% url 'customers:details' inspection.equipment.customer_site.customer.slug %}" >
+                {% if_can_access 'customers:details' %}<a href="{% url 'customers:details' inspection.equipment.customer_site.customer.slug %}" >
                     {% if inspection.equipment.customer_site.customer.short_name %}
                         {{ inspection.equipment.customer_site.customer.short_name }}
                     {% else %}
                         {{ inspection.equipment.customer_site.customer.company_name }}
                     {% endif %}
-                </a>
+                </a>{% else %}<span>
+                    {% if inspection.equipment.customer_site.customer.short_name %}
+                        {{ inspection.equipment.customer_site.customer.short_name }}
+                    {% else %}
+                        {{ inspection.equipment.customer_site.customer.company_name }}
+                    {% endif %}
+                </span>{% endif_can_access %}
             </li>
 
             <li>
-                <a href="{% url 'customers:site-details' inspection.equipment.customer_site.customer.slug inspection.equipment.customer_site.slug %}">
+                {% if_can_access 'customers:site-details' %}<a href="{% url 'customers:site-details' inspection.equipment.customer_site.customer.slug inspection.equipment.customer_site.slug %}">
                     {% if inspection.equipment.customer_site.short_name %}
                         {{ inspection.equipment.customer_site.short_name }}
                     {% else %}
                         {{ inspection.equipment.customer_site.name }}
                     {% endif %}
-                </a>
+                </a>{% else %}<span>
+                    {% if inspection.equipment.customer_site.short_name %}
+                        {{ inspection.equipment.customer_site.short_name }}
+                    {% else %}
+                        {{ inspection.equipment.customer_site.name }}
+                    {% endif %}
+                </span>{% endif_can_access %}
             </li>
 
             <li>
-                <a href="{% url 'equipment:detail' inspection.equipment.slug %}" >
+                {% if_can_access 'equipment:detail' %}<a href="{% url 'equipment:detail' inspection.equipment.slug %}" >
                     {{ inspection.equipment.serial_number }}
-                </a>
+                </a>{% else %}<span>
+                    {{ inspection.equipment.serial_number }}
+                </span>{% endif_can_access %}
             </li>
 
             <li aria-current="page">
@@ -84,60 +101,7 @@
         </div>
 
         <div class="page-actions">
-            {% if inspection.status == inspection.Status.PENDING %}
-                <a
-                    class="button"
-                    href="{% url 'inspections:assign' inspection.pk %}"
-                >
-                    Assign employees
-                </a>
-
-                {% if not inspection.assigned_employees.exists %}
-                    <button
-                        class="button button-success button-disabled"
-                        type="button"
-                        disabled
-                        title="Assign at least one qualified employee before starting the activity."
-                    >
-                        Start activity
-                    </button>
-
-                {% elif inspection.equipment.status == inspection.equipment.Status.UNDER_INSPECTION %}
-                    <button
-                        class="button button-success button-disabled"
-                        type="button"
-                        disabled
-                        title="Another activity is already in progress for this equipment."
-                    >
-                        Start activity
-                    </button>
-
-                {% else %}
-                    <a
-                        class="button button-success"
-                        href="{% url 'inspections:start' inspection.pk %}"
-                    >
-                        Start activity
-                    </a>
-                {% endif %}
-
-                <a
-                    class="button button-danger"
-                    href="{% url 'inspections:cancel' inspection.pk %}"
-                >
-                    Cancel activity
-                </a>
-            {% endif %}
-
-            {% if inspection.status == inspection.Status.IN_PROGRESS %}
-                <a class="button button-success" href="{% url 'inspections:complete' inspection.pk %}" >
-                    Complete activity
-                </a>
-
-                <a class="button button-danger" href="{% url 'inspections:cancel' inspection.pk %}" >
-                    Cancel activity
-                </a>
-            {% endif %}
+            {% include "inspections/includes/action_buttons.html" with inspection=inspection perms=perms show_details=False only %}
         </div>
     </header>
 
@@ -200,13 +164,15 @@
                 </dl>
 
                 <div class="context-navigation">
-                    <a class="button button-small" href="{% url 'equipment:detail' inspection.equipment.slug %}" >
+                    {% if_can_access 'equipment:detail' %}<a class="button button-small" href="{% url 'equipment:detail' inspection.equipment.slug %}" >
                         Equipment details
-                    </a>
+                    </a>{% endif_can_access %}
 
-                    <a href="{% url 'customers:site-details' inspection.equipment.customer_site.customer.slug inspection.equipment.customer_site.slug %}">
+                    {% if_can_access 'customers:site-details' %}<a href="{% url 'customers:site-details' inspection.equipment.customer_site.customer.slug inspection.equipment.customer_site.slug %}">
                         Customer-site details
-                    </a>
+                    </a>{% else %}<span>
+                        Customer-site details
+                    </span>{% endif_can_access %}
                 </div>
             </section>
 
@@ -345,9 +311,9 @@
                                     {{ employee.full_name }}
                                 </span>
 
-                                <a class="button button-small" href="{% url 'employees:details' employee.pk %}" >
+                                {% if_can_access 'employees:details' %}<a class="button button-small" href="{% url 'employees:details' employee.pk %}" >
                                     Employee details
-                                </a>
+                                </a>{% endif_can_access %}
                             </li>
                         {% endfor %}
                     </ul>
@@ -361,9 +327,8 @@
                         </p>
 
                         {% if inspection.status == inspection.Status.PENDING %}
-                            <a class="button button-primary" href="{% url 'inspections:assign' inspection.pk %}">
-                                Assign employees
-                            </a>
+                            {% url 'inspections:assign' inspection.pk as assign_url %}
+                            {% include "components/action_link.html" with allowed=perms.inspections.assign_inspection url=assign_url label="Assign employees" css_class="button-primary" only %}
                         {% endif %}
                     </div>
                 {% endif %}
@@ -434,17 +399,19 @@
             class="context-navigation"
             aria-label="Activity navigation"
         >
-            <a class="button" href="{% url 'inspections:list' %}" >
+            {% if_can_access 'inspections:list' %}<a class="button" href="{% url 'inspections:list' %}" >
                 All activities
-            </a>
+            </a>{% endif_can_access %}
 
-            <a class="button" href="{% url 'equipment:detail' inspection.equipment.slug %}" >
+            {% if_can_access 'equipment:detail' %}<a class="button" href="{% url 'equipment:detail' inspection.equipment.slug %}" >
                 Equipment details
-            </a>
+            </a>{% endif_can_access %}
 
-            <a href="{% url 'customers:site-details' inspection.equipment.customer_site.customer.slug inspection.equipment.customer_site.slug %}">
+            {% if_can_access 'customers:site-details' %}<a href="{% url 'customers:site-details' inspection.equipment.customer_site.customer.slug inspection.equipment.customer_site.slug %}">
                 Customer site
-            </a>
+            </a>{% else %}<span>
+                Customer site
+            </span>{% endif_can_access %}
 
             <a class="button" href="{% url 'core:home' %}" >
                 Home

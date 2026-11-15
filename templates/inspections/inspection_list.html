@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load access_tags %}
 {% load static status_tags %}
 
 {% block title %}
@@ -189,73 +190,7 @@
 
                                 <td class="table-actions">
                                     <div class="action-group">
-                                        <a
-                                            class="button button-small"
-                                            href="{% url 'inspections:details' inspection.pk %}"
-                                        >
-                                            Details
-                                        </a>
-
-                                        {% if inspection.status == inspection.Status.PENDING %}
-                                            <a
-                                                class="button button-small"
-                                                href="{% url 'inspections:assign' inspection.pk %}"
-                                            >
-                                                Assign
-                                            </a>
-
-                                            {% if not inspection.assigned_employees.exists %}
-                                                <button
-                                                    class="button button-success button-disabled"
-                                                    type="button"
-                                                    disabled
-                                                    title="Assign at least one qualified employee before starting the activity."
-                                                >
-                                                    Start
-                                                </button>
-
-                                            {% elif inspection.equipment.status == inspection.equipment.Status.UNDER_INSPECTION %}
-                                                <button
-                                                    class="button button-success button-disabled"
-                                                    type="button"
-                                                    disabled
-                                                    title="Another activity is already in progress for this equipment."
-                                                >
-                                                    Start
-                                                </button>
-
-                                            {% else %}
-                                                <a
-                                                    class="button button-success"
-                                                    href="{% url 'inspections:start' inspection.pk %}"
-                                                >
-                                                    Start
-                                                </a>
-                                            {% endif %}
-
-                                            <a
-                                                class="button button-small button-danger"
-                                                href="{% url 'inspections:cancel' inspection.pk %}"
-                                            >
-                                                Cancel
-                                            </a>
-                                        {% endif %}
-
-                                        {% if inspection.status == inspection.Status.IN_PROGRESS %}
-                                            <a
-                                                class="button button-small button-success"
-                                                href="{% url 'inspections:complete' inspection.pk %}"
-                                            >
-                                                Complete
-                                            </a>
-
-                                            <a
-                                                class="button button-small button-danger"
-                                                href="{% url 'inspections:cancel' inspection.pk %}"
-                                            >
-                                                Cancel
-                                            </a>
-                                        {% endif %}
+                                        {% include "inspections/includes/action_buttons.html" with inspection=inspection perms=perms show_details=True only %}
                                     </div>
                                 </td>
                             </tr>
@@ -277,9 +212,9 @@
                     and filter selection.
                 </p>
 
-                <a class="button" href="{% url 'inspections:list' %}?page_size={{ current_page_size }}">
+                {% if_can_access 'inspections:list' %}<a class="button" href="{% url 'inspections:list' %}?page_size={{ current_page_size }}">
                     Clear search and filters
-                </a>
+                </a>{% endif_can_access %}
             {% else %}
 
                 <h2>No activities</h2>
@@ -292,9 +227,9 @@
                         the first activity.
                     </p>
 
-                    <a class="button" href="{% url 'equipment:list' %}">
+                    {% if_can_access 'equipment:list' %}<a class="button" href="{% url 'equipment:list' %}">
                         Open equipment registry
-                    </a>
+                    </a>{% endif_can_access %}
 
                 {% else %}
 

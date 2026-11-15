@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from .models import Inspection
+from .access import filter_inspections_for_user
 
 
 class InspectionActionMixin:
@@ -9,7 +10,7 @@ class InspectionActionMixin:
     inspection_context_name = 'inspection'
 
     def get_inspection_queryset(self):
-        return (Inspection.objects
+        queryset = (Inspection.objects
             .select_related(
                 'equipment',
                 'equipment__equipment_type',
@@ -18,11 +19,9 @@ class InspectionActionMixin:
                 'equipment__customer_site__customer',
                 'customer_contact',
             )
-            .prefetch_related(
-                'assigned_employees',
-                'assigned_employees__specialties',
-            )
+            .prefetch_related('assigned_employees', 'assigned_employees__specialties')
         )
+        return filter_inspections_for_user(queryset, self.request.user)
 
     def setup(self, request, *args, **kwargs):          #find current inspection before Post and Get
         super().setup(request, *args, **kwargs)

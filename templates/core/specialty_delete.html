@@ -1,4 +1,5 @@
 {% extends "shared/delete_confirm_base.html" %}
+{% load access_tags %}
 
 {% block delete_page_title %}
     Delete specialty
@@ -79,12 +80,12 @@
 {% endblock %}
 
 {% block delete_cancel_action %}
-    <a class="button" href="{% url 'core:specialty-list' %}">
+    {% if_can_access 'core:specialty-list' %}<a class="button" href="{% url 'core:specialty-list' %}">
         Return without deleting
-    </a>
+    </a>{% endif_can_access %}
 {% endblock %}
 {% block delete_blocked_action %}
-    <a class="button" href="{% url 'core:specialty-list' %}">
+    {% if_can_access 'core:specialty-list' %}<a class="button" href="{% url 'core:specialty-list' %}">
         Return to specialties
-    </a>
+    </a>{% endif_can_access %}
 {% endblock %}
