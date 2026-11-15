@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Contacts | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <section class="card">
+        <h1>Contacts</h1>
+
+        {% if company %}
+            <h2>{{ company.company_name }}</h2>
+
+            <p>{{ company.country }} {{ company.city }}</p>
+            <p>{{ company.address }}</p>
+            <p>{{ company.phone }}</p>
+            <p>{{ company.email }}</p>
+        {% else %}
+            <p>Company information is not available yet.</p>
+        {% endif %}
+    </section>
+{% endblock %}

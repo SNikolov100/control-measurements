@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load access_tags %}
 {% load static %}
 {% load status_tags %}
 
@@ -36,9 +37,9 @@
         </div>
 
         <div class="page-actions">
-            <a class="button button-primary" href="{% url 'core:specialty-create' %}">
+            {% if_can_access 'core:specialty-create' %}<a class="button button-primary" href="{% url 'core:specialty-create' %}">
                 Add specialty
-            </a>
+            </a>{% endif_can_access %}
         </div>
     </header>
     <section class="list-tools">
@@ -131,13 +132,13 @@
 
                                 <td class="table-actions">
                                     <div class="action-group">
-                                        <a class="button button-small" href="{% url 'core:specialty-edit' specialty.pk %}">
+                                        {% if_can_access 'core:specialty-edit' %}<a class="button button-small" href="{% url 'core:specialty-edit' specialty.pk %}">
                                             Edit
-                                        </a>
+                                        </a>{% endif_can_access %}
 
-                                        <a class="button button-small button-danger" href="{% url 'core:specialty-delete' specialty.pk %}">
+                                        {% if_can_access 'core:specialty-delete' %}<a class="button button-small button-danger" href="{% url 'core:specialty-delete' specialty.pk %}">
                                             Delete
-                                        </a>
+                                        </a>{% endif_can_access %}
                                     </div>
                                 </td>
                             </tr>
@@ -159,12 +160,12 @@
                         or color value.
                     </p>
 
-                    <a
+                    {% if_can_access 'core:specialty-list' %}<a
                         class="button"
                         href="{% url 'core:specialty-list' %}?page_size={{ current_page_size }}"
                     >
                         Clear search
-                    </a>
+                    </a>{% endif_can_access %}
                 {% else %}
                     <h2>No specialties</h2>
 
@@ -173,12 +174,12 @@
                         equipment types and employee qualifications.
                     </p>
 
-                    <a
+                    {% if_can_access 'core:specialty-create' %}<a
                         class="button button-primary"
                         href="{% url 'core:specialty-create' %}"
                     >
                         Add specialty
-                    </a>
+                    </a>{% endif_can_access %}
                 {% endif %}
             </section>
         {% endif %}

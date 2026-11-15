@@ -10,7 +10,7 @@ from uuid import uuid4
 class Customer(TextNormalizationMixin, AutoSlugMixin, CompanyMixin, TimestampMixin):
     strip_fields = ('company_name', 'short_name', 'city', 'country', 'address', 'phone', 'email', 'notes',)
     lowercase_fields = ('email',)
-    default_text_values = {"country": "Bulgaria",}
+    default_text_values = {'country': 'Bulgaria'}
 
     is_active = models.BooleanField(
         default=True,
@@ -86,7 +86,7 @@ class CustomerSite(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
         return self.address or self.customer.address
 
     def __str__(self):
-        return f"{self.customer.short_name} - {self.short_name}"
+        return f'{self.customer.short_name} - {self.short_name}'
 
     class Meta:
         ordering = ('customer__company_name', 'name')
@@ -105,17 +105,17 @@ class CustomerContact(TextNormalizationMixin, TimestampMixin):
     site = models.ForeignKey(
         'CustomerSite',
         on_delete=models.PROTECT,
-        related_name="contacts",
-        verbose_name=translate("Customer site"),
+        related_name='contacts',
+        verbose_name=translate('Customer site'),
     )
     full_name = models.CharField(
         max_length=100,
-        verbose_name=translate("Full name"),
+        verbose_name=translate('Full name'),
     )
     position = models.CharField(
         max_length=100,
         blank=True,
-        verbose_name=translate("Position"),
+        verbose_name=translate('Position'),
     )
     phone = models.CharField(
         max_length=30,
@@ -132,7 +132,7 @@ class CustomerContact(TextNormalizationMixin, TimestampMixin):
         validators=[validate_uploaded_image],
         blank=True,
         null=True,
-        verbose_name=translate("Contact photo"),
+        verbose_name=translate('Contact photo'),
     )
     notes = models.TextField(
         blank=True,
@@ -191,5 +191,5 @@ class CustomerContact(TextNormalizationMixin, TimestampMixin):
 
     class Meta:
         ordering = ('site__customer__company_name', 'site__name', '-is_primary', 'full_name')
-        verbose_name = translate("Customer contact")
-        verbose_name_plural = translate("Customer contacts")
+        verbose_name = translate('Customer contact')
+        verbose_name_plural = translate('Customer contacts')

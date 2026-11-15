@@ -119,21 +119,21 @@ class CustomerContactBaseForm(forms.ModelForm):
         widgets = {
             'full_name': forms.TextInput(
                 attrs={
-                    'placeholder': 'For example: Ivan Ivanov',
-                    'autocomplete': 'name',},
+                    'placeholder': translate('For example: Ivan Ivanov'),
+                    'autocomplete': 'name'},
             ),
             'position': forms.TextInput(
-                attrs={'placeholder': 'For example: Technical manager'},
+                attrs={'placeholder': translate('For example: Technical manager')},
             ),
             'phone': forms.TextInput(
                 attrs={
-                    'placeholder': 'For example: +359 888 123 456',
+                    'placeholder': translate('For example: +359 888 123 456'),
                     'autocomplete': 'tel',
                 },
             ),
             'email': forms.EmailInput(
                 attrs={
-                    'placeholder': 'For example: contact@example.com',
+                    'placeholder': translate('For example: contact@example.com'),
                     'autocomplete': 'email',
                 },
             ),
@@ -141,7 +141,7 @@ class CustomerContactBaseForm(forms.ModelForm):
             'notes': forms.Textarea(
                 attrs={
                     'rows': 5,
-                    'placeholder': 'Add relevant information about the responsible contact.',
+                    'placeholder': translate('Add relevant information about the responsible contact.'),
                 },
             ),
         }

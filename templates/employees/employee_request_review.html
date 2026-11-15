@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% load form_tags %}
+{% block title %}
+    Review Employee Request | Control Measurements
+{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+    <div>
+        <h1 class="page-title">
+            Review employee request #{{ employee_request.pk }}
+        </h1>
+
+        <p class="page-description">
+            Review the user information before linking an employee record.
+        </p>
+    </div>
+</header>
+
+<section class="card">
+    <h2>Account information</h2>
+
+    <p>
+        <strong>Username:</strong>
+        {{ employee_request.user.username }}
+    </p>
+
+    <p>
+        <strong>Email:</strong>
+        {{ employee_request.user.email }}
+    </p>
+
+    <p>
+        <strong>Account status:</strong>
+        {{ employee_request.user.get_registration_status_display }}
+    </p>
+</section>
+
+<section class="card">
+    <h2>Personal profile</h2>
+
+    <p>
+        <strong>Full name:</strong>
+        {{ employee_request.user.profile.get_full_name }}
+    </p>
+
+    <p>
+        <strong>Phone:</strong>
+        {{ employee_request.user.profile.phone }}
+    </p>
+</section>
+
+<section class="card">
+    <h2>Request information</h2>
+
+    <p>
+        <strong>Status:</strong>
+        {{ employee_request.get_status_display }}
+    </p>
+
+    <p>
+        <strong>Created:</strong>
+        {{ employee_request.created_at|date:"d.m.Y H:i" }}
+    </p>
+</section>
+
+<section class="form-card">
+    <div class="form-card-header">
+        <h2 class="form-card-title">Administrator decision</h2>
+        <p class="form-card-description">
+            Select how this account should be linked
+            to an employee record.
+        </p>
+    </div>
+
+    <form method="post" id="employee-review-form" novalidate>
+        {% csrf_token %}
+
+        <div class="form-fields">
+            {% render_field form.action %}
+            {% render_field form.employee %}
+            {% render_field form.role %}
+            {% render_field form.review_note %}
+        </div>
+
+        {% if form.non_field_errors %}
+            <section id="review-error-panel"
+                     class="review-error-panel"
+                     aria-labelledby="review-error-title">
+
+                <h2 id="review-error-title">
+                    {% if form.show_name_confirmation %}
+                        Confirm employee identity
+                    {% else %}
+                        Please check the information
+                    {% endif %}
+                </h2>
+
+                <div class="review-error-messages" role="alert">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                {% if form.show_name_confirmation %}
+                    <label class="review-confirmation"
+                           for="{{ form.confirm_name_difference.id_for_label }}">
+                        {{ form.confirm_name_difference }}
+                        <span>
+                            I have checked both names and confirm
+                            that they refer to the same person.
+                            <small>
+                                The existing employee name will be preserved.
+                            </small>
+                        </span>
+                    </label>
+
+                    {{ form.confirm_name_difference.errors }}
+                {% endif %}
+
+                <div class="form-actions">
+                    {% if form.show_name_confirmation %}
+                        <button type="submit"
+                                class="button button-primary">
+                            Confirm and link account
+                        </button>
+                    {% endif %}
+
+                    <button type="button"
+                            class="button"
+                            id="review-error-close"
+                            hidden>
+                        Back to review
+                    </button>
+                </div>
+            </section>
+        {% endif %}
+
+        <div class="form-actions">
+            <button type="submit" class="button button-primary">
+                Submit decision
+            </button>
+        </div>
+    </form>
+</section>
+
+<div class="page-actions">
+    <a class="button" href="{% url 'employees:pending-requests' %}">
+        Back to requests
+    </a>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+<script>
+    (() => {
+        const panel = document.getElementById("review-error-panel");
+        const form = document.getElementById("employee-review-form");
+
+        if (!panel || !form) {
+            return;
+        }
+
+        const dialog = document.createElement("dialog");
+
+        if (typeof dialog.showModal !== "function") {
+            return;
+        }
+
+        dialog.className = "review-error-dialog";
+        dialog.setAttribute("aria-labelledby", "review-error-title");
+
+        // Keep the checkbox and submit button inside the original form.
+        form.appendChild(dialog);
+        dialog.appendChild(panel);
+
+        const closeButton = document.getElementById("review-error-close");
+        closeButton.hidden = false;
+
+        const closeReviewDialog = () => {
+            const checkbox = dialog.querySelector(
+                'input[name="confirm_name_difference"]'
+            );
+
+            if (checkbox) {
+                checkbox.checked = false;
+            }
+
+            dialog.close();
+            form.querySelector('button[type="submit"]').focus();
+        };
+
+        closeButton.addEventListener("click", closeReviewDialog);
+
+        dialog.addEventListener("cancel", (event) => {
+            event.preventDefault();
+            closeReviewDialog();
+        });
+
+        dialog.showModal();
+        closeButton.focus();
+    })();
+</script>
+{% endblock %}

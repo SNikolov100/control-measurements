@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load access_tags %}
 {% load static %}
 {% load form_tags %}
 {% load status_tags %}
@@ -22,15 +23,19 @@
             </li>
 
             <li>
-                <a href="{% url 'employees:list' %}">
+                {% if_can_access 'employees:list' %}<a href="{% url 'employees:list' %}">
                     Employees
-                </a>
+                </a>{% else %}<span>
+                    Employees
+                </span>{% endif_can_access %}
             </li>
 
             <li>
-                <a href="{% url 'employees:details' employee.pk %}">
+                {% if_can_access 'employees:details' %}<a href="{% url 'employees:details' employee.pk %}">
                     {{ employee.full_name }}
-                </a>
+                </a>{% else %}<span>
+                    {{ employee.full_name }}
+                </span>{% endif_can_access %}
             </li>
 
             <li aria-current="page">
@@ -217,9 +222,9 @@
                         </button>
                     {% endif %}
 
-                    <a class="button" href="{% url 'employees:list' %}" >
+                    {% if_can_access 'employees:list' %}<a class="button" href="{% url 'employees:list' %}" >
                         Return without changing status
-                    </a>
+                    </a>{% endif_can_access %}
                 </div>
             </form>
         </section>

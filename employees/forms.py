@@ -1,51 +1,31 @@
 from django import forms
 from .models import Employee
+from django.contrib.auth.models import Group
+from .choices import EmployeeRequestAction
 from django.utils.translation import gettext_lazy as translate
 
 class EmployeeBaseForm(forms.ModelForm):
     class Meta:
         model = Employee
-        fields = (
-            'full_name',
-            'position',
-            'phone',
-            'email',
-            'photo',
-            'notes',
-            'specialties',
-        )
+        fields = ('full_name', 'position', 'phone', 'email', 'photo', 'notes', 'specialties')
         widgets = {
             'full_name': forms.TextInput(
-                attrs={
-                    'placeholder': 'For example: Ivan Ivanov',
-                    'autocomplete': 'name',
-                },
+                attrs={'placeholder': translate('For example: Ivan Ivanov'), 'autocomplete': 'name'},
             ),
             'position': forms.TextInput(
-                attrs={'placeholder': 'For example: Laboratory technician'},
+                attrs={'placeholder': translate('For example: Laboratory technician')},
             ),
             'phone': forms.TextInput(
-                attrs={
-                    'placeholder': 'For example: +359 888 123 456',
-                    'autocomplete': 'tel',
-                },
+                attrs={'placeholder': translate('For example: +359 888 123 456'), 'autocomplete': 'tel'},
             ),
             'email': forms.EmailInput(
-                attrs={
-                    'placeholder': 'For example: employee@example.com',
-                    'autocomplete': 'email',
-                },
+                attrs={'placeholder': translate('For example: employee@example.com'), 'autocomplete': 'email'},
             ),
             'photo': forms.ClearableFileInput(
-                attrs={
-                    "accept": 'image/jpeg,image/png,image/webp',
-                },
+                attrs={"accept": 'image/jpeg,image/png,image/webp'},
             ),
             'notes': forms.Textarea(
-                attrs={
-                    'rows': 5,
-                    'placeholder': 'Add relevant information about the employee.',
-                },
+                attrs={'rows': 5, 'placeholder': translate('Add relevant information about the employee.')},
             ),
             'specialties': forms.CheckboxSelectMultiple(),
         }
@@ -82,4 +62,58 @@ class EmployeeActivityStatusForm(forms.Form):
         label= translate('Reason'),
         help_text= translate('Enter the reason for activating or deactivating the employee.'),
         error_messages={'required': translate("Enter the reason for changing the employee's active status."),}
+    )
+
+
+
+class EmployeeRequestReviewForm(forms.Form):
+    action = forms.ChoiceField(
+        choices=EmployeeRequestAction.choices,
+        widget=forms.RadioSelect,
+        label=translate('Decision'),
+    )
+    employee = forms.ModelChoiceField(
+        queryset=Employee.objects.none(),
+        required=False,
+        label=translate('Existing employee'),
+    )
+    role = forms.ModelChoiceField(
+        queryset=Group.objects.order_by('name'),
+        required=False,
+        label=translate('Permission group'),
+    )
+    review_note = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 3}),
+        label=translate('Review note'),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['employee'].queryset = (Employee.objects
+            .filter(user__isnull=True, is_active=True)
+            .order_by('full_name')
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        action = cleaned_data.get('action')
+        employee = cleaned_data.get('employee')
+        role = cleaned_data.get('role')
+        note = cleaned_data.get('review_note', '')
+
+        if action == EmployeeRequestAction.LINK and not employee:
+            self.add_error('employee', translate('Select an existing employee.'),)
+
+        if action in {EmployeeRequestAction.LINK, EmployeeRequestAction.CREATE,} and not role:
+            self.add_error('role', translate('Select a user role.'),)
+
+        if action == EmployeeRequestAction.REJECT and not note.strip():
+            self.add_error('review_note', translate('Enter a reason for rejection.'),)
+
+        return cleaned_data
+
+    confirm_name_difference = forms.BooleanField(required=False,
+        label=translate('I confirm that the different names refer to the same person.'),
+        help_text=translate('Use only after checking a reported name difference. The existing employee name will be preserved.'),
     )

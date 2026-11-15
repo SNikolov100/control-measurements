@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load access_tags %}
 {% load static %}
 {% load status_tags %}
 
@@ -16,15 +17,19 @@
             </li>
 
             <li>
-                <a href="{% url 'inspections:list' %}">
+                {% if_can_access 'inspections:list' %}<a href="{% url 'inspections:list' %}">
                     Activities
-                </a>
+                </a>{% else %}<span>
+                    Activities
+                </span>{% endif_can_access %}
             </li>
 
             <li>
-                <a href="{% url 'inspections:details' inspection.pk %}">
+                {% if_can_access 'inspections:details' %}<a href="{% url 'inspections:details' inspection.pk %}">
                     {{ inspection.get_inspection_type_display }}
-                </a>
+                </a>{% else %}<span>
+                    {{ inspection.get_inspection_type_display }}
+                </span>{% endif_can_access %}
             </li>
 
             <li aria-current="page">
@@ -222,9 +227,9 @@
                             Start activity
                         </button>
 
-                        <a class="button button-primary" href="{% url 'inspections:assign' inspection.pk %}">
+                        {% if_can_access 'inspections:assign' %}<a class="button button-primary" href="{% url 'inspections:assign' inspection.pk %}">
                             Assign employees
-                        </a>
+                        </a>{% endif_can_access %}
 
                     {% elif inspection.equipment.status == inspection.equipment.Status.UNDER_INSPECTION %}
                         <button
@@ -236,23 +241,23 @@
                             Start activity
                         </button>
 
-                        <a class="button" href="{% url 'inspections:assign' inspection.pk %}">
+                        {% if_can_access 'inspections:assign' %}<a class="button" href="{% url 'inspections:assign' inspection.pk %}">
                             Change assignment
-                        </a>
+                        </a>{% endif_can_access %}
 
                     {% else %}
                         <button class="button button-success" type="submit">
                             Start activity
                         </button>
 
-                        <a class="button" href="{% url 'inspections:assign' inspection.pk %}">
+                        {% if_can_access 'inspections:assign' %}<a class="button" href="{% url 'inspections:assign' inspection.pk %}">
                             Change assignment
-                        </a>
+                        </a>{% endif_can_access %}
                     {% endif %}
 
-                    <a class="button" href="{% url 'inspections:list' %}">
+                    {% if_can_access 'inspections:list' %}<a class="button" href="{% url 'inspections:list' %}">
                         Cancel
-                    </a>
+                    </a>{% endif_can_access %}
                 </div>
             </form>
         </section>

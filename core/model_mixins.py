@@ -8,11 +8,11 @@ from core.validators import phone_validator
 class TimestampMixin(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=translate("Created at"),
+        verbose_name=translate('Created at'),
     )
     updated_at = models.DateTimeField(
         auto_now=True,
-        verbose_name=translate("Updated at"),
+        verbose_name=translate('Updated at'),
     )
 
     class Meta:
@@ -25,7 +25,7 @@ class SingleRecordMixin(models.Model):
         model_class = type(self)
 
         if model_class.objects.exclude(pk=self.pk).exists():
-            raise ValidationError(translate("Only one record of this type is allowed."))
+            raise ValidationError(translate('Only one record of this type is allowed.'))
 
     class Meta:
         abstract = True
@@ -85,19 +85,19 @@ class AutoSlugMixin(models.Model):
         null=True,
         editable=False,
         allow_unicode=True,
-        verbose_name=translate("Slug"),
+        verbose_name=translate('Slug'),
     )
 
     def build_slug(self):
-        return f"{self.pk}-{slugify(self.short_name, allow_unicode=True)}"
+        return f'{self.pk}-{slugify(self.short_name, allow_unicode=True)}'
 
     def save(self, *args, **kwargs):
         if self.pk:
             self.slug = self.build_slug()
-            update_fields = kwargs.get("update_fields")
+            update_fields = kwargs.get('update_fields')
 
             if update_fields is not None:
-                kwargs["update_fields"] = set(update_fields) | {"slug"}
+                kwargs['update_fields'] = set(update_fields) | {'slug'}
             super().save(*args, **kwargs)
             return
         super().save(*args, **kwargs)

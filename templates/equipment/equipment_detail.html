@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load access_tags %}
 {% load static status_tags %}
 
 {% block title %}
@@ -17,21 +18,27 @@
             </li>
 
             <li>
-                <a href="{% url 'customers:list' %}">
+                {% if_can_access 'customers:list' %}<a href="{% url 'customers:list' %}">
                     Customers
-                </a>
+                </a>{% else %}<span>
+                    Customers
+                </span>{% endif_can_access %}
             </li>
 
             <li>
-                <a href="{% url 'customers:details' equipment.customer_site.customer.slug %}" >
+                {% if_can_access 'customers:details' %}<a href="{% url 'customers:details' equipment.customer_site.customer.slug %}" >
                     {{ equipment.customer_site.customer.short_name|default:equipment.customer_site.customer.company_name }}
-                </a>
+                </a>{% else %}<span>
+                    {{ equipment.customer_site.customer.short_name|default:equipment.customer_site.customer.company_name }}
+                </span>{% endif_can_access %}
             </li>
 
             <li>
-                <a href="{% url 'customers:site-details' equipment.customer_site.customer.slug equipment.customer_site.slug %}" >
+                {% if_can_access 'customers:site-details' %}<a href="{% url 'customers:site-details' equipment.customer_site.customer.slug equipment.customer_site.slug %}" >
                     {{ equipment.customer_site.short_name|default:equipment.customer_site.name }}
-                </a>
+                </a>{% else %}<span>
+                    {{ equipment.customer_site.short_name|default:equipment.customer_site.name }}
+                </span>{% endif_can_access %}
             </li>
 
             <li aria-current="page">
@@ -72,23 +79,23 @@
         </div>
 
         <div class="page-actions">
-            <a class="button" href="{% url 'equipment:edit' equipment.slug %}" >
+            {% if_can_access 'equipment:edit' %}<a class="button" href="{% url 'equipment:edit' equipment.slug %}" >
                 Edit equipment
-            </a>
+            </a>{% endif_can_access %}
 
            {% if equipment.status == equipment.Status.IN_SERVICE or equipment.status == equipment.Status.UNDER_REPAIR or equipment.status == equipment.Status.WAITING_REINSPECTION %}
-                <a class="button button-primary" href="{% url 'inspections:create' equipment.slug %}">
+                {% if_can_access 'inspections:create' %}<a class="button button-primary" href="{% url 'inspections:create' equipment.slug %}">
                     New activity
-                </a>
+                </a>{% endif_can_access %}
             {% else %}
-                <button
+                {% if_can_access 'inspections:create' %}<button
                     class="button button-primary button-disabled"
                     type="button"
                     disabled
                     title="A new activity cannot be created while the equipment is in its current status."
                 >
                     New activity
-                </button>
+                </button>{% endif_can_access %}
             {% endif %}
         </div>
     </header>
@@ -126,7 +133,7 @@
                 </p>
             {% endif %}
 
-            <a
+            {% if_can_access 'equipment:edit' %}<a
                 class="button button-small"
                 href="{% url 'equipment:edit' equipment.slug %}"
             >
@@ -135,7 +142,7 @@
                 {% else %}
                     Add image
                 {% endif %}
-            </a>
+            </a>{% endif_can_access %}
         </div>
     </section>
     <div class="detail-layout">
@@ -230,12 +237,12 @@
                 </dl>
 
                 <div class="context-navigation">
-                    <a
+                    {% if_can_access 'customers:site-details' %}<a
                         class="button button-small"
                         href="{% url 'customers:site-details' equipment.customer_site.customer.slug equipment.customer_site.slug %}"
                     >
                         Customer-site details
-                    </a>
+                    </a>{% endif_can_access %}
                 </div>
             </section>
         </div>
@@ -387,13 +394,15 @@
             class="context-navigation"
             aria-label="Equipment navigation"
         >
-            <a href="{% url 'customers:site-details' equipment.customer_site.customer.slug equipment.customer_site.slug %}">
+            {% if_can_access 'customers:site-details' %}<a href="{% url 'customers:site-details' equipment.customer_site.customer.slug equipment.customer_site.slug %}">
                 Back to customer site
-            </a>
+            </a>{% else %}<span>
+                Back to customer site
+            </span>{% endif_can_access %}
 
-            <a class="button" href="{% url 'equipment:list' %}" >
+            {% if_can_access 'equipment:list' %}<a class="button" href="{% url 'equipment:list' %}" >
                 Equipment registry
-            </a>
+            </a>{% endif_can_access %}
 
             <a class="button" href="{% url 'core:home' %}" >
                 Home

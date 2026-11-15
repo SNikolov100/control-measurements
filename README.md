@@ -1,356 +1,84 @@
 # Control Measurements
 
-Control Measurements is a Django application for managing customers,
-equipment, employees, inspections, calibrations, repairs,
-and control measurement schedules.
+Control Measurements is a Django application for managing customers, equipment, employees, and scheduled control measurements. It is under active development.
 
+## What the application does
 
----
+| Area | Features |
+| --- | --- |
+| Customers | Manage customer records, sites, and site contacts. |
+| Equipment | Register equipment by customer site, manage equipment types, and track equipment status. Inspection intervals and expected durations can use defaults from the equipment type. |
+| Employees | Manage employee records, specialties, active status, and links to user accounts. An employee record can exist without a login. |
+| Activities | Create and assign inspections, calibrations, repairs, and reinspections. Track activities through start, completion, or cancellation. Starting an activity requires active, qualified assignees. |
+| Settings | Manage company details, system settings, and specialties. System and company settings can be granted as read-only access. |
 
-# Development Status
+## Accounts and access
 
-<details>
-<summary><strong>Core Structure</strong></summary>
+Visitors can open About and Contacts, register, or sign in. Users sign in with an email address or username. A new account awaits approval. Once approved, the user completes their profile, and a superuser links the account to an existing employee record or creates one.
 
-- [x] Project structure established
-- [x] Reusable base models implemented
-- [x] Company settings implemented
-- [x] System settings implemented
-- [x] Internationalization (BG/EN) enabled
+Manage groups and permissions in **Django Admin → Groups**. The application uses the permissions assigned to each user, including permissions inherited from groups. Group names are configurable. The same access rules control navigation, action buttons, and requests sent directly to the server.
 
-</details>
+- **Superusers** manage groups and approve registrations and employee link requests.
+- **Operators** can see all inspections and create, assign, start, and complete them when granted the corresponding permissions. They can record progress for an assigned employee without a login.
+- **Employees** can see their assigned inspections when granted inspection viewing access. Starting and completing work require separate permissions.
 
-<details>
-<summary><strong>Customers</strong></summary>
+To grant visibility across all inspections, add `inspections.view_all_inspections` alongside `inspections.view_inspection`. Grant individual action permissions according to the user's responsibilities.
 
-- [x] Customers CRUD
-- [x] Customer sites CRUD
-- [x] Customer contacts CRUD
-- [x] Slug-based URLs
+## Local setup
 
-</details>
-
-<details>
-<summary><strong>Equipment</strong></summary>
-
-- [x] Equipment register
-- [x] Equipment types management
-- [x] Equipment image support
-- [x] Slug-based URLs
-- [x] Equipment ownership is fixed after registration
-- [x] Equipment type is fixed in the standard edit workflow
-- [x] Equipment status is managed through activity transitions
-- [x] Equipment interval and duration defaults are inherited from the equipment type
-- [x] Inventory numbers are globally unique when provided
-- [x] Globally unique inventory numbers
-- [x] Fixed equipment type in the standard edit workflow
-- [x] Equipment-type defaults for inspection interval and duration
-- [x] Controlled activity creation based on equipment status
-
-</details>
-
-<details>
-<summary><strong>Employees</strong></summary>
-
-- [x] Employee management
-- [x] Employee image support
-- [x] Specialty assignment
-
-</details>
-
-<details>
-<summary><strong>Activities (Inspections)</strong></summary>
-
-- [x] Activity creation
-- [x] Assignment workflow
-- [x] Start workflow
-- [x] Completion workflow
-- [x] Cancellation workflow
-- [x] Status history
-- [x] Qualified employee validation before activity start
-- [x] Activity start protection for equipment already under inspection
-- [x] Controlled activity creation based on equipment status
-- [x] Repair and reinspection status transitions
-- [x] Reusable status badges with icons
-
-</details>
-
-<details>
-<summary><strong>User Interface</strong></summary>
-
-- [x] Navigation menu
-- [x] Confirmation pages
-- [x] Custom 404 page
-- [ ] Advanced filtering
-- [ ] Final UI styling
-- [ ] Responsive review
-- [x] Reusable status badge template tag
-- [x] Status icons for equipment, activities, results, and history
-- [x] Disabled visual state for unavailable workflow actions
-- [ ] Navigation menu icons
-- [ ] HTML and CSS duplication review
-- [x] Unified CSS bundle
-- [x] Reusable form field component and template tag (`{% render_field %}`)
-- [x] Reusable status badge template tag with boolean and status support
-- [x] Production asset compression and cache busting (`WhiteNoise`)
-- [x] Cached template loading configuration
-- [ ] Shared quick filters component
-- [ ] Query optimization (N+1 queries prevention)
-
-
-
-</details>
-
-<details>
-<summary><strong>Future Enhancements</strong></summary>
-
-- [ ] User accounts
-- [ ] Roles and permissions
-- [ ] Controlled equipment-type correction with dedicated permission
-- [ ] Audit history for privileged equipment corrections
-- [ ] Backup and restore
-- [ ] Audit improvements
-<details>
-<summary><strong>Planned Permission-Controlled Actions</strong></summary>
-
-- `equipment.correct_equipment_type`
-  - Available only to authorized administrators or organization managers.
-  - Requires an explicit correction reason.
-  - Requires confirmation before applying the change.
-  - Records the previous type, new type, responsible user, date, and reason.
-  - Is not available through the standard equipment edit form.
-
-</details>
-
-</details>
-
----
-
-# Testing Checklist
-
-<details>
-<summary><strong>Customers</strong></summary>
-
-- [ ] Create customer
-- [ ] Edit customer
-- [ ] Delete customer
-- [ ] Open details page
-- [ ] Verify invalid slug returns 404
-
-</details>
-
-<details>
-<summary><strong>Customer Sites</strong></summary>
-
-- [ ] Create customer site
-- [ ] Edit customer site
-- [ ] Delete customer site
-
-</details>
-
-<details>
-<summary><strong>Equipment</strong></summary>
-
-- [ ] Create equipment
-- [ ] Upload equipment image
-- [ ] Edit equipment
-- [ ] Delete equipment
-- [ ] Verify invalid slug returns 404
-- [ ] Verify customer site cannot be changed through the standard equipment edit form
-- [ ] Verify equipment type cannot be changed through the standard equipment edit form
-- [ ] Verify empty inspection interval uses the equipment-type default
-- [ ] Verify empty expected duration uses the equipment-type default
-- [ ] Verify duplicate inventory numbers are rejected
-- [ ] Verify multiple equipment records may have an empty inventory number
-- [ ] Verify equipment-type short name is required
-- [ ] Verify activity cannot start without an assigned qualified employee
-- [ ] Verify duplicate non-empty inventory numbers are rejected
-- [ ] Verify multiple equipment records may have an empty inventory number
-- [ ] Verify equipment type cannot be changed through the standard edit form
-- [ ] Verify customer site cannot be changed through the standard edit form
-- [ ] Verify empty interval and duration fields use equipment-type defaults
-- [ ] Verify `New activity` is disabled for equipment under inspection
-- [ ] Verify the direct activity-creation URL is rejected for an unavailable equipment status
-
-</details>
-
-<details>
-<summary><strong>Employees</strong></summary>
-
-- [ ] Create employee
-- [ ] Upload employee image
-- [ ] Edit employee
-- [ ] Delete employee
-
-</details>
-
-<details>
-<summary><strong>Activities</strong></summary>
-
-- [ ] Create activity
-- [ ] Assign employee
-- [ ] Start activity
-- [ ] Complete activity
-- [ ] Cancel activity
-- [ ] Verify activity history
-- [ ] Verify redirects
-- [ ] Verify an activity cannot start without assigned employees
-- [ ] Verify an activity cannot start with inactive employees
-- [ ] Verify assigned employees have the required specialty
-- [ ] Verify another activity cannot start while one is already in progress
-- [ ] Verify unavailable actions are disabled in list and detail pages
-- [ ] Verify direct URLs cannot bypass workflow rules
-
-</details>
-
----
-
-# Development Principles
-
-<details>
-<summary><strong>Architecture Guidelines</strong></summary>
-
-- Service layer handles business rules.
-- Models own state transitions.
-- Related operations use transactions when needed.
-- URL parameters use TextChoices `.value`.
-- UI choices may be restricted by forms, but validation is performed in business logic.
-- Equipment ownership and type are fixed in the standard edit workflow.
-- Equipment statuses are changed only through controlled activity transitions.
-- Privileged corrections must use explicit permissions and audit history.
-- Delete operations always require confirmation.
-- Operator workflow and usability have priority over technical implementation details.
-- Django Admin is not used.
-- Single-user operation is the current target.
-- Multi-user support may be added later.
-- Reusable UI elements (form fields, status badges, filters) are centralized in `templates/components/` and custom template tags.
-- Stylesheets are consolidated into a single application.
-- Static assets are compressed and version-hashed for production deployment.
-
-</details>
-
-## Documentation
-
-The project currently uses:
-
-- `README.md` for the project overview and installation instructions
-- `CHANGELOG.md` for notable development changes
-- Git commits for the detailed development history
-
-### General Operational Workflow
-
-The following documents explain the business logic, participants,
-equipment lifecycle and activity status transitions:
-
-- [Typical Operational Workflow – English](docs/WORKFLOW_EN.md)
-- [Обичаен работен процес – Български](docs/WORKFLOW_BG.md)
-
-### Application Workflow Guides
-
-The following guides describe the practical actions performed by
-operators and testers:
-
-- [Application Workflow Guide – English](docs/WORKFLOW_GUIDE_EN.md)
-- [Ръководство за работа с приложението – Български](docs/WORKFLOW_GUIDE_BG.md)
-
-## Repository
-
-[Control Measurements on GitHub](https://github.com/SNikolov100/control-measurements)
-
-## Requirements
-
-- Python 3.12+ (or 3.13)
-- pip
-- Git
-- SQLite (included with Python)
-- Dependencies: Django, Pillow, psycopg (if PostgreSQL is used), python-dotenv, sqlparse, WhiteNoise
-
-<details>
-<summary><strong>Quick Start</strong></summary>
-
-### 1. Clone the repository
+The application uses SQLite by default. Use Python 3.12 or newer and install the dependencies pinned in [requirements.txt](requirements.txt).
 
 ```bash
 git clone https://github.com/SNikolov100/control-measurements.git
 cd control-measurements
+python -m venv .venv
 ```
 
-### 2. Create a virtual environment
+Activate the environment with `.venv\Scripts\activate.bat` in Windows Command Prompt or `source .venv/bin/activate` on Linux and macOS.
 
 ```bash
-python -m venv venv
+python -m pip install -r requirements.txt
 ```
 
-### 3. Activate the virtual environment
-
-On Windows:
-
-```bash
-venv\Scripts\activate
-```
-
-On Linux or macOS:
-
-```bash
-source venv/bin/activate
-```
-
-### 4. Install the dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 5. Create the environment file
-
-Copy `.env.example` to a new file named `.env`.
-
-On Windows Command Prompt:
-
-```bash
-copy .env.example .env
-```
-
-On Linux or macOS:
-
-```bash
-cp .env.example .env
-```
-
-Open the newly created `.env` file and replace the example secret key with your own Django secret key.
-
-A new key can be generated with:
+Copy `.env.example` to `.env` and replace the example secret key with a generated value. Keep `.env` outside version control.
 
 ```bash
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
-Your `.env` file should follow this structure:
+A local configuration uses these settings:
 
-```env
+```dotenv
 DJANGO_SECRET_KEY=replace-with-your-generated-secret-key
 DJANGO_DEBUG=True
 DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 ```
 
-> Do not commit the `.env` file. It is intentionally excluded through `.gitignore`.
-
-### 6. Apply the database migrations
+Apply migrations, create the initial superuser, and run the server:
 
 ```bash
-python manage.py migrate
+python -m django migrate --settings=Control_measurements.settings
+python -m django createsuperuser --settings=Control_measurements.settings
+python -m django runserver --settings=Control_measurements.settings
 ```
 
-### 7. Start the development server
+Open the [application](http://127.0.0.1:8000/) or [Django Admin](http://127.0.0.1:8000/admin/). Use the superuser to set up groups and their permissions.
+
+## Testing
+
+Run the Django test suite:
 
 ```bash
-python manage.py runserver
+python -m django test --settings=Control_measurements.settings
 ```
 
-Open the application at:
+For a browser check, use a regular account with only equipment-type viewing access. The list should open with Add, Edit, and Delete hidden. Grant the group the equipment-type change permission and reload to verify that Edit appears. Remove the permission and verify that the direct edit URL returns HTTP 403.
 
-[http://127.0.0.1:8000/](http://127.0.0.1:8000/)
-</details>
+## Documentation
+
+- Workflow overview ([English](docs/WORKFLOW_EN.md) · [Български](docs/WORKFLOW_BG.md))
+- Application guide ([English](docs/WORKFLOW_GUIDE_EN.md) · [Български](docs/WORKFLOW_GUIDE_BG.md))
+- [Changelog](CHANGELOG.md)
 
 ## License
 

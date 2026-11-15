@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load access_tags %}
 {% load static %}
 {% load status_tags %}
 
@@ -30,16 +31,18 @@
             </h1>
 
             <p class="page-description">
-                Manage employees, specialties, active status,
+                Browse employees, specialties, active status,
                 assignments, and employee history.
             </p>
         </div>
 
-        <div class="page-actions">
-            <a class="button button-primary" href="{% url 'employees:create' %}">
-                Add employee
-            </a>
-        </div>
+        {% if perms.employees.add_employee %}
+            <div class="page-actions">
+                {% if_can_access 'employees:create' %}<a class="button button-primary" href="{% url 'employees:create' %}">
+                    Add employee
+                </a>{% endif_can_access %}
+            </div>
+        {% endif %}
     </header>
     <section class="list-tools">
         <div class="list-tools-header">
@@ -91,7 +94,7 @@
                                 <td>
                                     <div class="employee-name-with-avatar">
                                         {% if employee.photo %}
-                                            <a
+                                            {% if_can_access 'employees:details' %}<a
                                                 class="employee-avatar"
                                                 href="{% url 'employees:details' employee.pk %}"
                                                 aria-label="Open details for {{ employee.full_name }}"
@@ -101,9 +104,15 @@
                                                     src="{{ employee.photo.url }}"
                                                     alt=""
                                                 >
-                                            </a>
+                                            </a>{% else %}<span>
+                                                <img
+                                                    class="employee-avatar-image"
+                                                    src="{{ employee.photo.url }}"
+                                                    alt=""
+                                                >
+                                            </span>{% endif_can_access %}
                                         {% else %}
-                                            <a
+                                            {% if_can_access 'employees:details' %}<a
                                                 class="employee-avatar"
                                                 href="{% url 'employees:details' employee.pk %}"
                                                 aria-label="Open details for {{ employee.full_name }}"
@@ -111,7 +120,11 @@
                                                 <span aria-hidden="true">
                                                     {{ employee.full_name|slice:":1"|upper }}
                                                 </span>
-                                            </a>
+                                            </a>{% else %}<span>
+                                                <span aria-hidden="true">
+                                                    {{ employee.full_name|slice:":1"|upper }}
+                                                </span>
+                                            </span>{% endif_can_access %}
                                         {% endif %}
 
                                         <div class="employee-name">
@@ -174,34 +187,36 @@
 
                                 <td class="table-actions">
                                     <div class="action-group">
-                                        <a
+                                        {% if_can_access 'employees:details' %}<a
                                             class="button button-small"
                                             href="{% url 'employees:details' employee.pk %}"
                                         >
                                             Details
-                                        </a>
+                                        </a>{% endif_can_access %}
 
-                                        <a
-                                            class="button button-small"
-                                            href="{% url 'employees:edit' employee.pk %}"
-                                        >
-                                            Edit
-                                        </a>
+                                        {% if perms.employees.change_employee %}
+                                            {% if_can_access 'employees:edit' %}<a
+                                                class="button button-small"
+                                                href="{% url 'employees:edit' employee.pk %}"
+                                            >
+                                                Edit
+                                            </a>{% endif_can_access %}
 
-                                        {% if employee.is_active %}
-                                            <a
-                                                class="button button-small button-danger"
-                                                href="{% url 'employees:activity-status' employee.pk %}"
-                                            >
-                                                Deactivate
-                                            </a>
-                                        {% else %}
-                                            <a
-                                                class="button button-small button-success"
-                                                href="{% url 'employees:activity-status' employee.pk %}"
-                                            >
-                                                Activate
-                                            </a>
+                                            {% if employee.is_active %}
+                                                {% if_can_access 'employees:activity-status' %}<a
+                                                    class="button button-small button-danger"
+                                                    href="{% url 'employees:activity-status' employee.pk %}"
+                                                >
+                                                    Deactivate
+                                                </a>{% endif_can_access %}
+                                            {% else %}
+                                                {% if_can_access 'employees:activity-status' %}<a
+                                                    class="button button-small button-success"
+                                                    href="{% url 'employees:activity-status' employee.pk %}"
+                                                >
+                                                    Activate
+                                                </a>{% endif_can_access %}
+                                            {% endif %}
                                         {% endif %}
                                     </div>
                                 </td>
@@ -222,20 +237,28 @@
                     <strong>{{ search_query }}</strong>.
                 </p>
 
-                <a class="button" href="{% url 'employees:list' %}?page_size={{ current_page_size }}">
+                {% if_can_access 'employees:list' %}<a class="button" href="{% url 'employees:list' %}?page_size={{ current_page_size }}">
                     Clear search
-                </a>
+                </a>{% endif_can_access %}
             {% else %}
                 <h2>No employees</h2>
 
-                <p>
-                    Add the first employee before assigning personnel
-                    to control activities.
-                </p>
+                {% if perms.employees.add_employee %}
+                    <p>
+                        Add the first employee before assigning personnel
+                        to control activities.
+                    </p>
+                {% else %}
+                    <p>
+                        No employee records have been added yet.
+                    </p>
+                {% endif %}
 
-                <a class="button button-primary" href="{% url 'employees:create' %}">
-                    Add employee
-                </a>
+                {% if perms.employees.add_employee %}
+                    {% if_can_access 'employees:create' %}<a class="button button-primary" href="{% url 'employees:create' %}">
+                        Add employee
+                    </a>{% endif_can_access %}
+                {% endif %}
             {% endif %}
         </section>
     {% endif %}

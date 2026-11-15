@@ -1,7 +1,11 @@
-from django.db.models import ProtectedError
+from django.db.models import ProtectedError, Q
 from django.utils.translation import gettext_lazy as translate
 from .base_forms import DeleteConfirmationForm
-from django.db.models import Q
+import re
+from django.db import connections
+from accounts.permissions import can_access_view
+from django.urls import resolve, reverse
+from urllib.parse import urlsplit
 
 class SingleRecordFormViewMixin:
     model = None
@@ -13,6 +17,21 @@ class SingleRecordFormViewMixin:
         kwargs = super().get_form_kwargs()
         kwargs["instance"] = self.get_record()
         return kwargs
+
+    def get_form(self, form_class=None):
+        from accounts.permissions import can_access_view
+        form = super().get_form(form_class)
+        self.can_edit_settings = can_access_view(
+            self.request.user, self.request.resolver_match.view_name, 'POST')
+        if not self.can_edit_settings:
+            for field in form.fields.values():
+                field.disabled = True
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['can_edit_settings'] = self.can_edit_settings
+        return context
 
     def form_valid(self, form):
         self.object = form.save()
@@ -30,8 +49,8 @@ class ConfirmedDeleteMixin:
 
     def render_deletion_blocked(self, form):
         context = self.get_context_data(form=form)
-        context["deletion_blocked"] = True
-        context["deletion_error"] = self.get_deletion_error_message()
+        context['deletion_blocked'] = True
+        context['deletion_error'] = self.get_deletion_error_message()
         return self.render_to_response(context)
 
     def form_valid(self, form):
@@ -72,7 +91,7 @@ class PaginationMixin:
         preserved_parameters = []
 
         for parameter_name, values in self.request.GET.lists():
-            if parameter_name in {"page",self.page_size_parameter}:
+            if parameter_name in {'page',self.page_size_parameter}:
                 continue
 
             for value in values:
@@ -110,17 +129,25 @@ class SearchMixin:
     def get_queryset(self):
         queryset = super().get_queryset()
         search_query = self.get_search_query()
-
         if not search_query:
             return queryset
 
+        is_sqlite = connections[queryset.db].vendor == 'sqlite'
+        escaped_query = re.escape(search_query)
         search_condition = Q()
 
         for field_name in self.get_search_fields():
-            search_condition |= Q(** {field_name: search_query,})
+            lookup = field_name
+            value = search_query
+
+            if is_sqlite and field_name.endswith('__icontains'):
+                field_path = field_name.removesuffix('__icontains')
+                lookup = f'{field_path}__iregex'
+                value = escaped_query
+
+            search_condition |= Q(**{lookup: value})
 
         queryset = queryset.filter(search_condition)
-
         if self.search_distinct:
             queryset = queryset.distinct()
 
@@ -161,16 +188,8 @@ class StatusFilterMixin:
         return self.status_choices
 
     def get_status_filters(self):
-        filters = [{
-            'value': '',
-            'label': translate('All'),
-        }]
-        filters.extend(
-            {
-                'value': status.value,
-                'label': status.label,
-            } for status in self.get_status_choices()
-        )
+        filters = [{'value': '', 'label': translate('All')}]
+        filters.extend({'value': status.value, 'label': status.label} for status in self.get_status_choices())
         return filters
 
     def filter_by_status(self, queryset, status_filter):
@@ -199,7 +218,18 @@ class StatusFilterMixin:
         context['current_status_filter'] = current_status_filter
         context['current_status_label'] = current_status_label
         query_parameters = self.request.GET.copy()
-        query_parameters.pop("page", None)
+        query_parameters.pop('page', None)
         query_parameters.pop(self.status_parameter, None)
-        context["status_filter_query"] = query_parameters.urlencode()
+        context['status_filter_query'] = query_parameters.urlencode()
         return context
+
+class PermissionAwareSuccessMixin:
+    def get_preferred_success_url(self):
+        return super().get_success_url()
+
+    def get_success_url(self):
+        url = self.get_preferred_success_url()
+        target = resolve(urlsplit(str(url)).path)
+        if can_access_view(self.request.user, target.view_name):
+            return url
+        return reverse('core:home')

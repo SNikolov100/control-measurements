@@ -26,10 +26,7 @@ def get_allowed_inspection_types(equipment):
         ),
     }
 
-    return allowed_types_by_status.get(
-        equipment.status,
-        (),
-    )
+    return allowed_types_by_status.get(equipment.status, (),)
 
 
 
@@ -39,9 +36,7 @@ def register_pending_inspection(inspection: Inspection) -> Inspection:
         raise ValidationError(translate('The activity must be saved before the equipment status can be updated.'))
 
     if inspection.status != inspection.Status.PENDING:
-        raise ValidationError(
-            {'status': translate('A newly registered activity must have Pending status.')}
-        )
+        raise ValidationError({'status': translate('A newly registered activity must have Pending status.')})
 
     another_open_activity = (type(inspection).objects
         .filter(
@@ -51,14 +46,10 @@ def register_pending_inspection(inspection: Inspection) -> Inspection:
         .exclude(pk=inspection.pk)
         .exists()
     )
-
     if another_open_activity:
-        raise ValidationError(
-            {'equipment': translate('This equipment already has another pending or in-progress activity.')}
-        )
+        raise ValidationError({'equipment': translate('This equipment already has another pending or in-progress activity.')})
 
     allowed_inspection_types = get_allowed_inspection_types(inspection.equipment)
-
     if inspection.inspection_type not in allowed_inspection_types:
         if inspection.equipment.status == inspection.equipment.Status.UNDER_REPAIR:
             message = translate('Only a repair activity can be created while the equipment is under repair.')
@@ -67,9 +58,7 @@ def register_pending_inspection(inspection: Inspection) -> Inspection:
         else:
             message = translate('A new activity cannot be created while the equipment is in its current status.')
 
-        raise ValidationError(
-            {'inspection_type': message}
-        )
+        raise ValidationError({'inspection_type': message})
 
     equipment = inspection.equipment
     previous_status = equipment.status
@@ -108,46 +97,34 @@ def start_inspection(inspection) ->Inspection:
         raise ValidationError(translate('The activity must be saved before it can be started.'))
 
     if not inspection.can_change_status_to(inspection.Status.IN_PROGRESS):
-        raise ValidationError(
-            {'status': translate('The activity cannot be started from its current status.')}
-        )
+        raise ValidationError({'status': translate('The activity cannot be started from its current status.')})
 
     another_activity_in_progress = (type(inspection).objects
-                                    .filter(equipment_id=inspection.equipment_id, status=inspection.Status.IN_PROGRESS, )
+                                    .filter(equipment_id=inspection.equipment_id, status=inspection.Status.IN_PROGRESS,)
                                     .exclude(pk=inspection.pk)
                                     .exists()
                                     )
-
     if another_activity_in_progress:
-        raise ValidationError(
-            {'status': translate('This equipment already has another activity in progress.')}
-        )
+        raise ValidationError({'status': translate('This equipment already has another activity in progress.')})
 
     assigned_employees = inspection.assigned_employees.all()
-
     if not assigned_employees.exists():
         raise ValidationError(
             {'assigned_employees': translate('At least one employee must be assigned before the activity can start.')}
         )
 
     inactive_employees = assigned_employees.filter(is_active=False)
-
     if inactive_employees.exists():
-        raise ValidationError(
-            {'assigned_employees': translate('Inactive employees cannot be assigned to an activity.')}
-        )
+        raise ValidationError({'assigned_employees': translate('Inactive employees cannot be assigned to an activity.')})
 
     required_specialty = inspection.equipment.equipment_type.specialty
-
     unqualified_employees = assigned_employees.exclude(specialties=required_specialty)
-
     if unqualified_employees.exists():
         raise ValidationError(
             {'assigned_employees': translate('All assigned employees must have the specialty required for this activity.')}
         )
 
     equipment = inspection.equipment
-
     if inspection.inspection_type == inspection.InspectionType.REINSPECTION:
         allowed_equipment_statuses = {equipment.Status.WAITING_REINSPECTION}
 
@@ -183,26 +160,17 @@ def start_inspection(inspection) ->Inspection:
 
 def complete_inspection(inspection, result='', result_notes='') -> Inspection:
     if not inspection.can_change_status_to(inspection.Status.COMPLETED):
-        raise ValidationError(
-            {'status': translate('The activity cannot be completed from its current status.')}
-        )
+        raise ValidationError({'status': translate('The activity cannot be completed from its current status.')})
 
     if result not in inspection.Result.values:
-        raise ValidationError(
-            {'result': translate('A valid result is required to complete this activity.')}
-        )
+        raise ValidationError({'result': translate('A valid result is required to complete this activity.')})
 
     result_notes = result_notes.strip()
-
     if inspection.inspection_type == inspection.InspectionType.REPAIR.value and not result_notes:
-        raise ValidationError(
-            {'result_notes': translate('Describe the repair work performed and the final repair outcome.')}
-        )
+        raise ValidationError({'result_notes': translate('Describe the repair work performed and the final repair outcome.')})
 
     if result == inspection.Result.FAILED.value and not result_notes:
-        raise ValidationError(
-            {'result_notes': translate('Describe why the activity was unsuccessful.')}
-        )
+        raise ValidationError({'result_notes': translate('Describe why the activity was unsuccessful.')})
 
     if inspection.inspection_type == inspection.InspectionType.REPAIR.value:
         if result == inspection.Result.PASSED.value:
@@ -222,7 +190,6 @@ def complete_inspection(inspection, result='', result_notes='') -> Inspection:
         inspection.result_notes = result_notes
         inspection.actual_end = timezone.now()
         inspection.save(update_fields=('status', 'result', 'result_notes', 'actual_end'))
-
         inspection.equipment.change_status(
             equipment_status,
             reason=f'Inspection #{inspection.pk} completed: {inspection.get_inspection_type_display()}.',
@@ -234,16 +201,12 @@ def complete_inspection(inspection, result='', result_notes='') -> Inspection:
 
 def cancel_inspection(inspection: Inspection,reason: str) -> Inspection:
     if not inspection.can_change_status_to(inspection.Status.CANCELLED):
-        raise ValidationError({
-                'status': translate('The activity cannot be cancelled from its current status.')
-        })
+        raise ValidationError({'status': translate('The activity cannot be cancelled from its current status.')})
 
     reason = reason.strip()
 
     if not reason:
-        raise ValidationError({
-                'cancellation_reason': translate('A cancellation reason is required.')
-        })
+        raise ValidationError({'cancellation_reason': translate('A cancellation reason is required.')})
 
     was_in_progress = inspection.status == inspection.Status.IN_PROGRESS
     equipment = inspection.equipment

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}
+    Register | Control Measurements
+{% endblock %}
+
+{% block content %}
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">
+                Create account
+            </h1>
+
+            <p class="page-description">
+                Register a new account to access
+                Control Measurements.
+            </p>
+        </div>
+    </header>
+
+    <section class="card">
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">
+                Register
+            </button>
+        </form>
+
+        <p>
+            Already have an account?
+            <a href="{% url 'accounts:login' %}">
+                Login
+            </a>
+        </p>
+
+    </section>
+{% endblock %}

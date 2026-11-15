@@ -11,7 +11,7 @@ from django.db.models import Q
 
 def equipment_image_upload_path(instance, filename):
     file_extension = Path(filename).suffix.lower()
-    return "equipment/"f"{uuid4().hex}{file_extension}"
+    return 'equipment/'f'{uuid4().hex}{file_extension}'
 
 class EquipmentType(TextNormalizationMixin, TimestampMixin):
     strip_fields = ('name', 'short_name', 'description',)
@@ -117,41 +117,41 @@ class Equipment(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
     )
     inspection_interval_value = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1)],
-        verbose_name=translate("Inspection interval value"),
+        verbose_name=translate('Inspection interval value'),
     )
     inspection_interval_unit = models.CharField(
         max_length=10,
         choices=EquipmentType.IntervalUnit.choices,
-        verbose_name=translate("Inspection interval unit"),
+        verbose_name=translate('Inspection interval unit'),
     )
     estimated_inspection_duration = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1)],
-        verbose_name=translate("Estimated inspection duration in minutes"),
+        verbose_name=translate('Estimated inspection duration in minutes'),
     )
     status = models.CharField(
         max_length=25,
         choices=Status.choices,
         default=Status.IN_SERVICE,
-        verbose_name=translate("Status"),
+        verbose_name=translate('Status'),
     )
     notes = models.TextField(
         blank=True,
-        verbose_name=translate("Notes"),
+        verbose_name=translate('Notes'),
     )
     image = models.ImageField(
         upload_to=equipment_image_upload_path,
         validators=[validate_uploaded_image],
         blank=True,
         null=True,
-        verbose_name=translate("Equipment image"),
+        verbose_name=translate('Equipment image'),
     )
 
     def save(self, *args, **kwargs):
         self.is_active = (self.status != self.Status.DECOMMISSIONED)
-        update_fields = kwargs.get("update_fields")
+        update_fields = kwargs.get('update_fields')
 
         if update_fields is not None:
-            kwargs["update_fields"] = (set(update_fields) | {"is_active"})
+            kwargs['update_fields'] = (set(update_fields) | {'is_active'})
         super().save(*args, **kwargs)
 
     def build_slug(self):
@@ -164,10 +164,10 @@ class Equipment(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
         valid_statuses = {status.value for status in self.Status}
 
         if new_status not in valid_statuses:
-            raise ValueError("Invalid equipment status.")
+            raise ValueError('Invalid equipment status.')
 
         if self.pk is None:
-            raise ValueError("Equipment must be saved before its status can be changed.")
+            raise ValueError('Equipment must be saved before its status can be changed.')
 
         if new_status == self.status:
             return False
@@ -176,7 +176,7 @@ class Equipment(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
 
         with transaction.atomic():
             self.status = new_status
-            self.save(update_fields={"status"})
+            self.save(update_fields={'status'})
             EquipmentStatusHistory.objects.create(
                 equipment=self,
                 previous_status=previous_status,
@@ -242,16 +242,13 @@ class EquipmentStatusHistory(models.Model):
 
     def __str__(self):
         if self.previous_status:
-            return (f"{self.equipment}:"
-                    f" {self.get_previous_status_display()}"
-                    f" -> {self.get_new_status_display()}"
-            )
-        return f"{self.equipment}: {self.get_new_status_display()}"
+            return f'{self.equipment}: {self.get_previous_status_display()} -> {self.get_new_status_display()}'
+        return f'{self.equipment}: {self.get_new_status_display()}'
 
     class Meta:
-        ordering = ("-changed_at",)
-        verbose_name = translate("Equipment status history")
-        verbose_name_plural = translate("Equipment status histories")
+        ordering = ('-changed_at',)
+        verbose_name = translate('Equipment status history')
+        verbose_name_plural = translate('Equipment status histories')
 
 
 

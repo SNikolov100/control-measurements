@@ -17,19 +17,19 @@ class SpecialtyBaseForm(forms.ModelForm):
         )
         widgets = {
             "name": forms.TextInput(
-                attrs={"placeholder": "For example: Electrical measurements",},
+                attrs={'placeholder': translate('For example: Electrical measurements')},
             ),
-            "description": forms.Textarea(
+            'description': forms.Textarea(
                 attrs={
-                    "rows": 5,
-                    "placeholder": "Describe the specialty and its typical applications.",
+                    'rows': 5,
+                    'placeholder': translate('Describe the specialty and its typical applications.'),
                 },
             ),
             "color": forms.TextInput(attrs={"type": "color"}),
             "sort_order": forms.NumberInput(
                 attrs={
                     "min": 0,
-                    "placeholder": "For example: 10",
+                    "placeholder": translate("For example: 10"),
                 },
             ),
         }
@@ -80,20 +80,20 @@ class CompanySettingsForm(forms.ModelForm):
         widgets = {
             'phone': forms.TextInput(
                 attrs={
-                    'placeholder': 'For example: +359 32 123 456',
+                    'placeholder': translate('For example: +359 32 123 456'),
                     'autocomplete': 'tel',
                 },
             ),
             'email': forms.EmailInput(
                 attrs={
-                    'placeholder': 'For example: office@example.com',
+                    'placeholder': translate('For example: office@example.com'),
                     'autocomplete': 'email',
                 },
             ),
             'notes': forms.Textarea(
                 attrs={
                     'rows': 5,
-                    'placeholder': 'Add relevant information about the operating company.',
+                    'placeholder': translate('Add relevant information about the operating company.'),
                 },
             ),
         }
@@ -108,12 +108,8 @@ class CompanySettingsForm(forms.ModelForm):
             'notes': translate('Optional additional company information.'),
         }
         error_messages = {
-            'company_name': {
-                'required': translate('Enter the company name.'),
-            },
-            'short_name': {
-                'required': translate('Enter the company short name.'),
-            },
+            'company_name': {'required': translate('Enter the company name.')},
+            'short_name': {'required': translate('Enter the company short name.')},
             'email': {'invalid': translate('Enter a valid company email address.')},
         }
 
@@ -145,13 +141,13 @@ class SystemSettingsForm(forms.ModelForm):
             "warning_days_before_due": forms.NumberInput(
                 attrs={
                     'min': 0,
-                    'placeholder': 'For example: 14',
+                    'placeholder': translate('For example: 14'),
                 },
             ),
             "critical_days_before_due": forms.NumberInput(
                 attrs={
                     'min': 0,
-                    'placeholder': 'For example: 3',
+                    'placeholder': translate('For example: 3'),
                 },
             ),
         }
