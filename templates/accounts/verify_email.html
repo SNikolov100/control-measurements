@@ -1,0 +1,33 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="same-origin">
+    <title>{% translate "Email confirmation" %}</title>
+</head>
+<body>
+    <h1>{% translate "Email confirmation" %}</h1>
+
+    {% if error %}
+        <p>{{ error }}</p>
+
+    {% elif confirmed %}
+        <p>{% translate "Your email address has been confirmed." %}</p>
+        <a href="{% url 'accounts:login' %}">
+            {% translate "Continue to login" %}
+        </a>
+
+    {% else %}
+        <p>{% translate "Click the button to confirm your email address." %}</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit">
+                {% translate "Confirm email" %}
+            </button>
+        </form>
+    {% endif %}
+</body>
+</html>

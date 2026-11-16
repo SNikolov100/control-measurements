@@ -8,16 +8,24 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from django.shortcuts import redirect
-from django.views.decorators.http import require_POST
+from django.shortcuts import redirect, render
+from django.views.decorators.http import require_POST, require_http_methods
 from django.views.generic import FormView, TemplateView, ListView, CreateView
 from .forms import AppUserRegistrationForm, ProfileForm
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as translate
 from .forms import AppUserLoginForm
 from employees.services import ensure_employee_request
+from django.core.signing import BadSignature, SignatureExpired
+from .tokens import read_email_verification_token
+from functools import partial
+from .emails import send_verification_email
+import logging
+from smtplib import SMTPException
+
 
 AppUser = get_user_model()
+logger = logging.getLogger(__name__)
 class AppUserRegistrationView(FormView):
     form_class = AppUserRegistrationForm
     template_name = 'accounts/register.html'
@@ -61,11 +69,15 @@ def registration_decision(request, pk, action):
     if status is None:
         raise Http404
 
-    updated = AppUser.objects.filter(
-        pk=pk,
-        registration_status=AppUser.RegistrationStatus.PENDING,
-        is_superuser=False,
-    ).update(registration_status=status)
+    with transaction.atomic():
+        updated = AppUser.objects.filter(
+            pk=pk,
+            registration_status=AppUser.RegistrationStatus.PENDING,
+            is_superuser=False,
+        ).update(registration_status=status)
+        if updated and (status == AppUser.RegistrationStatus.APPROVED):
+            user = AppUser.objects.get(pk=pk)
+            transaction.on_commit(partial(send_verification_email, user, request))
 
     if updated:
         messages.success(request, translate(f'Registration successfully {status}.'))
@@ -96,3 +108,56 @@ class AppUserLoginView(LoginView):
     template_name = "accounts/login.html"
     authentication_form = AppUserLoginForm
     redirect_authenticated_user = True
+
+
+@require_http_methods(["GET", "POST"])
+def verify_email(request, token):
+    template_name = 'accounts/verify_email.html'
+    try:
+        data = read_email_verification_token(token)
+    except SignatureExpired:
+        return render(request, template_name, {'error': translate('This confirmation link has expired.')}, status=400)
+    except BadSignature:
+        return render(request, template_name, {'error': translate('This confirmation link is invalid.')}, status=400)
+
+    eligible_users = AppUser.objects.filter(
+        pk=data['user_id'],
+        email=data['email'],
+        is_active=True,
+        registration_status=AppUser.RegistrationStatus.APPROVED,
+    )
+    user = eligible_users.first()
+    if user is None:
+        return render(request, template_name, {'error': translate('This link cannot be used to confirm an email address.')}, status=400)
+
+    if user.email_verified:
+        return render(request, template_name, {'confirmed': True})
+
+    if request.method == 'POST':
+        updated = eligible_users.filter(email_verified=False).update(email_verified=True)
+
+        if not updated:
+            return render(request, template_name, {'error': translate('The account has changed. Please open the link again.')}, status=400)
+
+        return redirect('accounts:verify_email', token=token)
+
+    return render(request, template_name)
+
+
+@login_required
+@require_POST
+def resend_verification_email(request):
+    if get_access_state(request.user) != 'email_verification_required':
+        return redirect('core:home')
+    try:
+        sent = send_verification_email(request.user, request)
+    except (SMTPException, OSError):
+        logger.exception('Could not send email verification message.')
+        messages.error(request, translate('The email could not be sent. Please try again later.'))
+    else:
+        if sent:
+            messages.success(request, translate('A new confirmation email has been sent.'))
+        else:
+            messages.warning(request, translate('No new email was sent. Please wait at least one minute between requests and refresh the page.'))
+
+    return redirect('core:home')

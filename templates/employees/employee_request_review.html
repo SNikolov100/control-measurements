@@ -79,9 +79,9 @@
 
         <div class="form-fields">
             {% render_field form.action %}
-            {% render_field form.employee %}
-            {% render_field form.role %}
-            {% render_field form.review_note %}
+            {% render_field form.employee css_class="js-field-employee" %}
+            {% render_field form.role css_class="js-field-role" %}
+            {% render_field form.review_note css_class="js-field-note" %}
         </div>
 
         {% if form.non_field_errors %}
@@ -201,5 +201,43 @@
         dialog.showModal();
         closeButton.focus();
     })();
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const actionInputs = document.querySelectorAll('input[name="action"]');
+        const employeeContainer = document.querySelector(".js-field-employee");
+        const roleContainer = document.querySelector(".js-field-role");
+        const noteContainer = document.querySelector(".js-field-note");
+        const employeeSelect = document.getElementById("id_employee");
+
+        function updateFieldsVisibility() {
+            const selectedAction = document.querySelector('input[name="action"]:checked')?.value;
+
+            if (selectedAction === "link") {
+                if (employeeContainer) employeeContainer.style.display = "";
+                if (roleContainer) roleContainer.style.display = "";
+            } else if (selectedAction === "create") {
+                if (employeeContainer) {
+                    employeeContainer.style.display = "none";
+                    if (employeeSelect) employeeSelect.value = ""; // нулира избора
+                }
+                if (roleContainer) roleContainer.style.display = "";
+            } else if (selectedAction === "reject") {
+                if (employeeContainer) {
+                    employeeContainer.style.display = "none";
+                    if (employeeSelect) employeeSelect.value = "";
+                }
+                if (roleContainer) roleContainer.style.display = "none";
+                if (noteContainer) noteContainer.style.display = "";
+            }
+        }
+
+        actionInputs.forEach(input => {
+            input.addEventListener("change", updateFieldsVisibility);
+        });
+
+        // Първоначално извикване при зареждане на страницата
+        updateFieldsVisibility();
+    });
 </script>
 {% endblock %}

@@ -174,6 +174,7 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+DEFAULT_FROM_EMAIL = 'Control Measurements <noreply@example.com>'
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"

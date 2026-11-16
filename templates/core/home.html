@@ -46,6 +46,23 @@
                     </span>
                 </a>{% endif_can_access %}
 
+                {% if_can_access 'equipment:types-list' %}
+                    <a
+                        class="card quick-link"
+                        href="{% url 'equipment:types-list' %}"
+                    >
+                        <h3 class="card-title">Equipment types</h3>
+
+                        <p class="card-description">
+                            Manage equipment types and their characteristics.
+                        </p>
+
+                        <span class="quick-link-label">
+                            Open equipment types
+                        </span>
+                    </a>
+                {% endif_can_access %}
+
                 {% if_can_access 'equipment:list' %}<a
                     class="card quick-link"
                     href="{% url 'equipment:list' %}"
@@ -98,7 +115,6 @@
                 {% if not perms.customers.view_customer %}{% if_can_access 'customers:create' %}<a class="button" href="{% url 'customers:create' %}">Add customer</a>{% endif_can_access %}{% endif %}
                 {% if not perms.equipment.view_equipment %}{% if_can_access 'equipment:create' %}<a class="button" href="{% url 'equipment:create' %}">Add equipment</a>{% endif_can_access %}{% endif %}
                 {% if not perms.employees.view_employee %}{% if_can_access 'employees:create' %}<a class="button" href="{% url 'employees:create' %}">Add employee</a>{% endif_can_access %}{% endif %}
-                {% if_can_access 'equipment:types-list' %}<a class="button" href="{% url 'equipment:types-list' %}">Equipment types</a>{% endif_can_access %}
                 {% if not perms.equipment.view_equipmenttype %}{% if_can_access 'equipment:type-create' %}<a class="button" href="{% url 'equipment:type-create' %}">Add equipment type</a>{% endif_can_access %}{% endif %}
                 {% if not perms.core.view_specialty %}{% if_can_access 'core:specialty-create' %}<a class="button" href="{% url 'core:specialty-create' %}">Add specialty</a>{% endif_can_access %}{% endif %}
             </div>
@@ -184,7 +200,25 @@
                 Your account registration has not been approved.
             </p>
         </section>
-
+    {% elif request.access_state == "email_verification_required" %}
+        <form method="post" action="{% url 'accounts:resend_verification_email' %}">
+            {% csrf_token %}
+            <button type="submit" class="button">
+                Resend confirmation email
+            </button>
+        </form>
+        <section class="card">
+            <h2>Email confirmation required</h2>
+            <p>
+                Your registration has been approved.
+                Please confirm your email address to continue.
+            </p>
+            <p>
+                Open the confirmation link sent to
+                <strong>{{ request.user.email }}</strong>.
+                The link is valid for 24 hours.
+            </p>
+        </section>
     {% elif request.access_state == "profile_required" %}
         <section class="card">
             <h2>Profile required</h2>

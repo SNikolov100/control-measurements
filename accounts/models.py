@@ -34,6 +34,17 @@ class AppUser(TextNormalizationMixin, AbstractUser):
     email = models.EmailField(
         verbose_name=translate('Email address'),
     )
+    email_verified = models.BooleanField(
+        default=False,
+        editable=False,
+        verbose_name=translate('Email verified'),
+    )
+    email_verification_sent_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        editable=False,
+        verbose_name=translate('Email verification last sent at'),
+    )
     first_name = None
     last_name = None
     registration_status = models.CharField(

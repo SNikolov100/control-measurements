@@ -12,6 +12,9 @@ def get_access_state(user):
     if user.registration_status != user.RegistrationStatus.APPROVED:
         return 'pending'
 
+    if not user.email_verified:
+        return 'email_verification_required'
+
     if not hasattr(user, "profile"):
         return 'profile_required'
 

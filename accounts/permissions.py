@@ -2,7 +2,7 @@ from .access import get_access_state
 
 PUBLIC_VIEWS = {
     'accounts:login', 'accounts:register', 'accounts:registration_pending', 'accounts:logout',
-    'public:contacts', 'public:about',
+    'public:contacts', 'public:about', 'accounts:verify_email',
 }
 ADMIN_VIEWS = {
     'accounts:pending_registrations', 'accounts:registration_decision',
@@ -65,6 +65,9 @@ def can_access_view(user, view_name, method='GET', *, access_state=None):
     state = access_state if access_state is not None else get_access_state(user)
     if view_name == 'accounts:profile_create':
         return state == 'profile_required'
+
+    if view_name == 'accounts:resend_verification_email':
+        return state == 'email_verification_required' and method.upper() == 'POST'
 
     if state != 'ready':
         return False

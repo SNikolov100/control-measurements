@@ -102,6 +102,9 @@ class EmployeeRequestReviewForm(forms.Form):
         role = cleaned_data.get('role')
         note = cleaned_data.get('review_note', '')
 
+        if action != EmployeeRequestAction.LINK:
+            cleaned_data['employee'] = None
+
         if action == EmployeeRequestAction.LINK and not employee:
             self.add_error('employee', translate('Select an existing employee.'),)
 
