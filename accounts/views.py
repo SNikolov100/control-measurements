@@ -19,7 +19,7 @@ from employees.services import ensure_employee_request
 from django.core.signing import BadSignature, SignatureExpired
 from .tokens import read_email_verification_token
 from functools import partial
-from .emails import send_verification_email
+from .emails import send_verification_email, send_registration_rejected_email
 import logging
 from smtplib import SMTPException
 
@@ -69,15 +69,24 @@ def registration_decision(request, pk, action):
     if status is None:
         raise Http404
 
-    with transaction.atomic():
+    with (transaction.atomic()):
         updated = AppUser.objects.filter(
             pk=pk,
             registration_status=AppUser.RegistrationStatus.PENDING,
             is_superuser=False,
         ).update(registration_status=status)
-        if updated and (status == AppUser.RegistrationStatus.APPROVED):
+        if updated:
             user = AppUser.objects.get(pk=pk)
-            transaction.on_commit(partial(send_verification_email, user, request))
+            if status == AppUser.RegistrationStatus.APPROVED:
+                transaction.on_commit(
+                    partial(send_verification_email, user, request),
+                    robust=True,
+                )
+            elif status == AppUser.RegistrationStatus.REJECTED:
+                transaction.on_commit(
+                    partial(send_registration_rejected_email, user),
+                    robust=True,
+                )
 
     if updated:
         messages.success(request, translate(f'Registration successfully {status}.'))

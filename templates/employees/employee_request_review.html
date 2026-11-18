@@ -119,27 +119,16 @@
                     {{ form.confirm_name_difference.errors }}
                 {% endif %}
 
-                <div class="form-actions">
-                    {% if form.show_name_confirmation %}
-                        <button type="submit"
-                                class="button button-primary">
-                            Confirm and link account
-                        </button>
-                    {% endif %}
-
-                    <button type="button"
-                            class="button"
-                            id="review-error-close"
-                            hidden>
-                        Back to review
-                    </button>
-                </div>
             </section>
         {% endif %}
 
         <div class="form-actions">
             <button type="submit" class="button button-primary">
-                Submit decision
+                {% if form.show_name_confirmation %}
+                    Confirm and link account
+                {% else %}
+                    Submit decision
+                {% endif %}
             </button>
         </div>
     </form>
@@ -155,7 +144,6 @@
 {% block extra_js %}
 <script>
     (() => {
-        const panel = document.getElementById("review-error-panel");
         const form = document.getElementById("employee-review-form");
 
         if (!panel || !form) {
@@ -210,33 +198,19 @@
         const noteContainer = document.querySelector(".js-field-note");
         const employeeSelect = document.getElementById("id_employee");
 
-        function updateFieldsVisibility() {
-            const selectedAction = document.querySelector('input[name="action"]:checked')?.value;
+        function updateFieldsVisibility() {const selectedAction = document.querySelector('input[name="action"]:checked')?.value;
 
-            if (selectedAction === "link") {
-                if (employeeContainer) employeeContainer.style.display = "";
-                if (roleContainer) roleContainer.style.display = "";
-            } else if (selectedAction === "create") {
-                if (employeeContainer) {
-                    employeeContainer.style.display = "none";
-                    if (employeeSelect) employeeSelect.value = ""; // нулира избора
-                }
-                if (roleContainer) roleContainer.style.display = "";
-            } else if (selectedAction === "reject") {
-                if (employeeContainer) {
-                    employeeContainer.style.display = "none";
-                    if (employeeSelect) employeeSelect.value = "";
-                }
-                if (roleContainer) roleContainer.style.display = "none";
-                if (noteContainer) noteContainer.style.display = "";
-            }
+            if (employeeContainer) {employeeContainer.style.display = selectedAction === "link" ? "" : "none";}
+
+            if (roleContainer) {roleContainer.style.display = ["link", "create"].includes(selectedAction) ? "" : "none";}
+
+            if (noteContainer) {noteContainer.style.display = selectedAction ? "" : "none";}
+
+            if (selectedAction !== "link" && employeeSelect) {employeeSelect.value = "";}
         }
 
-        actionInputs.forEach(input => {
-            input.addEventListener("change", updateFieldsVisibility);
-        });
+        actionInputs.forEach(input => {input.addEventListener("change", updateFieldsVisibility);});
 
-        // Първоначално извикване при зареждане на страницата
         updateFieldsVisibility();
     });
 </script>

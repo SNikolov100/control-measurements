@@ -7,6 +7,8 @@ from django.db import transaction
 from django.utils import timezone
 from .models import EmployeeHistory
 from .choices import EmployeeRequestAction
+from functools import partial
+from .emails import send_employee_request_result_email
 
 def ensure_employee_request(user):
     if user.registration_status != AppUser.RegistrationStatus.APPROVED:
@@ -66,6 +68,10 @@ def review_employee_request(*,
 
     employee_request = EmployeeRequest.objects.select_related('user', 'user__profile').get(pk=request_id)
     if action == EmployeeRequestAction.REJECT:
+        transaction.on_commit(
+            partial(send_employee_request_result_email, employee_request.user.email, employee_request.status),
+            robust=True,
+        )
         return employee_request
 
     user = employee_request.user
@@ -152,5 +158,9 @@ def review_employee_request(*,
     user.groups.set([group])
     EmployeeRequest.objects.filter(pk=request_id,).update(employee=employee)
     employee_request.employee = employee
+    transaction.on_commit(
+        partial(send_employee_request_result_email, employee_request.user.email, employee_request.status),
+        robust=True,
+    )
 
     return employee_request

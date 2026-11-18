@@ -60,3 +60,18 @@ def send_verification_email(user, request):
         return False
 
     return True
+
+
+def send_registration_rejected_email(user):
+    return send_mail(
+        subject='Registration request — Control Measurements',
+        message=(
+            'Hello,\n\n'
+            'Your registration request for Control Measurements '
+            'has been rejected.\n\n'
+            'If you believe this is a mistake, '
+            'please contact the administrator.\n'
+        ),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+    )

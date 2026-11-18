@@ -13,7 +13,7 @@
                     {% if_can_access 'employees:list' %}<li><a href="{% url 'employees:list' %}">Employees</a></li>{% endif_can_access %}
                     {% if_can_access 'inspections:list' %}<li><a href="{% url 'inspections:list' %}">Activities</a></li>{% endif_can_access %}
                     {% if perms.equipment.view_equipment or perms.equipment.view_equipmenttype %}
-                        <li class="navigation-dropdown"><details>
+                        <li class="navigation-dropdown"><details name="main-navigation">
                             <summary>Equipment</summary>
                             <ul class="navigation-submenu">
                                 {% if_can_access 'equipment:list' %}<li><a href="{% url 'equipment:list' %}">Equipment registry</a></li>{% endif_can_access %}
@@ -22,7 +22,7 @@
                         </details></li>
                     {% endif %}
                     {% if request.user.is_superuser %}
-                        <li class="navigation-dropdown"><details>
+                        <li class="navigation-dropdown"><details name="main-navigation">
                             <summary>Requests</summary>
                             <ul class="navigation-submenu">
                                 <li><a href="{% url 'accounts:pending_registrations' %}">Pending registrations</a></li>
@@ -34,7 +34,7 @@
                     {% can_access 'core:system-settings' as can_view_system %}
                     {% can_access 'core:specialty-list' as can_view_specialties %}
                     {% if can_view_company or can_view_system or can_view_specialties %}
-                        <li class="navigation-dropdown"><details>
+                        <li class="navigation-dropdown"><details name="main-navigation">
                             <summary>Settings</summary>
                             <ul class="navigation-submenu">
                                 {% if can_view_company %}<li><a href="{% url 'core:company-settings' %}">Our company</a></li>{% endif %}

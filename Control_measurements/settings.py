@@ -169,12 +169,31 @@ STORAGES = {
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+EMAIL_MODE = os.getenv("EMAIL_MODE", "console").lower()
+
+MAILERS: dict[str, dict[str, object]] = {
+    "default": {
+        "BACKEND": "django.core.mail.backends.console.EmailBackend",
     },
 }
-DEFAULT_FROM_EMAIL = 'Control Measurements <noreply@example.com>'
+
+if EMAIL_MODE == "smtp":
+    MAILERS["default"] = {
+        "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
+        "OPTIONS": {
+            "host": os.environ["SMTP_HOST"],
+            "port": int(os.getenv("SMTP_PORT", "587")),
+            "username": os.environ["SMTP_USERNAME"],
+            "password": os.environ["SMTP_PASSWORD"],
+            "use_tls": True,
+            "timeout": 10,
+        },
+    }
+
+DEFAULT_FROM_EMAIL = os.getenv(
+    "DEFAULT_FROM_EMAIL",
+    "Control Measurements <noreply@example.com>",
+)
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
