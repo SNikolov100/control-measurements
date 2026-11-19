@@ -1,6 +1,6 @@
 from django.db import transaction
 from .access import get_access_state
-from .models import Profile
+from .models import Profile, RegistrationStatusHistory
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
@@ -22,7 +22,7 @@ from functools import partial
 from .emails import send_verification_email, send_registration_rejected_email
 import logging
 from smtplib import SMTPException
-
+from core.view_mixins import StatusFilterMixin, PaginationMixin
 
 AppUser = get_user_model()
 logger = logging.getLogger(__name__)
@@ -40,20 +40,20 @@ class RegistrationPendingView(TemplateView):
     template_name = 'accounts/registration_pending.html'
 
 
-class PendingRegistrationsView(UserPassesTestMixin, ListView):
+class PendingRegistrationsView(UserPassesTestMixin, StatusFilterMixin, PaginationMixin, ListView):
     model = AppUser
     template_name = 'accounts/pending_registrations.html'
-    context_object_name = 'pending_users'
+    context_object_name = 'registrations'
     paginate_by = 20
+    status_field = 'registration_status'
+    status_choices = AppUser.RegistrationStatus
 
     def test_func(self):
         return self.request.user.is_authenticated and self.request.user.is_superuser
 
     def get_queryset(self):
-        return AppUser.objects.filter(
-            registration_status=AppUser.RegistrationStatus.PENDING,
-            is_superuser=False,
-        ).order_by('date_joined')
+        return super().get_queryset().filter(is_superuser=False).order_by('date_joined')
+
 
 @login_required
 @require_POST
@@ -64,19 +64,39 @@ def registration_decision(request, pk, action):
     statuses = {
         'approve': AppUser.RegistrationStatus.APPROVED,
         'reject': AppUser.RegistrationStatus.REJECTED,
+        'reconsider': AppUser.RegistrationStatus.PENDING,
     }
     status = statuses.get(action)
     if status is None:
         raise Http404
 
+    if action == 'reconsider':
+        expected_status = AppUser.RegistrationStatus.REJECTED
+    else:
+        expected_status = AppUser.RegistrationStatus.PENDING
+
+    note = request.POST.get('note', '').strip()
+    if action == 'reconsider' and not note:
+        messages.error(request, 'Please provide a reason for reconsideration.')
+        return redirect('accounts:pending_registrations')
+
     with (transaction.atomic()):
         updated = AppUser.objects.filter(
             pk=pk,
-            registration_status=AppUser.RegistrationStatus.PENDING,
+            registration_status=expected_status,
             is_superuser=False,
         ).update(registration_status=status)
         if updated:
             user = AppUser.objects.get(pk=pk)
+            RegistrationStatusHistory.objects.create(
+                user=user,
+                changed_by=request.user,
+                action=action,
+                previous_status=expected_status,
+                new_status=status,
+                note=note,
+            )
+
             if status == AppUser.RegistrationStatus.APPROVED:
                 transaction.on_commit(
                     partial(send_verification_email, user, request),

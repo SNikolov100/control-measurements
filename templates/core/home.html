@@ -231,6 +231,22 @@
             </a>
         </section>
 
+    {% elif request.access_state == "employee_rejected" %}
+
+        <section class="card">
+            <h2>Employee request rejected</h2>
+
+            <p>
+                Your request to associate an employee record
+                with your account has been rejected.
+            </p>
+
+            <p>
+                An administrator can reconsider this decision.
+                Please contact the administrator if necessary.
+            </p>
+        </section>
+
     {% elif request.access_state == "employee_pending" %}
 
         <section class="card">

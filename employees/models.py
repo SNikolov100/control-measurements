@@ -180,6 +180,23 @@ class EmployeeRequest(models.Model):
     review_note = models.TextField(
         blank=True,
     )
+    reconsidered_from = models.OneToOneField(
+        'self',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='reconsidered_as',
+    )
+    reconsidered_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reconsidered_employee_requests',
+    )
+    reconsideration_note = models.TextField(
+        blank=True,
+    )
 
     def __str__(self):
         return f'{self.user} - {self.get_status_display()}'

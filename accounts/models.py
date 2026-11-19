@@ -60,6 +60,43 @@ class AppUser(TextNormalizationMixin, AbstractUser):
         ]
 
 
+class RegistrationStatusHistory(models.Model):
+    class Action(models.TextChoices):
+        APPROVE = 'approve', translate('Approve')
+        REJECT = 'reject', translate('Reject')
+        RECONSIDER = 'reconsider', translate('Reconsider')
+
+    user = models.ForeignKey(
+        AppUser,
+        on_delete=models.PROTECT,
+        related_name='registration_history',
+    )
+    changed_by = models.ForeignKey(
+        AppUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='registration_decisions',
+    )
+    action = models.CharField(
+        max_length=20,
+        choices=Action.choices,
+    )
+    previous_status = models.CharField(
+        max_length=10,
+        choices=AppUser.RegistrationStatus.choices,
+    )
+    new_status = models.CharField(
+        max_length=10,
+        choices=AppUser.RegistrationStatus.choices,
+    )
+    note = models.TextField(blank=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        ordering = ('-created_at',)
+
 class Profile(TextNormalizationMixin, models.Model):
     user = models.OneToOneField(
         AppUser,

@@ -164,3 +164,49 @@ def review_employee_request(*,
     )
 
     return employee_request
+
+
+@transaction.atomic
+def reconsider_employee_request(*, request_id: int, reviewer, note: str):
+    if not reviewer.is_authenticated or not reviewer.is_superuser:
+        raise PermissionDenied
+
+    note = note.strip()
+    if not note:
+        raise ValidationError(translate('Reconsideration reason is required.'))
+
+    old_request = (
+        EmployeeRequest.objects
+        .select_for_update()
+        .select_related('user')
+        .filter(pk=request_id, status=EmployeeRequest.Status.REJECTED)
+        .first()
+    )
+    if old_request is None:
+        raise ValidationError(translate('The request is not rejected or does not exist.'))
+
+    if EmployeeRequest.objects.filter(reconsidered_from=old_request).exists():
+        raise ValidationError(translate('This request has already been reconsidered.'))
+
+    user = old_request.user
+    if not user.is_active or user.is_superuser or user.registration_status != user.RegistrationStatus.APPROVED or not user.email_verified:
+        raise ValidationError(translate('The user account is not eligible for reconsideration.'))
+
+    if not Profile.objects.filter(user=user).exists():
+        raise ValidationError(translate('The user profile does not exist.'))
+
+    if Employee.objects.filter(user=user).exists():
+        raise ValidationError(translate('This user already has an employee record.'))
+
+    if EmployeeRequest.objects.filter(user=user, status=EmployeeRequest.Status.PENDING).exists():
+        raise ValidationError(translate('The user already has a pending request.'))
+
+    new_request = EmployeeRequest.objects.create(
+        user=user,
+        status=EmployeeRequest.Status.PENDING,
+        reconsidered_from=old_request,
+        reconsidered_by=reviewer,
+        reconsideration_note=note,
+    )
+
+    return new_request
