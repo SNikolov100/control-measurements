@@ -6,7 +6,7 @@ PUBLIC_VIEWS = {
 }
 ADMIN_VIEWS = {
     'accounts:pending_registrations', 'accounts:registration_decision',
-    'employees:pending-requests', 'employees:review-request',
+    'employees:pending-requests', 'employees:review-request', 'employees:reconsider-request',
 }
 VIEW_PERMISSIONS = {
     'customers:list': 'customers.view_customer',

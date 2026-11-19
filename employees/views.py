@@ -4,14 +4,18 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, ListView, UpdateView, DetailView, FormView
 from .forms import EmployeeCreateForm, EmployeeEditForm, EmployeeActivityStatusForm
 from .models import Employee
-from core.view_mixins import PaginationMixin, SearchMixin
+from core.view_mixins import PaginationMixin, SearchMixin, StatusFilterMixin
 from django.contrib.auth.mixins import UserPassesTestMixin
 from .models import EmployeeRequest
 from django.contrib import messages
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import IntegrityError
 from .forms import EmployeeRequestReviewForm
-from .services import review_employee_request
+from .services import review_employee_request, reconsider_employee_request
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.shortcuts import redirect
+from django.db.models import Exists, OuterRef
 
 class EmployeeListView(SearchMixin, PaginationMixin, ListView):
     model = Employee
@@ -81,21 +85,26 @@ class EmployeeActivityStatusView(PermissionAwareSuccessMixin, FormView):
     def get_preferred_success_url(self):
         return reverse('employees:list')
 
-class PendingEmployeeRequestsView(UserPassesTestMixin, PaginationMixin, ListView):
+class PendingEmployeeRequestsView(UserPassesTestMixin,StatusFilterMixin, PaginationMixin, ListView):
     model = EmployeeRequest
     template_name = 'employees/pending_employee_requests.html'
     context_object_name = 'employee_requests'
     default_page_size = 10
+    status_field = 'status'
+    status_choices = EmployeeRequest.Status
 
     def test_func(self):
         return self.request.user.is_authenticated and self.request.user.is_superuser
 
     def get_queryset(self):
-        return (EmployeeRequest.objects
-            .filter(status=EmployeeRequest.Status.PENDING)
+        reconsidered_requests = EmployeeRequest.objects.filter(reconsidered_from_id=OuterRef('pk'))
+
+        return (super().get_queryset()
             .select_related('user', 'user__profile')
+            .annotate(has_reconsideration=Exists(reconsidered_requests))
             .order_by('created_at')
         )
+
 
 class EmployeeRequestReviewView(PermissionAwareSuccessMixin, UserPassesTestMixin, FormView):
     form_class = EmployeeRequestReviewForm
@@ -139,3 +148,27 @@ class EmployeeRequestReviewView(PermissionAwareSuccessMixin, UserPassesTestMixin
         messages.success(self.request, 'Employee request processed successfully.',)
         return super().form_valid(form)
 
+
+@login_required
+@require_POST
+def reconsider_employee_request_view(request, pk):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
+    note = request.POST.get('note', '')
+    rejected_url = reverse('employees:pending-requests') + '?status=rejected'
+    try:
+        reconsider_employee_request(request_id=pk, reviewer=request.user, note=note)
+
+    except ValidationError as error:
+        for message in error.messages:
+            messages.error(request, message)
+        return redirect(rejected_url)
+
+    except IntegrityError:
+        messages.error(request, 'The request could not be reconsidered. Please refresh the page and try again.')
+        return redirect(rejected_url)
+
+    messages.success(request, 'Employee request reopened successfully.')
+
+    return redirect(reverse('employees:pending-requests') + '?status=pending')
