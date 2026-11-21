@@ -11,7 +11,7 @@ urlpatterns = [
     path('login/', views.AppUserLoginView.as_view(), name='login'),
     path('registration/<int:pk>/<str:action>/', views.registration_decision, name="registration_decision"),
     path('logout/', LogoutView.as_view(next_page='accounts:login'), name='logout'),
-    path('profile/create/', views.ProfileCreateView.as_view(), name='profile_create'),
+    path('profile/create/', views.ProfileUpdateView.as_view(), name='profile_update'),
     path('verify-email/<str:token>/', views.verify_email, name='verify_email'),
     path('resend-verification-email/', views.resend_verification_email, name='resend_verification_email'),
 ]

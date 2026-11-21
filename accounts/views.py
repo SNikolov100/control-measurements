@@ -1,6 +1,6 @@
 from django.db import transaction
 from .access import get_access_state
-from .models import Profile, RegistrationStatusHistory
+from .models import RegistrationStatusHistory, Person
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
@@ -10,8 +10,8 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST, require_http_methods
-from django.views.generic import FormView, TemplateView, ListView, CreateView
-from .forms import AppUserRegistrationForm, ProfileForm
+from django.views.generic import FormView, TemplateView, ListView, UpdateView
+from .forms import AppUserRegistrationForm, PersonForm
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as translate
 from .forms import AppUserLoginForm
@@ -23,6 +23,8 @@ from .emails import send_verification_email, send_registration_rejected_email
 import logging
 from smtplib import SMTPException
 from core.view_mixins import StatusFilterMixin, PaginationMixin
+from .services import register_user
+
 
 AppUser = get_user_model()
 logger = logging.getLogger(__name__)
@@ -32,7 +34,7 @@ class AppUserRegistrationView(FormView):
     success_url = reverse_lazy('accounts:registration_pending')
 
     def form_valid(self, form):
-        form.save()
+        register_user(form)
         messages.success(self.request,translate('Your registration has been submitted successfully.'))
         return super().form_valid(form)
 
@@ -115,17 +117,19 @@ def registration_decision(request, pk, action):
 
     return redirect('accounts:pending_registrations')
 
-class ProfileCreateView(UserPassesTestMixin, CreateView):
-    model = Profile
-    form_class = ProfileForm
+class ProfileUpdateView(UserPassesTestMixin, UpdateView):
+    model = Person
+    form_class = PersonForm
     template_name = 'accounts/profile_form.html'
     success_url = reverse_lazy('core:home')
+
+    def get_object(self, queryset=None):
+        return self.request.user.person
 
     def test_func(self):
         return get_access_state(self.request.user) == 'profile_required'
 
     def form_valid(self, form):
-        form.instance.user = self.request.user
         with transaction.atomic():
             response = super().form_valid(form)
             ensure_employee_request(self.request.user)

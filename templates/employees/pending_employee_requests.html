@@ -48,7 +48,7 @@
                 {% for employee_request in employee_requests %}
                     <tr>
                         <td>
-                            {{ employee_request.user.profile.get_full_name|default:"Profile missing" }}
+                            {{ employee_request.user.person.get_full_name|default:"Personal information missing" }}
                         </td>
 
                         <td>

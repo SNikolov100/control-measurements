@@ -84,15 +84,15 @@
 
     <section class="employee-profile-card">
         <div>
-            {% if employee.photo %}
+            {% if employee.person.photo %}
                 <a
-                    href="{{ employee.photo.url }}"
+                    href="{{ employee.person.photo.url }}"
                     target="_blank"
                     rel="noopener"
                 >
                     <img
                         class="employee-profile-image"
-                        src="{{ employee.photo.url }}"
+                        src="{{ employee.person.photo.url }}"
                         alt="Photo of {{ employee.full_name }}"
                     >
                 </a>
@@ -124,7 +124,7 @@
 
             {% if perms.employees.change_employee %}
                 {% if_can_access 'employees:edit' %}<a class="button button-small" href="{% url 'employees:edit' employee.pk %}">
-                    {% if employee.photo %}
+                    {% if employee.person.photo %}
                         Replace photo
                     {% else %}
                         Add photo

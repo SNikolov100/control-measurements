@@ -1,22 +1,17 @@
-from pathlib import Path
-from uuid import uuid4
 from core.validators import phone_validator, validate_uploaded_image
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as translate
 from django.db import models
 from core.model_mixins import TextNormalizationMixin
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from .managers import AppUserManager
+from .upload_paths import profile_photo_upload_path, person_photo_upload_path
 from .validators import validate_username_no_at
 from django.db.models.functions import Lower
 
-def profile_photo_upload_path(instance, filename):
-    file_extension = Path(filename).suffix.lower()
-    return f'profiles/{uuid4().hex}{file_extension}'
 
 
 class AppUser(TextNormalizationMixin, AbstractUser):
-    strip_fields = ('username',)
-    lowercase_fields = ('email',)
 
     class RegistrationStatus(models.TextChoices):
         PENDING = 'pending', 'Pending'
@@ -52,6 +47,18 @@ class AppUser(TextNormalizationMixin, AbstractUser):
         choices=RegistrationStatus.choices,
         default=RegistrationStatus.PENDING,
     )
+    person = models.OneToOneField(
+        'Person',
+        on_delete=models.PROTECT,
+        related_name='account',
+        null=True,
+        blank=True,
+        verbose_name=translate('Person'),
+    )
+
+    strip_fields = ('username',)
+    lowercase_fields = ('email',)
+    objects = AppUserManager()
 
     class Meta:
         constraints = [
@@ -96,6 +103,7 @@ class RegistrationStatusHistory(models.Model):
 
     class Meta:
         ordering = ('-created_at',)
+
 
 class Profile(TextNormalizationMixin, models.Model):
     user = models.OneToOneField(
@@ -146,5 +154,85 @@ class Profile(TextNormalizationMixin, models.Model):
 
     def __str__(self):
         return self.get_full_name()
+
+
+class Person(TextNormalizationMixin, models.Model):
+    first_name = models.CharField(
+        max_length=30,
+        blank=True,
+        verbose_name=translate('First name'),
+    )
+    middle_name = models.CharField(
+        max_length=30,
+        blank=True,
+        verbose_name=translate('Middle name'),
+    )
+    last_name = models.CharField(
+        max_length=30,
+        blank=True,
+        verbose_name=translate('Last name'),
+    )
+    email = models.EmailField(
+        blank=True,
+        verbose_name=translate('Email'),
+    )
+    phone = models.CharField(
+        max_length=30,
+        blank=True,
+        validators=[phone_validator],
+        verbose_name=translate('Phone'),
+    )
+    date_of_birth = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=translate('Date of birth'),
+    )
+    address = models.TextField(
+        blank=True,
+        verbose_name=translate('Address'),
+    )
+    photo = models.ImageField(
+        validators=[validate_uploaded_image],
+        blank=True,
+        null=True,
+        upload_to=person_photo_upload_path,
+        verbose_name=translate('Person photo'),
+    )
+    login_email_reserved = models.BooleanField(
+        default=False,
+        verbose_name=translate('Login email reserved'),
+    )
+    lowercase_fields = ('email',)
+    strip_fields = ('phone',)
+    titlecase_fields = ('first_name', 'middle_name', 'last_name')
+
+    @property
+    def is_profile_complete(self):
+        return all((value or '').strip() for value in (
+                self.first_name,
+                self.middle_name,
+                self.last_name,
+                self.phone,
+            )
+        )
+
+    def get_full_name(self):
+        return ' '.join(filter(None, [self.first_name, self.middle_name, self.last_name]))
+
+    def __str__(self):
+        return self.get_full_name() or self.email or f'Person #{self.pk}'
+
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(Lower('email'),
+                condition=models.Q(login_email_reserved=True),
+                name='unique_reserved_person_email',
+            ),
+            models.CheckConstraint(
+                condition=(models.Q(login_email_reserved=False) | ~models.Q(email='')),
+                name='reserved_person_email_not_empty',
+            ),
+        ]
 
 

@@ -93,7 +93,7 @@
                             <tr>
                                 <td>
                                     <div class="employee-name-with-avatar">
-                                        {% if employee.photo %}
+                                        {% if employee.person.photo %}
                                             {% if_can_access 'employees:details' %}<a
                                                 class="employee-avatar"
                                                 href="{% url 'employees:details' employee.pk %}"
@@ -101,13 +101,13 @@
                                             >
                                                 <img
                                                     class="employee-avatar-image"
-                                                    src="{{ employee.photo.url }}"
+                                                    src="{{ employee.person.photo.url }}"
                                                     alt=""
                                                 >
                                             </a>{% else %}<span>
                                                 <img
                                                     class="employee-avatar-image"
-                                                    src="{{ employee.photo.url }}"
+                                                    src="{{ employee.person.photo.url }}"
                                                     alt=""
                                                 >
                                             </span>{% endif_can_access %}

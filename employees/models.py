@@ -60,12 +60,13 @@ class Employee(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
         default=True,
         verbose_name=translate('Active'),
     )
-    photo = models.ImageField(
-        upload_to=employee_photo_upload_path,
-        validators=[validate_uploaded_image],
-        blank=True,
+    person = models.OneToOneField(
+        'accounts.Person',
+        on_delete=models.PROTECT,
+        related_name='employee',
         null=True,
-        verbose_name=translate('Employee photo'),
+        blank=True,
+        verbose_name=translate('Person'),
     )
 
     def _change_activity_status(self, *, is_active,event_type, description="",):

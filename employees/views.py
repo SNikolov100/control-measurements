@@ -1,3 +1,4 @@
+from django.http.response import HttpResponseRedirect
 from core.view_mixins import PermissionAwareSuccessMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
@@ -11,7 +12,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import IntegrityError
 from .forms import EmployeeRequestReviewForm
-from .services import review_employee_request, reconsider_employee_request
+from .services import review_employee_request, reconsider_employee_request, create_employee_from_form, update_employee_from_form
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.shortcuts import redirect
@@ -34,7 +35,7 @@ class EmployeeListView(SearchMixin, PaginationMixin, ListView):
     search_distinct = True
 
     def get_queryset(self):
-        queryset_result = super().get_queryset().prefetch_related('specialties')
+        queryset_result = super().get_queryset().select_related('person').prefetch_related('specialties')
         return queryset_result
 
 class EmployeeCreateView(PermissionAwareSuccessMixin, CreateView):
@@ -43,12 +44,35 @@ class EmployeeCreateView(PermissionAwareSuccessMixin, CreateView):
     template_name = 'employees/employee_create.html'
     success_url = reverse_lazy('employees:list')
 
+    def form_valid(self, form):
+        employee = create_employee_from_form(form)
+        self.object = employee
+        return HttpResponseRedirect(self.get_success_url())
+
 class EmployeeEditView(PermissionAwareSuccessMixin, UpdateView):
     model = Employee
     form_class = EmployeeEditForm
     template_name = 'employees/employee_edit.html'
     context_object_name = 'employee'
     success_url = reverse_lazy('employees:list')
+
+    def form_valid(self, form):
+        try:
+            employee = update_employee_from_form(form)
+
+        except ValidationError as error:
+            for message in error.messages:
+                form.add_error(None, message)
+            return self.form_invalid(form)
+
+        except IntegrityError:
+            form.add_error(None, 'The employee could not be updated. Please check the data.')
+            return self.form_invalid(form)
+
+        self.object = employee
+        messages.success(self.request, 'Employee updated successfully.')
+
+        return HttpResponseRedirect(self.get_success_url())
 
 class EmployeeDetailView(DetailView):
     model = Employee
@@ -98,9 +122,9 @@ class PendingEmployeeRequestsView(UserPassesTestMixin,StatusFilterMixin, Paginat
 
     def get_queryset(self):
         reconsidered_requests = EmployeeRequest.objects.filter(reconsidered_from_id=OuterRef('pk'))
-
-        return (super().get_queryset()
-            .select_related('user', 'user__profile')
+        return (
+            super().get_queryset()
+            .select_related('user__person')
             .annotate(has_reconsideration=Exists(reconsidered_requests))
             .order_by('created_at')
         )
@@ -117,7 +141,7 @@ class EmployeeRequestReviewView(PermissionAwareSuccessMixin, UserPassesTestMixin
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['employee_request'] = get_object_or_404(
-            EmployeeRequest.objects.select_related('user', 'user__profile',),
+            EmployeeRequest.objects.select_related('user', 'user__person',),
             pk=self.kwargs['pk'],
             status=EmployeeRequest.Status.PENDING,
         )
@@ -133,12 +157,17 @@ class EmployeeRequestReviewView(PermissionAwareSuccessMixin, UserPassesTestMixin
                 employee=form.cleaned_data['employee'],
                 note=form.cleaned_data['review_note'],
                 confirm_name_difference=form.cleaned_data['confirm_name_difference'],
+                name_source=form.cleaned_data.get('name_source'),
             )
 
+
         except ValidationError as error:
-            form.show_name_confirmation = getattr(error, 'code', None) == 'name_mismatch'
+            name_confirmation_codes = {'name_mismatch', 'name_source_required'}
+            form.show_name_confirmation = any(item.code in name_confirmation_codes for item in error.error_list)
+
             for message in error.messages:
                 form.add_error(None, message)
+
             return self.form_invalid(form)
 
         except IntegrityError:

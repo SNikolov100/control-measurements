@@ -17,7 +17,8 @@ def get_access_state(user):
     if not user.email_verified:
         return 'email_verification_required'
 
-    if not hasattr(user, 'profile'):
+    person = user.person
+    if not person or not person.is_profile_complete:
         return 'profile_required'
 
     if not hasattr(user, 'employee'):

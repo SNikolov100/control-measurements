@@ -1,4 +1,5 @@
-from accounts.models import AppUser, Profile
+from accounts.models import AppUser, Person
+from .forms import EmployeeRequestReviewForm
 from .models import Employee, EmployeeRequest
 from django.utils.translation import gettext_lazy as translate
 from django.contrib.auth.models import Group
@@ -6,16 +7,19 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.utils import timezone
 from .models import EmployeeHistory
-from .choices import EmployeeRequestAction
+from .choices import EmployeeRequestAction, PersonNameSource
 from functools import partial
 from .emails import send_employee_request_result_email
+from django.core.files.uploadedfile import UploadedFile
+
 
 def ensure_employee_request(user):
     if user.registration_status != AppUser.RegistrationStatus.APPROVED:
         raise ValueError(translate('User account is not approved.'))
 
-    if not Profile.objects.filter(user=user).exists():
-        raise ValueError(translate('User profile does not exist.'))
+    person = user.person
+    if person is None or not person.is_profile_complete:
+        raise ValueError(translate('The user profile is incomplete.'))
 
     if Employee.objects.filter(user=user).exists():
         return None, False
@@ -36,7 +40,9 @@ def review_employee_request(*,
     role: Group | None = None,
     employee=None,
     note: str = '',
-    confirm_name_difference: bool = False):
+    confirm_name_difference: bool = False,
+    name_source: str | None = None):
+
     if not reviewer.is_authenticated or not reviewer.is_superuser:
         raise PermissionDenied
 
@@ -66,7 +72,7 @@ def review_employee_request(*,
     if updated != 1:
         raise ValidationError(translate('This request has already been processed.'))
 
-    employee_request = EmployeeRequest.objects.select_related('user', 'user__profile').get(pk=request_id)
+    employee_request = EmployeeRequest.objects.select_related('user', 'user__person').get(pk=request_id)
     if action == EmployeeRequestAction.REJECT:
         transaction.on_commit(
             partial(send_employee_request_result_email, employee_request.user.email, employee_request.status),
@@ -74,79 +80,158 @@ def review_employee_request(*,
         )
         return employee_request
 
-    user = employee_request.user
+    user = AppUser.objects.select_for_update().get(pk=employee_request.user_id)
     if user.registration_status != user.RegistrationStatus.APPROVED:
         raise ValidationError(translate('User account is not approved.'))
 
     if user.is_superuser:
         raise ValidationError(translate('Cannot link a superuser account.'))
 
-    if not hasattr(user, 'profile'):
-        raise ValidationError(translate('User profile is missing.'))
+    person = user.person
+    if person is None or not person.is_profile_complete:
+        raise ValidationError(translate('The user profile is incomplete.'))
 
     if Employee.objects.filter(user=user).exists():
         raise ValidationError(translate('This user already has an employee record.'))
 
     history_details = []
     if action == EmployeeRequestAction.CREATE:
-        employee = Employee.objects.create(user=user, full_name=user.profile.get_full_name(), phone=user.profile.phone, email=user.email)
+        employee = Employee.objects.create(person=person, user=user, full_name=person.get_full_name(), phone=person.phone, email=person.email)
         event_type = EmployeeHistory.EventType.CREATED
 
     else:
-        employee = Employee.objects.filter(pk=employee.pk, user__isnull=True, is_active=True).first()
+        employee = (Employee.objects
+            .select_for_update()
+            .filter(pk=employee.pk, user__isnull=True, is_active=True)
+            .first()
+        )
 
         if employee is None:
             raise ValidationError(translate('The selected employee is no longer available.'))
 
-        account_email = user.email.strip().lower()
-        employee_email = employee.email.strip().lower()
-        if employee_email and employee_email != account_email:
-            raise ValidationError(
-                translate(
-                    "The selected employee's email (%(employee_email)s) "
-                    "differs from the account email (%(account_email)s). "
-                    "Select the correct employee or correct the employee record and try again."
-                ),
-                params={'employee_email': employee.email, 'account_email': user.email},
-            )
+        if employee.person_id is None:
+            raise ValidationError(translate('The selected employee has no personal record.'))
 
-        profile_name = user.profile.get_full_name()
-        normalized_employee_name = (' '.join(employee.full_name.split()).casefold())
-        normalized_profile_name = ' '.join(profile_name.split()).casefold()
-        names_differ = normalized_employee_name != normalized_profile_name
+        person_ids = (person.pk, employee.person_id)
+        locked_persons = {obj.pk: obj for obj in Person.objects.select_for_update().filter(pk__in=person_ids).order_by('pk')}
+
+        if len(locked_persons) != 2:
+            raise ValidationError(translate('Both personal records must exist and be different.'))
+
+        person = locked_persons[person.pk]
+        employee_person = locked_persons[employee.person_id]
+        if not person.is_profile_complete:
+            raise ValidationError(translate('The user personal profile is no longer complete.'))
+
+        if AppUser.objects.filter(person_id=employee_person.pk).exists():
+            raise ValidationError(translate('The selected employee personal record is already linked to a user account.'))
+
+        account_email = person.email.strip().lower()
+        employee_email = employee_person.email.strip().lower()
+        if user.email.strip().lower() != account_email:
+            raise ValidationError( translate('The account email does not match the personal record email.'))
+
+        if not employee_email or employee_email != account_email:
+            raise ValidationError(translate("The employee's email must match the account email. Check the employee's personal record before linking."))
+
+        account_name = person.get_full_name()
+        employee_name = employee_person.get_full_name()
+        normalized_account_name = ' '.join(account_name.split()).casefold()
+        normalized_employee_name = ' '.join(employee_name.split()).casefold()
+        names_differ = normalized_account_name != normalized_employee_name
         if names_differ and not confirm_name_difference:
             raise ValidationError(
-                translate(
-                    "The employee name (%(employee_name)s) differs "
-                    "from the personal profile name (%(profile_name)s). "
-                    "Check the selected employee. If this is the same "
-                    "person, select the name confirmation checkbox and submit again."
+                translate('The employee name (%(employee_name)s) differs '
+                          'from the account name (%(account_name)s). '
+                          'Check the selected employee. If this is the same '
+                          'person, confirm the name difference and submit again.'
                 ),
-                params={'employee_name': employee.full_name, 'profile_name': profile_name},
+                params={'employee_name': employee_name, 'account_name': account_name},
                 code='name_mismatch',
             )
+        if names_differ and name_source not in PersonNameSource.values:
+            raise ValidationError(translate('Choose which names to keep.'), code='name_source_required')
 
-        updates = {'user': user}
-        if not employee_email:
-            updates['email'] = account_email
-            history_details.append('Empty employee email filled from the account.')
+        if names_differ and name_source == PersonNameSource.ACCOUNT:
+            chosen_names = (person.first_name, person.middle_name, person.last_name)
+        else:
+            chosen_names = (employee_person.first_name, employee_person.middle_name, employee_person.last_name)
+
+        personal_fields = ('phone', 'date_of_birth', 'address', 'photo')
+        conflicting_fields = []
+        for field in personal_fields:
+            employee_value = getattr(employee_person, field)
+            account_value = getattr(person, field)
+            if employee_value and account_value and str(employee_value).strip() != str(account_value).strip():
+                conflicting_fields.append(field)
+
+        if conflicting_fields:
+            raise ValidationError(
+                translate('Conflicting personal data: %(fields)s. Resolve the differences before linking the account.'),
+                params={'fields': ', '.join(conflicting_fields)},
+                code='personal_data_conflict',
+            )
+
+        merged_personal_data = {}
+        for field in personal_fields:
+            employee_value = getattr(employee_person, field)
+            account_value = getattr(person, field)
+
+            if not employee_value and account_value:
+                merged_personal_data[field] = account_value
+
+        employee_person.first_name, employee_person.middle_name, employee_person.last_name = chosen_names
+        for field, value in merged_personal_data.items():
+            setattr(employee_person, field, value)
+
+        if person.pk == employee_person.pk:
+            raise ValidationError(translate('The account and employee already share the same person.'))
+
+        if not person.login_email_reserved:
+            raise ValidationError(translate('The account email is not reserved.'))
+
+        if employee_person.login_email_reserved:
+            raise ValidationError(translate('The employee email is already reserved.'))
+
+        person.login_email_reserved = False
+        person.save(update_fields=['login_email_reserved'])
+        employee_person.login_email_reserved = True
+        employee_person.save(update_fields=['login_email_reserved'])
+        user.person = employee_person
+        user.save(update_fields=['person'])
+        fields_to_update = ['first_name', 'middle_name', 'last_name', *merged_personal_data.keys()]
+        employee_person.save(update_fields=fields_to_update)
 
         if names_differ:
-            history_details.append(f'Name difference confirmed: employee "{employee.full_name}", profile "{profile_name}". Employee name preserved.')
+            history_details.append(f'Name difference confirmed: employee "{employee_name}", account "{account_name}". Selected name source: "{name_source}".')
 
+        old_full_name = employee.full_name
+        employee.full_name = employee_person.get_full_name()
+        updates = {
+            'user': user,
+            'full_name': employee.full_name,
+            'slug': employee.build_slug(),
+            'phone': employee_person.phone,
+            'email': employee_person.email,
+            'updated_at': timezone.now(),
+        }
         updated_employee = (Employee.objects
             .filter(
                 pk=employee.pk,
                 user__isnull=True,
                 is_active=True,
                 email=employee.email,
-                full_name=employee.full_name,
+                full_name=old_full_name,
             )
             .update(**updates)
         )
         if updated_employee != 1:
             raise ValidationError(translate('The employee record changed during review. Reload the page and check the details again.'))
 
+        if AppUser.objects.filter(person_id=person.pk).exists() or Employee.objects.filter(person_id=person.pk).exists():
+            raise ValidationError(translate('The temporary personal record is still in use.'))
+
+        person.delete()
         employee.refresh_from_db()
         event_type = EmployeeHistory.EventType.UPDATED
 
@@ -192,8 +277,9 @@ def reconsider_employee_request(*, request_id: int, reviewer, note: str):
     if not user.is_active or user.is_superuser or user.registration_status != user.RegistrationStatus.APPROVED or not user.email_verified:
         raise ValidationError(translate('The user account is not eligible for reconsideration.'))
 
-    if not Profile.objects.filter(user=user).exists():
-        raise ValidationError(translate('The user profile does not exist.'))
+    person = user.person
+    if person is None or not person.is_profile_complete:
+        raise ValidationError(translate('The user profile is incomplete.'))
 
     if Employee.objects.filter(user=user).exists():
         raise ValidationError(translate('This user already has an employee record.'))
@@ -210,3 +296,99 @@ def reconsider_employee_request(*, request_id: int, reviewer, note: str):
     )
 
     return new_request
+
+
+@transaction.atomic
+def create_employee_from_form(form):
+    uploaded_photo = form.cleaned_data['photo']
+    person = Person.objects.create(
+        first_name=form.cleaned_data['first_name'],
+        middle_name=form.cleaned_data['middle_name'],
+        last_name=form.cleaned_data['last_name'],
+        email=form.cleaned_data['email'],
+        phone=form.cleaned_data['phone'],
+        photo=uploaded_photo,
+        login_email_reserved=False,
+    )
+    employee = form.save(commit=False)
+    employee.person = person
+    employee.full_name = person.get_full_name()
+    employee.phone = person.phone
+    employee.email = person.email
+    employee.save()
+    form.save_m2m()
+    return employee
+
+
+def delete_unused_person_photo(photo_name: str):
+    if not photo_name:
+        return
+
+    is_used = Person.objects.filter(photo=photo_name).exists()
+    if is_used:
+        return
+
+    storage = Person._meta.get_field('photo').storage
+    storage.delete(photo_name)
+
+
+
+@transaction.atomic
+def update_employee_from_form(form):
+    employee = Employee.objects.select_for_update().get(pk=form.instance.pk)
+
+    if employee.person_id is None:
+        raise ValidationError(translate('The employee has no linked personal record.'))
+
+    person = Person.objects.select_for_update().get(pk=employee.person_id)
+    old_photo_name = person.photo.name if person.photo else None
+    new_email = form.cleaned_data['email'].strip().lower()
+    current_email = person.email.strip().lower()
+    has_account = AppUser.objects.filter(person_id=person.pk).exists()
+    if has_account != person.login_email_reserved:
+        raise ValidationError(translate('The personal record has an inconsistent email reservation state.'))
+
+    if has_account and (new_email != current_email):
+        raise ValidationError(translate('This employee has a linked user account. The email address cannot be changed from this form.'))
+
+    new_names = {
+        'first_name': form.cleaned_data['first_name'],
+        'middle_name': form.cleaned_data['middle_name'],
+        'last_name': form.cleaned_data['last_name'],
+    }
+    new_personal_data = {**new_names, 'phone': form.cleaned_data['phone'], 'email': new_email}
+    new_photo = form.cleaned_data['photo']
+    for field, value in new_personal_data.items():
+        setattr(person, field, value)
+
+    if new_photo is False:
+        person.photo = None
+    elif isinstance(new_photo, UploadedFile):
+        person.photo = new_photo
+
+    fields_to_update = list(new_personal_data.keys())
+    if new_photo is False or isinstance(new_photo, UploadedFile):
+        fields_to_update.append('photo')
+
+    person.save(update_fields=fields_to_update)
+    employee.full_name = person.get_full_name()
+    Employee.objects.filter(pk=employee.pk).update(
+        full_name=person.get_full_name(),
+        phone=person.phone,
+        email=person.email,
+        position=form.cleaned_data['position'],
+        notes=form.cleaned_data['notes'],
+        updated_at=timezone.now(),
+        slug=employee.build_slug(),
+    )
+    employee.specialties.set(form.cleaned_data['specialties'])
+    employee.refresh_from_db()
+    new_photo_name = person.photo.name if person.photo else None
+
+    if old_photo_name and old_photo_name != new_photo_name:
+        transaction.on_commit(
+            partial(delete_unused_person_photo, old_photo_name),
+            robust=True,
+        )
+
+    return employee

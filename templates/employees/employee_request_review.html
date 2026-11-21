@@ -42,12 +42,12 @@
 
     <p>
         <strong>Full name:</strong>
-        {{ employee_request.user.profile.get_full_name }}
+        {{ employee_request.user.person.get_full_name }}
     </p>
 
     <p>
         <strong>Phone:</strong>
-        {{ employee_request.user.profile.phone }}
+        {{ employee_request.user.person.phone }}
     </p>
 </section>
 
@@ -80,6 +80,9 @@
         <div class="form-fields">
             {% render_field form.action %}
             {% render_field form.employee css_class="js-field-employee" %}
+            {% if form.show_name_confirmation %}
+                {% render_field form.name_source css_class="js-field-name-source" %}
+            {% endif %}
             {% render_field form.role css_class="js-field-role" %}
             {% render_field form.review_note css_class="js-field-note" %}
         </div>
@@ -111,12 +114,21 @@
                             I have checked both names and confirm
                             that they refer to the same person.
                             <small>
-                                The existing employee name will be preserved.
+                                Select which names to keep before linking the account.
                             </small>
                         </span>
                     </label>
 
                     {{ form.confirm_name_difference.errors }}
+                    <div class="form-actions">
+                        <button type="button" id="review-error-close" class="button" hidden>
+                            Cancel
+                        </button>
+
+                        <button type="submit" class="button button-primary">
+                            Confirm and link account
+                        </button>
+                    </div>
                 {% endif %}
 
             </section>
@@ -145,8 +157,10 @@
 <script>
     (() => {
         const form = document.getElementById("employee-review-form");
+        const panel = document.getElementById("review-error-panel");
+        const closeButton = document.getElementById("review-error-close");
 
-        if (!panel || !form) {
+        if (!panel || !form || !closeButton) {
             return;
         }
 
@@ -162,8 +176,13 @@
         // Keep the checkbox and submit button inside the original form.
         form.appendChild(dialog);
         dialog.appendChild(panel);
+        const nameSourceContainer = form.querySelector(".js-field-name-source");
+        const dialogActions = panel.querySelector(".form-actions");
 
-        const closeButton = document.getElementById("review-error-close");
+        if (nameSourceContainer && dialogActions) {
+            panel.insertBefore(nameSourceContainer, dialogActions);
+        }
+
         closeButton.hidden = false;
 
         const closeReviewDialog = () => {
@@ -197,6 +216,7 @@
         const roleContainer = document.querySelector(".js-field-role");
         const noteContainer = document.querySelector(".js-field-note");
         const employeeSelect = document.getElementById("id_employee");
+        const nameSourceContainer = document.querySelector(".js-field-name-source");
 
         function updateFieldsVisibility() {const selectedAction = document.querySelector('input[name="action"]:checked')?.value;
 
@@ -207,6 +227,8 @@
             if (noteContainer) {noteContainer.style.display = selectedAction ? "" : "none";}
 
             if (selectedAction !== "link" && employeeSelect) {employeeSelect.value = "";}
+
+            if (nameSourceContainer) {nameSourceContainer.style.display = selectedAction === "link" ? "" : "none";}
         }
 
         actionInputs.forEach(input => {input.addEventListener("change", updateFieldsVisibility);});

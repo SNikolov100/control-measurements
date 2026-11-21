@@ -69,7 +69,9 @@
                 {% csrf_token %}
 
                 <div class="form-fields">
-                    {% render_field form.full_name %}
+                    {% render_field form.first_name %}
+                    {% render_field form.middle_name %}
+                    {% render_field form.last_name %}
                     {% render_field form.position %}
                     {% render_field form.phone %}
                     {% render_field form.email %}

@@ -3,7 +3,7 @@ from django.contrib.auth.forms import BaseUserCreationForm
 from django import forms
 from django.utils.translation import gettext_lazy as translate
 from uuid import uuid4
-from accounts.models import Profile
+from accounts.models import Profile, Person
 from django.contrib.auth.forms import AuthenticationForm
 
 AppUser = get_user_model()
@@ -33,20 +33,17 @@ class AppUserRegistrationForm(BaseUserCreationForm):
         cleaned_data['username'] = username
 
         if email:
-            email = email.strip().lower()
-            if AppUser.objects.filter(email__iexact=email).exists():
+            if (AppUser.objects.filter(email__iexact=email).exists()
+                    or
+                Person.objects.filter(email__iexact=email, login_email_reserved=True).exists()):
                 self.add_error('email', translate('This email is already registered.'))
-            cleaned_data['email'] = email
 
         if username:
-            username = username.strip().lower()
-            if username:
-                if "@" in username:
-                    self.add_error('username', translate("Username cannot contain '@'."))
+            if "@" in username:
+                self.add_error('username', translate("Username cannot contain '@'."))
 
-                elif AppUser.objects.filter(username__iexact=username).exists():
-                    self.add_error('username', translate('This username is already taken.'))
-                cleaned_data['username'] = username
+            elif AppUser.objects.filter(username__iexact=username).exists():
+                self.add_error('username', translate('This username is already taken.'))
 
         return cleaned_data
 
@@ -64,9 +61,14 @@ class AppUserRegistrationForm(BaseUserCreationForm):
 
         return user
 
-class ProfileForm(forms.ModelForm):
+class PersonForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in ('first_name', 'middle_name', 'last_name', 'phone'):
+            self.fields[field_name].required = True
+
     class Meta:
-        model = Profile
+        model = Person
         fields = (
             'first_name',
             'middle_name',

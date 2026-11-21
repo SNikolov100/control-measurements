@@ -63,7 +63,7 @@ def can_access_view(user, view_name, method='GET', *, access_state=None):
         return True
 
     state = access_state if access_state is not None else get_access_state(user)
-    if view_name == 'accounts:profile_create':
+    if view_name == 'accounts:profile_update':
         return state == 'profile_required'
 
     if view_name == 'accounts:resend_verification_email':

@@ -1,10 +1,22 @@
 from django import forms
+from core.validators import validate_uploaded_image
+
+
 from .models import Employee
 from django.contrib.auth.models import Group
-from .choices import EmployeeRequestAction
+from .choices import EmployeeRequestAction, PersonNameSource
 from django.utils.translation import gettext_lazy as translate
 
 class EmployeeBaseForm(forms.ModelForm):
+    photo = forms.ImageField(
+        required=False,
+        validators=[validate_uploaded_image],
+        widget=forms.ClearableFileInput(attrs={'accept': 'image/jpeg,image/png,image/webp'}),
+        label=translate('Employee photo'),
+        help_text=translate('Upload a JPEG, PNG, or WebP photo up to 5 MB. The photo is optional.'),
+        error_messages={'invalid_image': translate('Upload a valid JPEG, PNG, or WebP image.')},
+    )
+
     class Meta:
         model = Employee
         fields = ('full_name', 'position', 'phone', 'email', 'photo', 'notes', 'specialties')
@@ -21,9 +33,6 @@ class EmployeeBaseForm(forms.ModelForm):
             'email': forms.EmailInput(
                 attrs={'placeholder': translate('For example: employee@example.com'), 'autocomplete': 'email'},
             ),
-            'photo': forms.ClearableFileInput(
-                attrs={"accept": 'image/jpeg,image/png,image/webp'},
-            ),
             'notes': forms.Textarea(
                 attrs={'rows': 5, 'placeholder': translate('Add relevant information about the employee.')},
             ),
@@ -34,22 +43,60 @@ class EmployeeBaseForm(forms.ModelForm):
             'position': translate("Enter the employee's position or work role."),
             'phone': translate('Enter a contact phone number.'),
             'email': translate('Enter a valid email address.'),
-            'photo': translate('Upload a JPEG, PNG, or WebP photo up to 5 MB. The photo is optional.'),
             'notes': translate('Optional additional information.'),
             'specialties': translate('Select one or more specialties in which the employee is qualified to work.'),
         }
         error_messages = {
             'full_name': {'required': translate("Enter the employee's full name.")},
             'email': {'invalid': translate('Enter a valid email address.')},
-            'photo': {'invalid_image': translate('Upload a valid JPEG, PNG, or WebP image.'),
-            },
         }
 
 class EmployeeCreateForm(EmployeeBaseForm):
-    ...
+    first_name = forms.CharField(
+        max_length=30,
+        label=translate('First name'),
+        widget=forms.TextInput(attrs={'placeholder': translate('Enter first name'), 'autocomplete': 'given-name'}),
+        help_text=translate("Enter the employee's first name."),
+        error_messages={'required': translate('Enter the first name.')},
+    )
+    middle_name = forms.CharField(
+        max_length=30,
+        label=translate('Middle name'),
+        widget=forms.TextInput(attrs={'placeholder': translate('Enter middle name'), 'autocomplete': 'additional-name'}),
+        help_text=translate("Enter the employee's middle name."),
+        error_messages={'required': translate('Enter the middle name.')},
+    )
+    last_name = forms.CharField(
+        max_length=30,
+        label=translate('Last name'),
+        widget=forms.TextInput(attrs={'placeholder': translate('Enter last name'), 'autocomplete': 'family-name'}),
+        help_text=translate("Enter the employee's last name."),
+        error_messages={'required': translate('Enter the last name.')},
+    )
 
-class EmployeeEditForm(EmployeeBaseForm):
-    ...
+    class Meta(EmployeeBaseForm.Meta):
+        fields = (
+            'first_name',
+            'middle_name',
+            'last_name',
+            'position',
+            'phone',
+            'email',
+            'photo',
+            'notes',
+            'specialties',
+        )
+
+class EmployeeEditForm(EmployeeCreateForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance.pk and self.instance.person_id:
+            person = self.instance.person
+            personal_fields = ('first_name', 'middle_name', 'last_name', 'phone', 'email', 'photo')
+
+            for field in personal_fields:
+                self.initial[field] = getattr(person, field)
 
 class EmployeeActivityStatusForm(forms.Form):
     description = forms.CharField(
@@ -87,6 +134,18 @@ class EmployeeRequestReviewForm(forms.Form):
         widget=forms.Textarea(attrs={'rows': 3}),
         label=translate('Review note'),
     )
+    name_source = forms.ChoiceField(
+        choices=PersonNameSource.choices,
+        widget=forms.RadioSelect,
+        required=False,
+        label=translate('Choose which names to keep'),
+    )
+
+    confirm_name_difference = forms.BooleanField(
+        required=False,
+        label=translate('I confirm that the different names refer to the same person.'),
+        help_text=translate('Confirm that both records belong to the same person. Then choose which names to keep.')
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -104,6 +163,7 @@ class EmployeeRequestReviewForm(forms.Form):
 
         if action != EmployeeRequestAction.LINK:
             cleaned_data['employee'] = None
+            cleaned_data['name_source'] = None
 
         if action == EmployeeRequestAction.LINK and not employee:
             self.add_error('employee', translate('Select an existing employee.'),)
@@ -115,8 +175,3 @@ class EmployeeRequestReviewForm(forms.Form):
             self.add_error('review_note', translate('Enter a reason for rejection.'),)
 
         return cleaned_data
-
-    confirm_name_difference = forms.BooleanField(required=False,
-        label=translate('I confirm that the different names refer to the same person.'),
-        help_text=translate('Use only after checking a reported name difference. The existing employee name will be preserved.'),
-    )

@@ -20,3 +20,7 @@ class EmployeeRequestAction(models.TextChoices):
     LINK = 'link', translate('Link existing employee')
     CREATE = 'create', translate('Create new employee')
     REJECT = 'reject', translate('Reject request')
+
+class PersonNameSource(models.TextChoices):
+    EMPLOYEE = 'employee', translate('Existing employee names')
+    ACCOUNT = 'account', translate('Account profile names')

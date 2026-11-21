@@ -26,9 +26,9 @@
 
             <li>
                 {% if_can_access 'employees:details' %}<a href="{% url 'employees:details' employee.pk %}">
-                    {{ employee.full_name }}
+                    {{ employee.person.get_full_name|default:employee.full_name }}
                 </a>{% else %}<span>
-                    {{ employee.full_name }}
+                    {{ employee.person.get_full_name|default:employee.full_name }}
                 </span>{% endif_can_access %}
             </li>
 
@@ -57,7 +57,7 @@
         <section class="form-card">
             <div class="form-card-header">
                 <h2 class="form-card-title">
-                    {{ employee.full_name }}
+                    {{ employee.person.get_full_name|default:employee.full_name }}
                 </h2>
 
                 <p class="form-card-description">
@@ -77,7 +77,9 @@
                 {% csrf_token %}
 
                 <div class="form-fields">
-                    {% render_field form.full_name %}
+                    {% render_field form.first_name %}
+                    {% render_field form.middle_name %}
+                    {% render_field form.last_name %}
                     {% render_field form.position %}
                     {% render_field form.phone %}
                     {% render_field form.email %}
@@ -96,17 +98,17 @@
 
                         {{ form.photo.errors }}
 
-                        {% if employee.photo %}
+                        {% if employee.person and employee.person.photo %}
                             <div class="employee-current-photo">
                                 <a
-                                    href="{{ employee.photo.url }}"
+                                    href="{{ employee.person.photo.url }}"
                                     target="_blank"
                                     rel="noopener"
                                 >
                                     <img
                                         class="employee-current-photo-image"
-                                        src="{{ employee.photo.url }}"
-                                        alt="Photo of {{ employee.full_name }}"
+                                        src="{{ employee.person.photo.url }}"
+                                        alt="Photo of {{ employee.person.get_full_name|default:employee.full_name }}"
                                     >
                                 </a>
 

@@ -171,7 +171,9 @@ class InspectionCreateView(PermissionAwareSuccessMixin, PermissionRequiredMixin,
         site_slug = customer_site.slug
         return reverse('customers:site-details',kwargs={'customer_slug': customer_slug ,'site_slug': site_slug})
 
-class InspectionAssignmentView(PermissionAwareSuccessMixin, UpdateView):
+class InspectionAssignmentView(PermissionAwareSuccessMixin, PermissionRequiredMixin, UpdateView):
+    permission_required = 'inspections.assign_inspection'
+    raise_exception = True
     model = Inspection
     form_class = InspectionAssignmentForm
     template_name = 'inspections/inspection_assignment.html'
@@ -185,7 +187,9 @@ class InspectionAssignmentView(PermissionAwareSuccessMixin, UpdateView):
         )
         return filter_inspections_for_user(queryset, self.request.user)
 
-class InspectionDetailView(DetailView):
+class InspectionDetailView(PermissionRequiredMixin, DetailView):
+    permission_required = 'inspections.view_inspection'
+    raise_exception = True
     model = Inspection
     template_name = 'inspections/inspection_detail.html'
     context_object_name = 'inspection'
@@ -205,14 +209,18 @@ class InspectionDetailView(DetailView):
         return filter_inspections_for_user(queryset, self.request.user)
 
 
-class InspectionStartView(PermissionAwareSuccessMixin, InspectionActionMixin, FormView):
+class InspectionStartView(PermissionAwareSuccessMixin, PermissionRequiredMixin, InspectionActionMixin, FormView):
+    permission_required = 'inspections.start_inspection'
+    raise_exception = True
     form_class = InspectionStartForm
     template_name = 'inspections/inspection_start.html'
 
     def execute_action(self, form):
         start_inspection(self.inspection)
 
-class InspectionCompleteView(PermissionAwareSuccessMixin, InspectionActionMixin, FormView):
+class InspectionCompleteView(PermissionAwareSuccessMixin, PermissionRequiredMixin, InspectionActionMixin, FormView):
+    permission_required = 'inspections.complete_inspection'
+    raise_exception = True
     form_class = InspectionCompleteForm
     template_name = 'inspections/inspection_complete.html'
 
@@ -226,7 +234,9 @@ class InspectionCompleteView(PermissionAwareSuccessMixin, InspectionActionMixin,
         result_notes = form.cleaned_data['result_notes']
         complete_inspection(self.inspection, result= result, result_notes= result_notes,)
 
-class InspectionCancelView(PermissionAwareSuccessMixin, InspectionActionMixin, FormView):
+class InspectionCancelView(PermissionAwareSuccessMixin, PermissionRequiredMixin, InspectionActionMixin, FormView):
+    permission_required = 'inspections.cancel_inspection'
+    raise_exception = True
     form_class = InspectionCancelForm
     template_name = 'inspections/inspection_cancel.html'
 
