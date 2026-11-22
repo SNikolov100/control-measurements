@@ -1,13 +1,27 @@
 from django import forms
-from core.validators import validate_uploaded_image
-
-
+from core.validators import validate_uploaded_image, phone_validator
 from .models import Employee
 from django.contrib.auth.models import Group
-from .choices import EmployeeRequestAction, PersonNameSource
+from .choices import EmployeeRequestAction, PersonNameSource, PersonPhoneSource
 from django.utils.translation import gettext_lazy as translate
 
 class EmployeeBaseForm(forms.ModelForm):
+    phone = forms.CharField(
+        max_length=30,
+        required=False,
+        validators=[phone_validator],
+        widget=forms.TextInput(attrs={'placeholder': translate('For example: +359 888 123 456'), 'autocomplete': 'tel'}),
+        label=translate('Phone'),
+        help_text=translate('Enter a contact phone number.'),
+    )
+    email = forms.EmailField(
+        max_length=254,
+        required=False,
+        widget=forms.EmailInput(attrs={'placeholder': translate('For example: employee@example.com'), 'autocomplete': 'email'}),
+        label=translate('Email'),
+        help_text=translate('Enter a valid email address.'),
+        error_messages={'invalid': translate('Enter a valid email address.')},
+    )
     photo = forms.ImageField(
         required=False,
         validators=[validate_uploaded_image],
@@ -19,19 +33,10 @@ class EmployeeBaseForm(forms.ModelForm):
 
     class Meta:
         model = Employee
-        fields = ('full_name', 'position', 'phone', 'email', 'photo', 'notes', 'specialties')
+        fields = ('position', 'phone', 'email', 'photo', 'notes', 'specialties')
         widgets = {
-            'full_name': forms.TextInput(
-                attrs={'placeholder': translate('For example: Ivan Ivanov'), 'autocomplete': 'name'},
-            ),
             'position': forms.TextInput(
                 attrs={'placeholder': translate('For example: Laboratory technician')},
-            ),
-            'phone': forms.TextInput(
-                attrs={'placeholder': translate('For example: +359 888 123 456'), 'autocomplete': 'tel'},
-            ),
-            'email': forms.EmailInput(
-                attrs={'placeholder': translate('For example: employee@example.com'), 'autocomplete': 'email'},
             ),
             'notes': forms.Textarea(
                 attrs={'rows': 5, 'placeholder': translate('Add relevant information about the employee.')},
@@ -39,15 +44,11 @@ class EmployeeBaseForm(forms.ModelForm):
             'specialties': forms.CheckboxSelectMultiple(),
         }
         help_texts = {
-            'full_name': translate("Enter the employee's full name."),
             'position': translate("Enter the employee's position or work role."),
-            'phone': translate('Enter a contact phone number.'),
-            'email': translate('Enter a valid email address.'),
             'notes': translate('Optional additional information.'),
             'specialties': translate('Select one or more specialties in which the employee is qualified to work.'),
         }
         error_messages = {
-            'full_name': {'required': translate("Enter the employee's full name.")},
             'email': {'invalid': translate('Enter a valid email address.')},
         }
 
@@ -140,7 +141,12 @@ class EmployeeRequestReviewForm(forms.Form):
         required=False,
         label=translate('Choose which names to keep'),
     )
-
+    phone_source = forms.ChoiceField(
+        choices=PersonPhoneSource.choices,
+        widget=forms.RadioSelect,
+        required=False,
+        label=translate('Choose which phone number to keep'),
+    )
     confirm_name_difference = forms.BooleanField(
         required=False,
         label=translate('I confirm that the different names refer to the same person.'),
@@ -151,7 +157,7 @@ class EmployeeRequestReviewForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields['employee'].queryset = (Employee.objects
             .filter(user__isnull=True, is_active=True)
-            .order_by('full_name')
+            .order_by('person__first_name', 'person__middle_name', 'person__last_name')
         )
 
     def clean(self):
@@ -164,6 +170,7 @@ class EmployeeRequestReviewForm(forms.Form):
         if action != EmployeeRequestAction.LINK:
             cleaned_data['employee'] = None
             cleaned_data['name_source'] = None
+            cleaned_data['phone_source'] = None
 
         if action == EmployeeRequestAction.LINK and not employee:
             self.add_error('employee', translate('Select an existing employee.'),)

@@ -83,6 +83,9 @@
             {% if form.show_name_confirmation %}
                 {% render_field form.name_source css_class="js-field-name-source" %}
             {% endif %}
+            {% if form.show_phone_confirmation %}
+                {% render_field form.phone_source css_class="js-field-phone-source" %}
+            {% endif %}
             {% render_field form.role css_class="js-field-role" %}
             {% render_field form.review_note css_class="js-field-note" %}
         </div>
@@ -93,7 +96,7 @@
                      aria-labelledby="review-error-title">
 
                 <h2 id="review-error-title">
-                    {% if form.show_name_confirmation %}
+                    {% if form.show_link_confirmation %}
                         Confirm employee identity
                     {% else %}
                         Please check the information
@@ -106,22 +109,26 @@
                     {% endfor %}
                 </div>
 
-                {% if form.show_name_confirmation %}
-                    <label class="review-confirmation"
-                           for="{{ form.confirm_name_difference.id_for_label }}">
-                        {{ form.confirm_name_difference }}
-                        <span>
-                            I have checked both names and confirm
-                            that they refer to the same person.
-                            <small>
-                                Select which names to keep before linking the account.
-                            </small>
-                        </span>
-                    </label>
+                {% if form.show_link_confirmation %}
 
-                    {{ form.confirm_name_difference.errors }}
+                    {% if form.show_name_confirmation %}
+                        <label class="review-confirmation"
+                               for="{{ form.confirm_name_difference.id_for_label }}">
+                            {{ form.confirm_name_difference }}
+                            <span>
+                                I have checked both names and confirm
+                                that they refer to the same person.
+                            </span>
+                        </label>
+
+                        {{ form.confirm_name_difference.errors }}
+                    {% endif %}
+
                     <div class="form-actions">
-                        <button type="button" id="review-error-close" class="button" hidden>
+                        <button type="button"
+                                id="review-error-close"
+                                class="button"
+                                hidden>
                             Cancel
                         </button>
 
@@ -129,6 +136,7 @@
                             Confirm and link account
                         </button>
                     </div>
+
                 {% endif %}
 
             </section>
@@ -136,7 +144,7 @@
 
         <div class="form-actions">
             <button type="submit" class="button button-primary">
-                {% if form.show_name_confirmation %}
+                {% if form.show_link_confirmation %}
                     Confirm and link account
                 {% else %}
                     Submit decision
@@ -177,10 +185,17 @@
         form.appendChild(dialog);
         dialog.appendChild(panel);
         const nameSourceContainer = form.querySelector(".js-field-name-source");
+        const phoneSourceContainer = form.querySelector(".js-field-phone-source");
         const dialogActions = panel.querySelector(".form-actions");
+        const confirmation = panel.querySelector(".review-confirmation");
+        const insertionPoint = confirmation || dialogActions;
 
-        if (nameSourceContainer && dialogActions) {
-            panel.insertBefore(nameSourceContainer, dialogActions);
+        if (insertionPoint) {
+            for (const container of [nameSourceContainer, phoneSourceContainer]) {
+                if (container) {
+                    panel.insertBefore(container, insertionPoint);
+                }
+            }
         }
 
         closeButton.hidden = false;
@@ -217,6 +232,7 @@
         const noteContainer = document.querySelector(".js-field-note");
         const employeeSelect = document.getElementById("id_employee");
         const nameSourceContainer = document.querySelector(".js-field-name-source");
+        const phoneSourceContainer = document.querySelector(".js-field-phone-source");
 
         function updateFieldsVisibility() {const selectedAction = document.querySelector('input[name="action"]:checked')?.value;
 
@@ -229,6 +245,8 @@
             if (selectedAction !== "link" && employeeSelect) {employeeSelect.value = "";}
 
             if (nameSourceContainer) {nameSourceContainer.style.display = selectedAction === "link" ? "" : "none";}
+
+            if (phoneSourceContainer) {phoneSourceContainer.style.display = selectedAction === "link" ? "" : "none";}
         }
 
         actionInputs.forEach(input => {input.addEventListener("change", updateFieldsVisibility);});

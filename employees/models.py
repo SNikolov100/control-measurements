@@ -9,15 +9,8 @@ from django.conf import settings
 from .choices import EmployeeHistoryEventType, EmployeeRequestStatus
 
 
-def employee_photo_upload_path(instance, filename):
-    file_extension = Path(filename).suffix.lower()
-    return 'employees/'f'{uuid4().hex}{file_extension}'
-
-
 class Employee(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
-    strip_fields = ('full_name', 'position', 'phone', 'email', 'notes',)
-    lowercase_fields = ('email',)
-    titlecase_fields = ('full_name',)
+    strip_fields = ('position', 'notes',)
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -27,24 +20,10 @@ class Employee(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
         blank=True,
         verbose_name=translate('User account'),
     )
-    full_name = models.CharField(
-        max_length=100,
-        verbose_name=translate('Full name'),
-    )
     position = models.CharField(
         max_length=100,
         blank=True,
         verbose_name=translate('Position'),
-    )
-    phone = models.CharField(
-        max_length=30,
-        blank=True,
-        validators=[phone_validator],
-        verbose_name=translate('Phone'),
-    )
-    email = models.EmailField(
-        blank=True,
-        verbose_name=translate('Email'),
     )
     notes = models.TextField(
         blank=True,
@@ -64,10 +43,22 @@ class Employee(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
         'accounts.Person',
         on_delete=models.PROTECT,
         related_name='employee',
-        null=True,
-        blank=True,
+        null=False,
+        blank=False,
         verbose_name=translate('Person'),
     )
+
+    @property
+    def full_name(self):
+        return self.person.get_full_name()
+
+    @property
+    def phone(self):
+        return self.person.phone
+
+    @property
+    def email(self):
+        return self.person.email
 
     def _change_activity_status(self, *, is_active,event_type, description="",):
         if self.is_active == is_active:
@@ -106,7 +97,7 @@ class Employee(TextNormalizationMixin, AutoSlugMixin, TimestampMixin):
         return self.full_name
 
     class Meta:
-        ordering = ('full_name',)
+        ordering = ('person__first_name', 'person__middle_name', 'person__last_name')
         verbose_name = translate('Employee')
         verbose_name_plural = translate('Employees')
 

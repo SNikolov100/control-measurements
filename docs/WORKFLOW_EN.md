@@ -1,6 +1,3 @@
-
----
-
 # Typical Operational Workflow
 
 This document describes the general operational logic of the  
@@ -51,6 +48,39 @@ officially qualified to perform specialized work independently.
 
 Until the required specialty has been acquired, the employee must not
 be available for assignment to activities requiring that qualification.
+
+### Personal Data and Application Access
+
+`Person` is the shared source of personal information for employee
+records and user profiles.
+
+- Every `Employee` is linked to a `Person`.
+- An `Employee` record can exist **without a login account**.
+- `AppUser` represents application sign-in access. After a successful
+  `LINK`, the account and employee record share **the same `Person`**.
+- An employee's name, phone and email are read through `Person`
+  rather than maintained as duplicated fields on `Employee`.
+
+### Registration and Linking an Account to an Employee
+
+1. A person registers with an email address and password; a username is optional.
+2. The applicable email confirmation and administrative registration review take place.
+3. Once approved, the user completes the required personal profile information.
+4. An administrator reviews the employee request (`EmployeeRequest`).
+5. `CREATE` creates an employee record; `LINK` connects the account
+   to an existing employee who has no account.
+6. On approval, the administrator may select an existing permission group.
+
+During `LINK`, the system compares existing personal information.
+When names or phone numbers differ, the administrator chooses which
+source to keep **independently for each field**. Different names also
+require explicit confirmation that both records refer to the same
+person. Other incompatible personal data may block the link until
+resolved. The decision and selected sources are recorded in
+`EmployeeHistory`.
+
+A rejected request may be reviewed again using `Reconsider` according
+to the administrative process; the prior rejection remains in history.
 
 ---
 
@@ -239,7 +269,7 @@ for repair again.
 
 The typical operational workflow is:
 
-1. Register employees and their specialties.
+1. Register employees and their specialties; where needed, register an account and complete `CREATE`/`LINK`.
 2. Select or create a customer.
 3. Select or create a customer site.
 4. Select the primary contact person.

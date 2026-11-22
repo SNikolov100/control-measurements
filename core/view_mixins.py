@@ -164,11 +164,13 @@ class SearchMixin:
                 continue
 
             for value in values:
-                preserved_parameters.append(
-                    (parameter_name,value,)
-                )
+                preserved_parameters.append((parameter_name,value,))
 
         context['search_preserved_parameters'] = preserved_parameters
+        clear_parameters = self.request.GET.copy()
+        clear_parameters.pop('page', None)
+        clear_parameters.pop(self.search_parameter, None)
+        context['search_clear_query'] = clear_parameters.urlencode()
 
         return context
 

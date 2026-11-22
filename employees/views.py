@@ -17,6 +17,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.shortcuts import redirect
 from django.db.models import Exists, OuterRef
+from core.models import Specialty
+from .choices import PersonNameSource, PersonPhoneSource
 
 class EmployeeListView(SearchMixin, PaginationMixin, ListView):
     model = Employee
@@ -24,10 +26,12 @@ class EmployeeListView(SearchMixin, PaginationMixin, ListView):
     context_object_name = 'employees'
 
     search_fields = (
-        'full_name__icontains',
+        'person__first_name__icontains',
+        'person__middle_name__icontains',
+        'person__last_name__icontains',
         'position__icontains',
-        'phone__icontains',
-        'email__icontains',
+        'person__phone__icontains',
+        'person__email__icontains',
         'specialties__code__icontains',
         'specialties__name__icontains',
         'specialties__short_name__icontains',
@@ -35,8 +39,28 @@ class EmployeeListView(SearchMixin, PaginationMixin, ListView):
     search_distinct = True
 
     def get_queryset(self):
-        queryset_result = super().get_queryset().select_related('person').prefetch_related('specialties')
-        return queryset_result
+        queryset = super().get_queryset().select_related('person', 'user').prefetch_related('specialties', 'user__groups')
+        active = self.request.GET.get('active', 'all')
+
+        if active == 'active':
+            queryset = queryset.filter(is_active=True)
+        elif active == 'inactive':
+            queryset = queryset.filter(is_active=False)
+
+        specialty_ids = [int(value) for value in self.request.GET.getlist('specialty') if value.isdecimal()]
+        if specialty_ids:
+            queryset = queryset.filter(specialties__pk__in=specialty_ids).distinct()
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['specialty_options'] = Specialty.objects.all()
+        context['selected_specialty_ids'] = [int(value) for value in self.request.GET.getlist('specialty') if value.isdecimal()]
+        active = self.request.GET.get('active', 'all')
+        context['current_active_filter'] = active if active in ('all', 'active', 'inactive') else 'all'
+
+        return context
 
 class EmployeeCreateView(PermissionAwareSuccessMixin, CreateView):
     model = Employee
@@ -158,13 +182,44 @@ class EmployeeRequestReviewView(PermissionAwareSuccessMixin, UserPassesTestMixin
                 note=form.cleaned_data['review_note'],
                 confirm_name_difference=form.cleaned_data['confirm_name_difference'],
                 name_source=form.cleaned_data.get('name_source'),
+                phone_source=form.cleaned_data.get('phone_source')
             )
 
 
-        except ValidationError as error:
-            name_confirmation_codes = {'name_mismatch', 'name_source_required'}
-            form.show_name_confirmation = any(item.code in name_confirmation_codes for item in error.error_list)
 
+        except ValidationError as error:
+            confirmation_codes = {'name_mismatch', 'name_source_required', 'phone_source_required'}
+            needs_confirmation = any(item.code in confirmation_codes for item in error.error_list)
+            form.show_name_confirmation = False
+            form.show_phone_confirmation = False
+
+            if needs_confirmation:
+                employee = form.cleaned_data.get('employee')
+                employee_request = EmployeeRequest.objects.select_related('user__person').get(pk=self.kwargs['pk'])
+                account_person = employee_request.user.person
+
+                if employee and employee.person_id and account_person:
+                    employee_person = employee.person
+                    employee_name = employee_person.get_full_name()
+                    account_name = account_person.get_full_name()
+                    form.show_name_confirmation = ' '.join(employee_name.split()).casefold() != ' '.join(account_name.split()).casefold()
+                    form.show_phone_confirmation = bool(employee_person.phone and account_person.phone and employee_person.phone.strip()!= account_person.phone.strip())
+
+                    if form.show_name_confirmation:
+                        form.fields['name_source'].required = True
+                        form.fields['name_source'].choices = [
+                            (PersonNameSource.EMPLOYEE, f'{PersonNameSource.EMPLOYEE.label}: {employee_name}'),
+                            (PersonNameSource.ACCOUNT, f'{PersonNameSource.ACCOUNT.label}: {account_name}'),
+                        ]
+
+                    if form.show_phone_confirmation:
+                        form.fields['phone_source'].required = True
+                        form.fields['phone_source'].choices = [
+                            (PersonPhoneSource.EMPLOYEE, f'{PersonPhoneSource.EMPLOYEE.label}: {employee_person.phone}'),
+                            (PersonPhoneSource.ACCOUNT, f'{PersonPhoneSource.ACCOUNT.label}: {account_person.phone}'),
+                        ]
+
+            form.show_link_confirmation = form.show_name_confirmation or form.show_phone_confirmation
             for message in error.messages:
                 form.add_error(None, message)
 

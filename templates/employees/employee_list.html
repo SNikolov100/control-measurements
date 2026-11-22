@@ -57,8 +57,97 @@
                 </p>
             </div>
         </div>
+        <div class="employee-search-filters">
+            {% include "shared/search_form.html" with search_placeholder="Search employees" %}
 
-        {% include "shared/search_form.html" with search_placeholder="Search employees" %}
+            <form method="get" class="employee-filter-form">
+                <input
+                    type="hidden"
+                    name="{{ search_parameter }}"
+                    value="{{ search_query }}"
+                >
+
+                <input
+                    type="hidden"
+                    name="page_size"
+                    value="{{ current_page_size }}"
+                >
+
+                <fieldset class="employee-filter-group">
+                    <legend>Specialties</legend>
+
+                    <div class="employee-filter-pills">
+                        {% for specialty in specialty_options %}
+                            <label class="employee-filter-pill">
+                                <input
+                                    type="checkbox"
+                                    name="specialty"
+                                    value="{{ specialty.pk }}"
+                                    {% if specialty.pk in selected_specialty_ids %}checked{% endif %}
+                                >
+                                <span>
+                                    {{ specialty.short_name|default:specialty.name }}
+                                </span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </fieldset>
+
+                <fieldset class="employee-filter-group">
+                    <legend>Activity status</legend>
+
+                    <div class="employee-activity-row">
+
+                        <div class="employee-filter-pills">
+                            <label class="employee-filter-pill">
+                                <input
+                                    type="radio"
+                                    name="active"
+                                    value="all"
+                                    {% if current_active_filter == 'all' %}checked{% endif %}
+                                >
+                                <span>All</span>
+                            </label>
+
+                            <label class="employee-filter-pill">
+                                <input
+                                    type="radio"
+                                    name="active"
+                                    value="active"
+                                    {% if current_active_filter == 'active' %}checked{% endif %}
+                                >
+                                <span>Active</span>
+                            </label>
+
+                            <label class="employee-filter-pill">
+                                <input
+                                    type="radio"
+                                    name="active"
+                                    value="inactive"
+                                    {% if current_active_filter == 'inactive' %}checked{% endif %}
+                                >
+                                <span>Inactive</span>
+                            </label>
+                        </div>
+
+                        <div class="employee-filter-actions">
+                            <button type="submit" class="button button-primary">
+                                Apply filters
+                            </button>
+
+                            <a
+                                class="button"
+                                href="{% url 'employees:list' %}?page_size={{ current_page_size }}{% if search_query %}&amp;{{ search_parameter }}={{ search_query|urlencode }}{% endif %}"
+                            >
+                                Clear filters
+                            </a>
+                        </div>
+
+                    </div>
+                </fieldset>
+
+            </form>
+        </div>
     </section>
 
     {% if search_query %}
@@ -83,7 +172,6 @@
                             <th>Employee</th>
                             <th>Contact information</th>
                             <th>Specialties</th>
-                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -132,13 +220,33 @@
                                                 {{ employee.full_name }}
                                             </strong>
 
-                                            <span class="employee-position">
-                                                {% if employee.position %}
-                                                    {{ employee.position }}
+                                            <div class="employee-meta">
+                                                <span class="employee-position">
+                                                    {% if employee.position %}
+                                                        {{ employee.position }}
+                                                    {% else %}
+                                                        No position
+                                                    {% endif %}
+                                                </span>
+
+                                                {% if employee.user %}
+                                                    {% if employee.user.is_superuser %}
+                                                        <span class="employee-role">Admin</span>
+                                                    {% else %}
+                                                        {% for group in employee.user.groups.all %}
+                                                            <span class="employee-role">
+                                                                {{ group.name }}
+                                                            </span>
+                                                        {% empty %}
+                                                            <span class="employee-role">No role</span>
+                                                        {% endfor %}
+                                                    {% endif %}
                                                 {% else %}
-                                                    No position
+                                                    <span class="employee-role">No account</span>
                                                 {% endif %}
-                                            </span>
+
+                                                {% status_badge employee.is_active %}
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -179,10 +287,6 @@
                                             </span>
                                         {% endfor %}
                                     </div>
-                                </td>
-
-                                <td class="employee-status-column">
-                                    {% status_badge employee.is_active %}
                                 </td>
 
                                 <td class="table-actions">
@@ -229,17 +333,21 @@
         {% include "shared/pagination.html" %}
     {% else %}
         <section class="empty-state">
-            {% if search_query %}
+            {% if search_query or selected_specialty_ids or current_active_filter != 'all' %}
                 <h2>No matching employees</h2>
 
                 <p>
-                    No employees match
-                    <strong>{{ search_query }}</strong>.
+                    No employees match the current search or filters.
                 </p>
 
-                {% if_can_access 'employees:list' %}<a class="button" href="{% url 'employees:list' %}?page_size={{ current_page_size }}">
-                    Clear search
-                </a>{% endif_can_access %}
+                {% if_can_access 'employees:list' %}
+                    <a
+                        class="button"
+                        href="{% url 'employees:list' %}?page_size={{ current_page_size }}"
+                    >
+                        Clear search and filters
+                    </a>
+                {% endif_can_access %}
             {% else %}
                 <h2>No employees</h2>
 

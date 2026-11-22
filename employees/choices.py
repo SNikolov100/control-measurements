@@ -22,5 +22,9 @@ class EmployeeRequestAction(models.TextChoices):
     REJECT = 'reject', translate('Reject request')
 
 class PersonNameSource(models.TextChoices):
-    EMPLOYEE = 'employee', translate('Existing employee names')
-    ACCOUNT = 'account', translate('Account profile names')
+    EMPLOYEE = 'employee', translate('Keep name from existing employee record')
+    ACCOUNT = 'account', translate('Keep name from registered account profile')
+
+class PersonPhoneSource(models.TextChoices):
+    EMPLOYEE = ('employee', translate('Keep phone from existing employee record'))
+    ACCOUNT = ('account', translate('Keep phone from registered account profile'))

@@ -8,7 +8,6 @@ Control Measurements application.
 > General operational logic: [WORKFLOW_EN.md](WORKFLOW_EN.md)
 
 
-
 ## Main Workflow
 
 Initial Setup → Customer → Customer Site → Equipment → Activity → Employee → Result → History
@@ -56,6 +55,52 @@ Before continuing, verify that:
 - [ ] Active specialties are correctly marked.
 
 The initial setup should be completed before employees, equipment, and activities are entered into the system.
+
+</details>
+
+<details>
+<summary><strong>1A. Registration, Employee Records and Permissions</strong></summary>
+
+This workflow is performed by users with the required administrative
+permissions. An ordinary employee does not approve their own request.
+
+1. The user registers with an email address and password (username optional).
+2. The email confirmation and administrative registration review take place.
+3. Once approved, the user completes the required personal profile information.
+4. An administrator opens the `EmployeeRequest` and selects an action:
+   - `CREATE` — create a new employee record;
+   - `LINK` — link the account to an existing employee without an account;
+   - `REJECT` — reject the request.
+5. On approval, select an existing permission group where appropriate.
+6. For `LINK`, review the data and confirm identity before saving the merge.
+
+### When Names or Phone Numbers Differ During `LINK`
+
+- The dialog shows values from the existing employee record and the registered account.
+- Choose the **source for the name** if the names differ.
+- Choose the **source for the phone number** if the phone numbers differ.
+- When names differ, explicitly confirm that both records refer to the same person.
+- If other incompatible data block the link, review and correct those
+  values rather than creating a duplicate employee record.
+- After a successful link, check the shared `Person` and the `EmployeeHistory` entry.
+
+For a rejected request, the administrative `Reconsider` action may
+be used; the earlier rejection remains in the history.
+
+`Person` stores personal data. Each `Employee` has a `Person`, but
+may exist without an `AppUser`. Once linked, the account and employee
+share the same `Person`. Name, phone and email are not maintained
+as independent duplicate fields on `Employee`.
+
+### Using the Employee List
+
+The `Employees` list supports search, an `All` / `Active` / `Inactive`
+filter and selection of multiple specialties. When several specialties
+are selected, matching **any one** is sufficient. Search and filters
+can be combined and are preserved across pages.
+
+Access permissions are managed through **Django Admin → Groups**.
+Group membership does not bypass application permission checks.
 
 </details>
 
@@ -172,7 +217,7 @@ main Activities list.
 2. Assign an employee.
 3. Start the repair.
 4. Complete the repair when the work is finished.
-5. Create a follow-up inspection when required.
+5. After a successful repair, create a repeat inspection after repair.
 6. Record the final inspection result.
 
 Repair activities may initially have no fixed completion date.
@@ -192,5 +237,3 @@ Repair activities may initially have no fixed completion date.
 - Use the main lists to continue work after completing an operation.
 
 </details>
-
-

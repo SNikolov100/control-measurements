@@ -37,7 +37,7 @@
         </button>
 
         {% if search_query %}
-            <a class="button" href="?{% if current_page_size %}page_size={{ current_page_size }}{% endif %}">
+            <a class="button" href="?{{ search_clear_query }}">
                 Clear
             </a>
         {% endif %}

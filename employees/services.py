@@ -7,7 +7,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.utils import timezone
 from .models import EmployeeHistory
-from .choices import EmployeeRequestAction, PersonNameSource
+from .choices import EmployeeRequestAction, PersonNameSource, PersonPhoneSource
 from functools import partial
 from .emails import send_employee_request_result_email
 from django.core.files.uploadedfile import UploadedFile
@@ -41,7 +41,8 @@ def review_employee_request(*,
     employee=None,
     note: str = '',
     confirm_name_difference: bool = False,
-    name_source: str | None = None):
+    name_source: str | None = None,
+    phone_source: str | None = None):
 
     if not reviewer.is_authenticated or not reviewer.is_superuser:
         raise PermissionDenied
@@ -96,7 +97,7 @@ def review_employee_request(*,
 
     history_details = []
     if action == EmployeeRequestAction.CREATE:
-        employee = Employee.objects.create(person=person, user=user, full_name=person.get_full_name(), phone=person.phone, email=person.email)
+        employee = Employee.objects.create(person=person, user=user)
         event_type = EmployeeHistory.EventType.CREATED
 
     else:
@@ -139,29 +140,46 @@ def review_employee_request(*,
         normalized_account_name = ' '.join(account_name.split()).casefold()
         normalized_employee_name = ' '.join(employee_name.split()).casefold()
         names_differ = normalized_account_name != normalized_employee_name
-        if names_differ and not confirm_name_difference:
-            raise ValidationError(
-                translate('The employee name (%(employee_name)s) differs '
-                          'from the account name (%(account_name)s). '
-                          'Check the selected employee. If this is the same '
-                          'person, confirm the name difference and submit again.'
-                ),
-                params={'employee_name': employee_name, 'account_name': account_name},
-                code='name_mismatch',
+        phone_differs = bool(employee_person.phone and person.phone and employee_person.phone.strip() != person.phone.strip())
+        link_errors = []
+        if names_differ:
+            if not confirm_name_difference:
+                link_errors.append(
+                    ValidationError(
+                        translate(
+                            'The employee name (%(employee_name)s) differs '
+                            'from the account name (%(account_name)s). '
+                            'Confirm that both records belong to the same person.'
+                        ),
+                        params={'employee_name': employee_name, 'account_name': account_name},
+                        code='name_mismatch',
+                    )
+                )
+            elif name_source not in PersonNameSource.values:
+                link_errors.append(ValidationError(translate('Choose which names to keep.'), code='name_source_required'))
+
+        if phone_differs and phone_source not in PersonPhoneSource.values:
+            link_errors.append(ValidationError(
+                translate('The employee and account phone numbers differ. Choose which phone number to keep.'),
+                code='phone_source_required'
+                )
             )
-        if names_differ and name_source not in PersonNameSource.values:
-            raise ValidationError(translate('Choose which names to keep.'), code='name_source_required')
+
+        if link_errors:
+            raise ValidationError(link_errors)
 
         if names_differ and name_source == PersonNameSource.ACCOUNT:
             chosen_names = (person.first_name, person.middle_name, person.last_name)
         else:
             chosen_names = (employee_person.first_name, employee_person.middle_name, employee_person.last_name)
 
-        personal_fields = ('phone', 'date_of_birth', 'address', 'photo')
+        personal_fields = ('date_of_birth', 'address', 'photo')
         conflicting_fields = []
+
         for field in personal_fields:
             employee_value = getattr(employee_person, field)
             account_value = getattr(person, field)
+
             if employee_value and account_value and str(employee_value).strip() != str(account_value).strip():
                 conflicting_fields.append(field)
 
@@ -179,6 +197,14 @@ def review_employee_request(*,
 
             if not employee_value and account_value:
                 merged_personal_data[field] = account_value
+
+        if phone_differs:
+            if phone_source == PersonPhoneSource.ACCOUNT:
+                merged_personal_data['phone'] = person.phone
+            history_details.append(f'Phone difference resolved. Selected phone source: "{phone_source}".')
+
+        elif not employee_person.phone and person.phone:
+            merged_personal_data['phone'] = person.phone
 
         employee_person.first_name, employee_person.middle_name, employee_person.last_name = chosen_names
         for field, value in merged_personal_data.items():
@@ -205,24 +231,14 @@ def review_employee_request(*,
         if names_differ:
             history_details.append(f'Name difference confirmed: employee "{employee_name}", account "{account_name}". Selected name source: "{name_source}".')
 
-        old_full_name = employee.full_name
-        employee.full_name = employee_person.get_full_name()
+        employee.person = employee_person
         updates = {
             'user': user,
-            'full_name': employee.full_name,
             'slug': employee.build_slug(),
-            'phone': employee_person.phone,
-            'email': employee_person.email,
             'updated_at': timezone.now(),
         }
         updated_employee = (Employee.objects
-            .filter(
-                pk=employee.pk,
-                user__isnull=True,
-                is_active=True,
-                email=employee.email,
-                full_name=old_full_name,
-            )
+            .filter(pk=employee.pk, person_id=employee_person.pk, user__isnull=True, is_active=True)
             .update(**updates)
         )
         if updated_employee != 1:
@@ -312,9 +328,6 @@ def create_employee_from_form(form):
     )
     employee = form.save(commit=False)
     employee.person = person
-    employee.full_name = person.get_full_name()
-    employee.phone = person.phone
-    employee.email = person.email
     employee.save()
     form.save_m2m()
     return employee
@@ -371,11 +384,8 @@ def update_employee_from_form(form):
         fields_to_update.append('photo')
 
     person.save(update_fields=fields_to_update)
-    employee.full_name = person.get_full_name()
+    employee.person = person
     Employee.objects.filter(pk=employee.pk).update(
-        full_name=person.get_full_name(),
-        phone=person.phone,
-        email=person.email,
         position=form.cleaned_data['position'],
         notes=form.cleaned_data['notes'],
         updated_at=timezone.now(),

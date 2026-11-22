@@ -1,6 +1,6 @@
 # Control Measurements
 
-Control Measurements is a Django application for managing customers, equipment, employees, and scheduled control measurements. It is under active development.
+Control Measurements is a Django application for managing customers, equipment, employees, and scheduled control measurements. The project is under active development.
 
 ## What the application does
 
@@ -8,25 +8,39 @@ Control Measurements is a Django application for managing customers, equipment, 
 | --- | --- |
 | Customers | Manage customer records, sites, and site contacts. |
 | Equipment | Register equipment by customer site, manage equipment types, and track equipment status. Inspection intervals and expected durations can use defaults from the equipment type. |
-| Employees | Manage employee records, specialties, active status, and links to user accounts. An employee record can exist without a login. |
+| Employees | Manage employee records, specialties, active status, and optional links to user accounts. Search and filter employees by specialty and active status. An employee can exist without a login. |
 | Activities | Create and assign inspections, calibrations, repairs, and reinspections. Track activities through start, completion, or cancellation. Starting an activity requires active, qualified assignees. |
-| Settings | Manage company details, system settings, and specialties. System and company settings can be granted as read-only access. |
+| Settings | Manage company details, system settings, and specialties. Company and system settings can be exposed as read-only where permissions allow. |
 
-## Accounts and access
+## People, accounts, and access
 
-Visitors can open About and Contacts, register, or sign in. Users sign in with an email address or username. A new account awaits approval. Once approved, the user completes their profile, and a superuser links the account to an existing employee record or creates one.
+### Shared personal data
 
-Manage groups and permissions in **Django Admin → Groups**. The application uses the permissions assigned to each user, including permissions inherited from groups. Group names are configurable. The same access rules control navigation, action buttons, and requests sent directly to the server.
+`Person` is the central record for personal information, including names and contact details. An `Employee` must reference a `Person`; a `Person` may also be associated with an `AppUser` account. An employee record does not require an account.
 
-- **Superusers** manage groups and approve registrations and employee link requests.
-- **Operators** can see all inspections and create, assign, start, and complete them when granted the corresponding permissions. They can record progress for an assigned employee without a login.
-- **Employees** can see their assigned inspections when granted inspection viewing access. Starting and completing work require separate permissions.
+The employee's `full_name`, `phone`, and `email` are read-only properties derived from the linked `Person`, rather than separate stored fields on `Employee`. This keeps personal information in one place.
 
-To grant visibility across all inspections, add `inspections.view_all_inspections` alongside `inspections.view_inspection`. Grant individual action permissions according to the user's responsibilities.
+### Registration and employee requests
+
+Visitors can access the public pages (including About and Contacts), register, and sign in. Users can sign in using their email address or username. The registration process includes email confirmation and administrative approval or rejection. Approved accounts complete their personal profile before receiving full application access.
+
+A superuser reviews an employee request and can either **CREATE** a new employee record or **LINK** the account to an existing employee. An existing permission group can be selected during review. Rejected registration and employee requests support an administrative **Reconsider** workflow; the employee-request workflow preserves the earlier decision in its history.
+
+When linking, the application checks personal-data conflicts. For different names and/or phone numbers, the reviewer can select which record's values to retain and confirm that the records belong to the same person. The action and the chosen sources are recorded in `EmployeeHistory`. Other conflicting personal data may still require manual resolution before linking.
+
+### Permissions
+
+Manage groups and permissions in **Django Admin → Groups**. Authorization is based on assigned permissions, including those inherited from groups; group names are configurable. Navigation, action buttons, and direct requests use consistent permission checks.
+
+- **Superusers** manage permission groups and review registration and employee requests.
+- **Operators** can see all inspections and create, assign, start, or complete them when granted the corresponding permissions. They can record progress for an assigned employee without a login.
+- **Employees** can see assigned inspections when granted viewing access. Starting and completing work require separate permissions.
+
+To allow visibility across all inspections, grant `inspections.view_all_inspections` alongside `inspections.view_inspection`. Grant each action permission according to the user's responsibilities.
 
 ## Local setup
 
-The application uses SQLite by default. Use Python 3.12 or newer and install the dependencies pinned in [requirements.txt](requirements.txt).
+Use Python 3.12 or newer and install the dependencies listed in [requirements.txt](requirements.txt). The current development workflow uses PostgreSQL; consult the Django settings and local environment configuration for the database connection details. Do not assume an SQLite default without checking the settings in the version you are running.
 
 ```bash
 git clone https://github.com/SNikolov100/control-measurements.git
@@ -34,25 +48,27 @@ cd control-measurements
 python -m venv .venv
 ```
 
-Activate the environment with `.venv\Scripts\activate.bat` in Windows Command Prompt or `source .venv/bin/activate` on Linux and macOS.
+Activate the environment with `./.venv/Scripts/Activate.ps1` in Windows PowerShell (or `.venv\Scripts\activate.bat` in Command Prompt), or `source .venv/bin/activate` on Linux/macOS.
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-Copy `.env.example` to `.env` and replace the example secret key with a generated value. Keep `.env` outside version control.
+Copy `.env.example` to `.env` where the example file is available, generate a unique secret key, and configure the environment values required by the current settings (including database and email settings as applicable). Do not commit `.env` or secrets.
 
 ```bash
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
-A local configuration uses these settings:
+A typical local configuration includes:
 
 ```dotenv
 DJANGO_SECRET_KEY=replace-with-your-generated-secret-key
 DJANGO_DEBUG=True
 DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 ```
+
+**Migration baseline:** During development, the initial migration files were regenerated and the legacy development database was retired. Set up a **fresh database** for the current migration history; do not attempt to upgrade the old development database using these files. Ensure the database exists and is correctly configured before running migrations.
 
 Apply migrations, create the initial superuser, and run the server:
 
@@ -62,17 +78,25 @@ python -m django createsuperuser --settings=Control_measurements.settings
 python -m django runserver --settings=Control_measurements.settings
 ```
 
-Open the [application](http://127.0.0.1:8000/) or [Django Admin](http://127.0.0.1:8000/admin/). Use the superuser to set up groups and their permissions.
+Open the [application](http://127.0.0.1:8000/) or [Django Admin](http://127.0.0.1:8000/admin/). Use the superuser to configure groups and their permissions.
 
-## Testing
+## Testing and verification
 
-Run the Django test suite:
+Run Django's system checks:
+
+```bash
+python manage.py check
+```
+
+Run the test suite when appropriate:
 
 ```bash
 python -m django test --settings=Control_measurements.settings
 ```
 
-For a browser check, use a regular account with only equipment-type viewing access. The list should open with Add, Edit, and Delete hidden. Grant the group the equipment-type change permission and reload to verify that Edit appears. Remove the permission and verify that the direct edit URL returns HTTP 403.
+Manual checks carried out during development include employee CREATE/EDIT/LINK, linking with name and phone conflicts, and the employee list's search, filtering, and pagination. `EmployeeHistory` was also inspected after linking to verify that the selected sources were logged. These manual checks do **not** replace a full automated regression run.
+
+For a permission check, use a regular account with only equipment-type viewing access. The list should open with Add, Edit, and Delete hidden. Grant the equipment-type change permission and reload to verify that Edit appears. Remove it and verify that the direct edit URL returns HTTP 403.
 
 ## Documentation
 
