@@ -28,6 +28,7 @@ urlpatterns = [
     path('inspections/', include('inspections.urls')),
     path('accounts/', include('accounts.urls')),
     path('', include('public.urls')),
+    path('api/', include('Control_measurements.api_urls')),
 ]
 
 if settings.DEBUG:
