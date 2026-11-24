@@ -8,7 +8,6 @@ from equipment.models import Equipment
 
 class Inspection(TimestampMixin):
     class InspectionType(models.TextChoices):
-        CALIBRATION = 'calibration', translate('Calibration')
         PERIODIC = 'periodic', translate('Periodic inspection')
         EXTRAORDINARY = 'extraordinary', translate('Extraordinary inspection')
         REPAIR = 'repair', translate('Repair')

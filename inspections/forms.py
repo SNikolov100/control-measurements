@@ -2,7 +2,8 @@ from django import forms
 from django.utils.translation import gettext_lazy as translate
 from employees.models import Employee
 from .models import Inspection
-from .services import get_allowed_inspection_types
+from .services import get_allowed_inspection_types, get_busy_employee_ids
+from django.db.models import Q
 
 
 class InspectionBaseForm(forms.ModelForm):
@@ -102,8 +103,17 @@ class InspectionAssignmentForm(forms.ModelForm):
             return
 
         required_specialty = self.instance.equipment.equipment_type.specialty
-        get_assigned_employees = Employee.objects.filter(is_active=True, specialties=required_specialty).distinct()
-        self.fields['assigned_employees'].queryset = get_assigned_employees
+        if self.instance.pk:
+            assigned_ids = self.instance.assigned_employees.values_list('pk', flat=True)
+        else:
+            assigned_ids = []
+
+        available_employees = (Employee.objects
+            .filter(is_active=True, specialties=required_specialty)
+            .filter(Q(pk__in=assigned_ids) | ~Q(pk__in=get_busy_employee_ids()))
+            .distinct()
+        )
+        self.fields['assigned_employees'].queryset = available_employees
 
 class InspectionStartForm(forms.Form):
     ...

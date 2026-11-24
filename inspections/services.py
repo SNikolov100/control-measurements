@@ -3,17 +3,24 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as translate
 from django.utils import timezone
 from inspections.models import Inspection
+from equipment.models import Equipment
+from employees.models import Employee
 
 INSPECTION_TYPES = {
-    Inspection.InspectionType.CALIBRATION,
     Inspection.InspectionType.PERIODIC,
     Inspection.InspectionType.EXTRAORDINARY,
 }
 
+def get_busy_employee_ids():
+    return (Inspection.objects
+        .filter(status=Inspection.Status.IN_PROGRESS, assigned_employees__isnull=False)
+        .values_list('assigned_employees__id', flat=True)
+        .distinct()
+    )
+
 def get_allowed_inspection_types(equipment):
     allowed_types_by_status = {
         equipment.Status.IN_SERVICE: (
-            Inspection.InspectionType.CALIBRATION.value,
             Inspection.InspectionType.PERIODIC.value,
             Inspection.InspectionType.EXTRAORDINARY.value,
             Inspection.InspectionType.REPAIR.value,
@@ -91,11 +98,13 @@ def register_pending_inspection(inspection: Inspection) -> Inspection:
 
     return inspection
 
-
+@transaction.atomic
 def start_inspection(inspection) ->Inspection:
     if inspection.pk is None:
         raise ValidationError(translate('The activity must be saved before it can be started.'))
 
+    equipment = Equipment.objects.select_for_update().get(pk=inspection.equipment_id)
+    inspection = Inspection.objects.select_for_update().get(pk=inspection.pk)
     if not inspection.can_change_status_to(inspection.Status.IN_PROGRESS):
         raise ValidationError({'status': translate('The activity cannot be started from its current status.')})
 
@@ -108,6 +117,8 @@ def start_inspection(inspection) ->Inspection:
         raise ValidationError({'status': translate('This equipment already has another activity in progress.')})
 
     assigned_employees = inspection.assigned_employees.all()
+    employee_ids = list(assigned_employees.values_list('pk', flat=True))
+    list(Employee.objects.select_for_update().filter(pk__in=employee_ids).order_by('pk'))
     if not assigned_employees.exists():
         raise ValidationError(
             {'assigned_employees': translate('At least one employee must be assigned before the activity can start.')}
@@ -117,14 +128,20 @@ def start_inspection(inspection) ->Inspection:
     if inactive_employees.exists():
         raise ValidationError({'assigned_employees': translate('Inactive employees cannot be assigned to an activity.')})
 
-    required_specialty = inspection.equipment.equipment_type.specialty
+    required_specialty = equipment.equipment_type.specialty
     unqualified_employees = assigned_employees.exclude(specialties=required_specialty)
     if unqualified_employees.exists():
         raise ValidationError(
             {'assigned_employees': translate('All assigned employees must have the specialty required for this activity.')}
         )
 
-    equipment = inspection.equipment
+    busy_employees = list(assigned_employees.filter(pk__in=get_busy_employee_ids()).select_related('person'))
+    if busy_employees:
+        names = ', '.join(employee.full_name for employee in busy_employees)
+        raise ValidationError({
+            'assigned_employees': translate('The activity cannot be started. The following employees are busy: %(names)s') % {'names': names}
+        })
+
     if inspection.inspection_type == inspection.InspectionType.REINSPECTION:
         allowed_equipment_statuses = {equipment.Status.WAITING_REINSPECTION}
 
@@ -140,20 +157,19 @@ def start_inspection(inspection) ->Inspection:
             }
         )
 
-    with transaction.atomic():
-        inspection.status = inspection.Status.IN_PROGRESS
-        inspection.actual_start = timezone.now()
-        inspection.save(update_fields={'status', 'actual_start', })
+    inspection.status = inspection.Status.IN_PROGRESS
+    inspection.actual_start = timezone.now()
+    inspection.save(update_fields={'status', 'actual_start', })
 
-        if inspection.inspection_type == inspection.InspectionType.REPAIR:
-            equipment_status = inspection.equipment.Status.UNDER_REPAIR
-        else:
-            equipment_status = inspection.equipment.Status.UNDER_INSPECTION
+    if inspection.inspection_type == inspection.InspectionType.REPAIR:
+        equipment_status = equipment.Status.UNDER_REPAIR
+    else:
+        equipment_status = equipment.Status.UNDER_INSPECTION
 
-        inspection.equipment.change_status(
-            equipment_status,
-            reason=f"Inspection #{inspection.pk} started: {inspection.get_inspection_type_display()}."
-        )
+    equipment.change_status(
+        equipment_status,
+        reason=f"Inspection #{inspection.pk} started: {inspection.get_inspection_type_display()}."
+    )
 
     return inspection
 
