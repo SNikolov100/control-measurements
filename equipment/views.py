@@ -1,16 +1,12 @@
 from core.view_mixins import PermissionAwareSuccessMixin
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView
-from .forms import (EquipmentTypeEditForm,
-                    EquipmentTypeCreateForm,
-                    EquipmentTypeDeleteForm,
-                    EquipmentCreateForm,
-                    EquipmentEditForm,
-                    )
+from .forms import EquipmentTypeEditForm,EquipmentTypeCreateForm,EquipmentTypeDeleteForm,EquipmentCreateForm,EquipmentEditForm
 from .models import Equipment, EquipmentType
 from django.urls import reverse_lazy, reverse
 from core.view_mixins import ConfirmedDeleteMixin, PaginationMixin, SearchMixin, StatusFilterMixin
 from .view_mixins import EquipmentRegistrationMixin
 from django.utils.translation import gettext_lazy as translate
+from .selectors import with_current_validity
 
 class EquipmentTypeListView(SearchMixin, PaginationMixin, ListView):
     model = EquipmentType
@@ -82,7 +78,7 @@ class EquipmentListView(StatusFilterMixin, SearchMixin, PaginationMixin, ListVie
                 'equipment_type',
                 'equipment_type__specialty',
                 )
-        return queryset_result
+        return with_current_validity(queryset_result)
 
 class EquipmentCreateView(PermissionAwareSuccessMixin, EquipmentRegistrationMixin, CreateView):
     model = Equipment
@@ -114,11 +110,8 @@ class EquipmentDetailView(DetailView):
     slug_url_kwarg = 'equipment_slug'
 
     def get_queryset(self):
-        return (super().get_queryset().select_related(
-                'customer_site',
-                'customer_site__customer',
-                'equipment_type',
-                'equipment_type__specialty',
-            )
-            .prefetch_related('status_history')
-        )
+        queryset = (super().get_queryset()
+                    .select_related('customer_site', 'customer_site__customer', 'equipment_type', 'equipment_type__specialty')
+                    .prefetch_related('status_history')
+                    )
+        return with_current_validity(queryset)

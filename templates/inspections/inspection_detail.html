@@ -287,6 +287,17 @@
                             </span>
                         {% endif %}
                     </dd>
+
+                    <dt>Valid until</dt>
+                    <dd>
+                        {% if inspection.valid_until %}
+                            {{ inspection.valid_until|date:"d.m.Y" }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not determined
+                            </span>
+                        {% endif %}
+                    </dd>
                 </dl>
             </section>
 

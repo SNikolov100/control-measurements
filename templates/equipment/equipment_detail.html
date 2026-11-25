@@ -298,7 +298,16 @@
                 <dl class="detail-list">
                     <dt>Status</dt>
                     <dd>{% status_badge equipment.status equipment.get_status_display %}</dd>
-
+                    <dt>Valid until</dt>
+                    <dd>
+                        {% if equipment.current_valid_until %}
+                            {{ equipment.current_valid_until|date:"d.m.Y" }}
+                        {% else %}
+                            <span class="detail-value-muted">
+                                Not determined
+                            </span>
+                        {% endif %}
+                    </dd>
                     <dt>Created</dt>
                     <dd>{{ equipment.created_at }}</dd>
 

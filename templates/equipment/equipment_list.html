@@ -97,6 +97,7 @@
                             <th>Identifiers</th>
                             <th>Customer and site</th>
                             <th>Status</th>
+                            <th>Valid until</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -163,6 +164,14 @@
 
                                 <td class="equipment-status">
                                     {% status_badge equipment.status equipment.get_status_display %}
+                                </td>
+
+                                <td>
+                                    {% if equipment.current_valid_until %}
+                                        {{ equipment.current_valid_until|date:"d.m.Y" }}
+                                    {% else %}
+                                        <span class="table-empty-cell">-</span>
+                                    {% endif %}
                                 </td>
 
                                 <td class="table-actions">

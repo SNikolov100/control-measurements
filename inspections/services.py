@@ -5,10 +5,18 @@ from django.utils import timezone
 from inspections.models import Inspection
 from equipment.models import Equipment
 from employees.models import Employee
+from inspections.utils import calculate_valid_until
+
 
 INSPECTION_TYPES = {
     Inspection.InspectionType.PERIODIC,
     Inspection.InspectionType.EXTRAORDINARY,
+}
+
+VALIDITY_RENEWAL_TYPES = {
+    Inspection.InspectionType.PERIODIC,
+    Inspection.InspectionType.EXTRAORDINARY,
+    Inspection.InspectionType.REINSPECTION,
 }
 
 def get_busy_employee_ids():
@@ -205,7 +213,16 @@ def complete_inspection(inspection, result='', result_notes='') -> Inspection:
         inspection.result = result
         inspection.result_notes = result_notes
         inspection.actual_end = timezone.now()
-        inspection.save(update_fields=('status', 'result', 'result_notes', 'actual_end'))
+        inspection.valid_until = None
+        if result == Inspection.Result.PASSED and inspection.inspection_type in VALIDITY_RENEWAL_TYPES:
+            equipment = inspection.equipment
+            inspection.valid_until = calculate_valid_until(
+                start_date=timezone.localdate(inspection.actual_end),
+                interval_value=equipment.inspection_interval_value,
+                interval_unit=equipment.inspection_interval_unit,
+            )
+
+        inspection.save(update_fields=('status', 'result', 'result_notes', 'actual_end', 'valid_until'))
         inspection.equipment.change_status(
             equipment_status,
             reason=f'Inspection #{inspection.pk} completed: {inspection.get_inspection_type_display()}.',

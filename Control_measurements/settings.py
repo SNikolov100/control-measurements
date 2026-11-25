@@ -166,7 +166,7 @@ LANGUAGES = [
     ("bg", _("Bulgaria")),
 ]
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Sofia'
 
 USE_I18N = True
 

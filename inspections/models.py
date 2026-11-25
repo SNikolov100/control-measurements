@@ -93,6 +93,12 @@ class Inspection(TimestampMixin):
         editable=False,
         verbose_name=translate('Actual end'),
     )
+    valid_until = models.DateField(
+        null=True,
+        blank=True,
+        editable=False,
+        verbose_name=translate('Valid until'),
+    )
     estimated_duration = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1)],
         verbose_name=translate('Estimated duration in minutes'),
