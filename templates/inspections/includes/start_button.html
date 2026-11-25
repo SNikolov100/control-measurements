@@ -1,0 +1,15 @@
+{% url 'inspections:start' inspection.pk as start_url %}
+
+{% if not inspection.assigned_employees.exists %}
+
+    {% include "components/action_link.html" with allowed=perms.inspections.start_inspection label=start_label css_class="button-small button-success" disabled_reason="Assign at least one qualified employee before starting the activity." only %}
+
+{% elif inspection.equipment.status == inspection.equipment.Status.UNDER_INSPECTION %}
+
+    {% include "components/action_link.html" with allowed=perms.inspections.start_inspection label=start_label css_class="button-small button-success" disabled_reason="Another activity is already in progress for this equipment." only %}
+
+{% else %}
+
+    {% include "components/action_link.html" with allowed=perms.inspections.start_inspection url=start_url label=start_label css_class="button-small button-success" only %}
+
+{% endif %}

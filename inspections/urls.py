@@ -10,6 +10,7 @@ urlpatterns = [
         path('assign/', views.InspectionAssignmentView.as_view(), name='assign'),
         path('details/', views.InspectionDetailView.as_view(), name='details'),
         path('start/', views.InspectionStartView.as_view(), name='start'),
+        path('interrupt/', views.InspectionInterruptView.as_view(), name='interrupt'),
         path('complete/', views.InspectionCompleteView.as_view(), name='complete'),
         path('cancel/', views.InspectionCancelView.as_view(), name='cancel'),
     ])),

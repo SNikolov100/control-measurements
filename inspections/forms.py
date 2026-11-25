@@ -118,6 +118,9 @@ class InspectionAssignmentForm(forms.ModelForm):
 class InspectionStartForm(forms.Form):
     ...
 
+class InspectionInterruptForm(forms.Form):
+    ...
+
 class InspectionCompleteForm(forms.Form):
     result = forms.ChoiceField(
         choices=Inspection.Result.choices,

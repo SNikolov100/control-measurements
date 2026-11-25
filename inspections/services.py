@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import gettext_lazy as translate
 from django.utils import timezone
-from inspections.models import Inspection
+from inspections.models import Inspection, InspectionHistory
 from equipment.models import Equipment
 from employees.models import Employee
 from inspections.utils import calculate_valid_until
@@ -18,6 +18,33 @@ VALIDITY_RENEWAL_TYPES = {
     Inspection.InspectionType.EXTRAORDINARY,
     Inspection.InspectionType.REINSPECTION,
 }
+
+def record_inspection_event(
+    inspection: Inspection,
+    event_type: str,
+    *,
+    actor=None,
+    previous_status: str = '',
+    new_status: str = '',
+    description: str = '',
+    details: dict | None = None,
+) -> InspectionHistory:
+
+    return InspectionHistory.objects.create(
+        inspection=inspection,
+        event_type=event_type,
+        actor=actor,
+        previous_status=previous_status,
+        new_status=new_status,
+        description=description,
+        details=details if details is not None else {},
+    )
+
+def get_assigned_employees_snapshot(inspection: Inspection) -> list[dict]:
+    return [
+        {'id': employee.pk, 'name': employee.full_name}
+        for employee in (inspection.assigned_employees.select_related('person').order_by('pk'))
+    ]
 
 def get_busy_employee_ids():
     return (Inspection.objects
@@ -46,7 +73,7 @@ def get_allowed_inspection_types(equipment):
 
 
 
-def register_pending_inspection(inspection: Inspection) -> Inspection:
+def register_pending_inspection(inspection: Inspection, *, actor=None) -> Inspection:
     if inspection.pk is None:
         raise ValidationError(translate('The activity must be saved before the equipment status can be updated.'))
 
@@ -56,13 +83,13 @@ def register_pending_inspection(inspection: Inspection) -> Inspection:
     another_open_activity = (type(inspection).objects
         .filter(
             equipment_id=inspection.equipment_id,
-            status__in=(inspection.Status.PENDING, inspection.Status.IN_PROGRESS,),
+            status__in=(inspection.Status.PENDING, inspection.Status.IN_PROGRESS, inspection.Status.INTERRUPTED),
         )
         .exclude(pk=inspection.pk)
         .exists()
     )
     if another_open_activity:
-        raise ValidationError({'equipment': translate('This equipment already has another pending or in-progress activity.')})
+        raise ValidationError({'equipment': translate('This equipment already has another open activity.')})
 
     allowed_inspection_types = get_allowed_inspection_types(inspection.equipment)
     if inspection.inspection_type not in allowed_inspection_types:
@@ -103,11 +130,19 @@ def register_pending_inspection(inspection: Inspection) -> Inspection:
         equipment.change_status(
             new_equipment_status,
             reason=f'Inspection #{inspection.pk} registered: {inspection.get_inspection_type_display()}.')
+        record_inspection_event(
+            inspection,
+            InspectionHistory.EventType.REGISTERED,
+            actor=actor,
+            new_status=inspection.status,
+            description='New activity registered.',
+            details={'inspection_type': inspection.inspection_type},
+        )
 
     return inspection
 
 @transaction.atomic
-def start_inspection(inspection) ->Inspection:
+def start_inspection(inspection: Inspection, *, actor=None) ->Inspection:
     if inspection.pk is None:
         raise ValidationError(translate('The activity must be saved before it can be started.'))
 
@@ -165,6 +200,14 @@ def start_inspection(inspection) ->Inspection:
             }
         )
 
+    previous_status = inspection.status
+    if previous_status == Inspection.Status.INTERRUPTED:
+        event_type = InspectionHistory.EventType.RESUMED
+        description = 'Activity resumed.'
+    else:
+        event_type = InspectionHistory.EventType.STARTED
+        description = 'Activity started.'
+
     inspection.status = inspection.Status.IN_PROGRESS
     inspection.actual_start = timezone.now()
     inspection.save(update_fields={'status', 'actual_start', })
@@ -178,11 +221,63 @@ def start_inspection(inspection) ->Inspection:
         equipment_status,
         reason=f"Inspection #{inspection.pk} started: {inspection.get_inspection_type_display()}."
     )
+    record_inspection_event(
+        inspection,
+        event_type,
+        actor=actor,
+        previous_status=previous_status,
+        new_status=inspection.status,
+        description=description,
+        details={'employees':
+            [{'id': employee.pk, 'name': employee.full_name}
+             for employee in assigned_employees.select_related('person')],
+        },
+    )
+    return inspection
+
+@transaction.atomic
+def interrupt_inspection(inspection: Inspection, *, actor=None) -> Inspection:
+    if inspection.pk is None:
+        raise ValidationError(translate('The activity must be saved before it can be interrupted.'))
+
+    equipment = Equipment.objects.select_for_update().get(pk=inspection.equipment_id)
+    inspection = Inspection.objects.select_for_update().get(pk=inspection.pk)
+
+    if not inspection.can_change_status_to(Inspection.Status.INTERRUPTED):
+        raise ValidationError({
+            'status': translate('The activity cannot be interrupted from its current status.')
+        })
+
+    if inspection.inspection_type == Inspection.InspectionType.REPAIR:
+        equipment_status = equipment.Status.UNDER_REPAIR
+
+    elif inspection.inspection_type == Inspection.InspectionType.REINSPECTION:
+        equipment_status = equipment.Status.WAITING_REINSPECTION
+
+    else:
+        equipment_status = equipment.Status.WAITING_INSPECTION
+
+    previous_status = inspection.status
+    inspection.status = Inspection.Status.INTERRUPTED
+    inspection.save(update_fields=('status',))
+    equipment.change_status(equipment_status, reason=f'Inspection #{inspection.pk} interrupted.')
+    record_inspection_event(
+        inspection,
+        InspectionHistory.EventType.INTERRUPTED,
+        actor=actor,
+        previous_status=previous_status,
+        new_status=inspection.status,
+        description='Activity interrupted.',
+        details={'employees':
+                     [{'id': employee.pk, 'name': employee.full_name}
+                      for employee in inspection.assigned_employees.select_related('person')]
+                 }
+    )
 
     return inspection
 
 
-def complete_inspection(inspection, result='', result_notes='') -> Inspection:
+def complete_inspection(inspection: Inspection, result='', result_notes='', *, actor=None) -> Inspection:
     if not inspection.can_change_status_to(inspection.Status.COMPLETED):
         raise ValidationError({'status': translate('The activity cannot be completed from its current status.')})
 
@@ -209,6 +304,7 @@ def complete_inspection(inspection, result='', result_notes='') -> Inspection:
         equipment_status = inspection.equipment.Status.UNDER_REPAIR
 
     with transaction.atomic():
+        previous_status = inspection.status
         inspection.status = inspection.Status.COMPLETED
         inspection.result = result
         inspection.result_notes = result_notes
@@ -228,11 +324,25 @@ def complete_inspection(inspection, result='', result_notes='') -> Inspection:
             reason=f'Inspection #{inspection.pk} completed: {inspection.get_inspection_type_display()}.',
             notes=inspection.result_notes,
         )
+        record_inspection_event(
+            inspection,
+            InspectionHistory.EventType.COMPLETED,
+            actor=actor,
+            previous_status=previous_status,
+            new_status=inspection.status,
+            description='Activity completed.',
+            details={
+                'result': inspection.result,
+                'result_notes': inspection.result_notes,
+                'valid_until': (inspection.valid_until.isoformat() if inspection.valid_until is not None else None),
+                'employees': [{'id': employee.pk, 'name': employee.full_name} for employee in inspection.assigned_employees.select_related('person')],
+            },
+        )
 
     return inspection
 
 
-def cancel_inspection(inspection: Inspection,reason: str) -> Inspection:
+def cancel_inspection(inspection: Inspection,reason: str, *, actor=None) -> Inspection:
     if not inspection.can_change_status_to(inspection.Status.CANCELLED):
         raise ValidationError({'status': translate('The activity cannot be cancelled from its current status.')})
 
@@ -241,16 +351,17 @@ def cancel_inspection(inspection: Inspection,reason: str) -> Inspection:
     if not reason:
         raise ValidationError({'cancellation_reason': translate('A cancellation reason is required.')})
 
-    was_in_progress = inspection.status == inspection.Status.IN_PROGRESS
+    was_started = inspection.status in (inspection.Status.IN_PROGRESS, inspection.Status.INTERRUPTED)
     equipment = inspection.equipment
     restored_status = inspection.previous_equipment_status or equipment.Status.IN_SERVICE
 
     with transaction.atomic():
+        previous_status = inspection.status
         inspection.status = inspection.Status.CANCELLED
         inspection.cancellation_reason = reason
         update_fields = {'status', 'cancellation_reason'}
 
-        if was_in_progress and not inspection.actual_end:
+        if was_started and not inspection.actual_end:
             inspection.actual_end = timezone.now()
             update_fields.add('actual_end')
 
@@ -258,6 +369,18 @@ def cancel_inspection(inspection: Inspection,reason: str) -> Inspection:
         equipment.change_status(restored_status,
             reason=f'Inspection #{inspection.pk} cancelled: {inspection.get_inspection_type_display()}.',
             notes=reason,
+        )
+        record_inspection_event(
+            inspection,
+            InspectionHistory.EventType.CANCELLED,
+            actor=actor,
+            previous_status=previous_status,
+            new_status=inspection.status,
+            description='Activity cancelled.',
+            details={
+                'cancellation_reason': inspection.cancellation_reason,
+                'employees': [{'id': employee.pk, 'name': employee.full_name} for employee in inspection.assigned_employees.select_related('person')]
+            },
         )
 
     return inspection

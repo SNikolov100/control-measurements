@@ -1,0 +1,147 @@
+{% load status_tags %}
+
+<section class="section-card">
+    <div class="section-card-header">
+        <div>
+            <h2 class="section-card-title">
+                Activity history
+            </h2>
+
+            <p class="section-card-description">
+                Recorded activity events, status transitions
+                and employee assignments.
+            </p>
+        </div>
+    </div>
+
+    <div class="history-list">
+        {% for event in inspection_history %}
+
+            <article class="history-entry">
+
+                <div class="history-entry-date">
+                    {{ event.changed_at|date:"d.m.Y H:i:s" }}
+                </div>
+
+                <div class="history-entry-main">
+
+                    <strong>
+                        {{ event.get_event_type_display }}
+                    </strong>
+
+                    <p class="detail-value-muted">
+                        Performed by:
+
+                        {% if event.actor %}
+                            {% if event.actor.username %}
+                                {{ event.actor.username }}
+                            {% else %}
+                                User #{{ event.actor_id }}
+                            {% endif %}
+                        {% else %}
+                            System / Unknown
+                        {% endif %}
+                    </p>
+
+                    <div class="history-entry-transition">
+
+                        {% if event.previous_status and event.previous_status != event.new_status %}
+
+                            {% status_badge event.previous_status event.get_previous_status_display %}
+
+                            <span class="history-arrow"
+                                  aria-hidden="true">
+                                →
+                            </span>
+
+                        {% endif %}
+
+                        {% if event.new_status %}
+                            {% status_badge event.new_status event.get_new_status_display %}
+                        {% endif %}
+
+                    </div>
+
+                    {% if event.description %}
+                        <p>{{ event.description|linebreaksbr }}</p>
+                    {% endif %}
+
+                    {% if event.event_type == 'assigned' %}
+
+                        <p>
+                            <strong>Previous employees:</strong>
+
+                            {% for employee in event.details.previous_employees %}
+                                {{ employee.name }}{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                                None
+                            {% endfor %}
+                        </p>
+
+                        <p>
+                            <strong>New employees:</strong>
+
+                            {% for employee in event.details.new_employees %}
+                                {{ employee.name }}{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                                None
+                            {% endfor %}
+                        </p>
+
+                    {% endif %}
+
+                    {% if event.details.employees %}
+                        <p>
+                            <strong>Assigned employees:</strong>
+
+                            {% for employee in event.details.employees %}
+                                {{ employee.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                    {% endif %}
+
+                    {% if event.details.result %}
+                        <p>
+                            <strong>Result:</strong>
+                            {% status_badge event.details.result %}
+                        </p>
+                    {% endif %}
+
+                    {% if event.details.result_notes %}
+                        <p>
+                            <strong>Result notes:</strong>
+                            {{ event.details.result_notes|linebreaksbr }}
+                        </p>
+                    {% endif %}
+
+                    {% if event.details.valid_until %}
+                        <p>
+                            <strong>Valid until:</strong>
+                            {{ event.details.valid_until }}
+                        </p>
+                    {% endif %}
+
+                    {% if event.details.cancellation_reason %}
+                        <p>
+                            <strong>Cancellation reason:</strong>
+                            {{ event.details.cancellation_reason|linebreaksbr }}
+                        </p>
+                    {% endif %}
+
+                </div>
+
+            </article>
+
+        {% empty %}
+
+            <div class="empty-state">
+                <h3>No activity history</h3>
+
+                <p>
+                    No historical events have been recorded.
+                </p>
+            </div>
+
+        {% endfor %}
+    </div>
+</section>

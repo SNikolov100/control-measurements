@@ -74,6 +74,9 @@ textarea {font: inherit;}
 }
 
 .main-navigation {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
     color: var(--color-surface);
     background: var(--color-primary-900);
     box-shadow: var(--shadow-small);

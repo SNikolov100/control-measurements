@@ -405,7 +405,7 @@
                 </p>
             </section>
         {% endif %}
-
+        {% include "inspections/includes/inspection_history.html" with inspection_history=inspection_history only %}
         <nav
             class="context-navigation"
             aria-label="Activity navigation"

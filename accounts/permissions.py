@@ -36,6 +36,7 @@ VIEW_PERMISSIONS = {
     'inspections:create': 'inspections.add_inspection',
     'inspections:assign': 'inspections.assign_inspection',
     'inspections:start': 'inspections.start_inspection',
+    'inspections:interrupt': 'inspections.interrupt_inspection',
     'inspections:complete': 'inspections.complete_inspection',
     'inspections:cancel': 'inspections.cancel_inspection',
     'employees:create': 'employees.add_employee',

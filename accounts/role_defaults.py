@@ -29,12 +29,13 @@ ROLE_PERMISSIONS = {
 }
 ROLE_CUSTOM_PERMISSIONS = {
     'Employee':
-        {'inspections.inspection': ('start_inspection', 'complete_inspection')},
+        {'inspections.inspection': ('start_inspection', 'interrupt_inspection', 'complete_inspection')},
     'Operator': {
         'inspections.inspection': (
             'view_all_inspections',
             'assign_inspection',
             'start_inspection',
+            'interrupt_inspection',
             'complete_inspection',
             'cancel_inspection',
         ),

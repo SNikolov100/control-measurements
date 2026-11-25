@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -16,6 +17,7 @@ class Inspection(TimestampMixin):
     class Status(models.TextChoices):
         PENDING = 'pending', translate('Pending')               #registered, but not start yet
         IN_PROGRESS = 'in_progress', translate('In progress')
+        INTERRUPTED = 'interrupted', translate('Interrupted')
         COMPLETED = 'completed', translate('Completed')
         CANCELLED = 'cancelled', translate('Cancelled')
 
@@ -118,8 +120,9 @@ class Inspection(TimestampMixin):
 
     def can_change_status_to(self, new_status) -> bool:
         allowed_transitions: dict[str, set[str]] = {
-            self.Status.PENDING: {self.Status.IN_PROGRESS, self.Status.CANCELLED,},
-            self.Status.IN_PROGRESS: {self.Status.COMPLETED, self.Status.CANCELLED,},
+            self.Status.PENDING: {self.Status.IN_PROGRESS, self.Status.CANCELLED},
+            self.Status.IN_PROGRESS: {self.Status.INTERRUPTED, self.Status.COMPLETED, self.Status.CANCELLED},
+            self.Status.INTERRUPTED: {self.Status.IN_PROGRESS, self.Status.CANCELLED},
             self.Status.COMPLETED: set(),
             self.Status.CANCELLED: set(),
         }
@@ -156,8 +159,72 @@ class Inspection(TimestampMixin):
             ('start_inspection',translate('Can start an inspection'),),
             ('complete_inspection', translate('Can complete an inspection'),),
             ('cancel_inspection', translate('Can cancel an inspection'),),
+            ('interrupt_inspection', translate('Can interrupt an inspection'),),
         )
 
+
+class InspectionHistory(models.Model):
+    class EventType(models.TextChoices):
+        REGISTERED = 'registered', translate('Registered')
+        ASSIGNED = 'assigned', translate('Assigned')
+        STARTED = 'started', translate('Started')
+        INTERRUPTED = 'interrupted', translate('Interrupted')
+        RESUMED = 'resumed', translate('Resumed')
+        COMPLETED = 'completed', translate('Completed')
+        CANCELLED = 'cancelled', translate('Cancelled')
+
+    inspection = models.ForeignKey(
+        'Inspection',
+        on_delete=models.PROTECT,
+        related_name='history',
+        verbose_name=translate('Inspection'),
+    )
+    event_type = models.CharField(
+        max_length=30,
+        choices=EventType.choices,
+        verbose_name=translate('Event type'),
+    )
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='inspection_events',
+        null=True,
+        blank=True,
+        verbose_name=translate('Performed by'),
+    )
+    previous_status = models.CharField(
+        max_length=20,
+        choices=Inspection.Status.choices,
+        blank=True,
+        verbose_name=translate('Previous status'),
+    )
+    new_status = models.CharField(
+        max_length=20,
+        choices=Inspection.Status.choices,
+        blank=True,
+        verbose_name=translate('New status'),
+    )
+    description = models.TextField(
+        blank=True,
+        verbose_name=translate('Description'),
+    )
+    details = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=translate('Event details'),
+    )
+    changed_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=translate('Changed at'),
+    )
+
+    def __str__(self):
+        return f'{self.inspection} - {self.get_event_type_display()}'
+
+    class Meta:
+        ordering = ('-changed_at', '-pk')
+        verbose_name = translate('Inspection history')
+        verbose_name_plural = translate('Inspection histories')
 
 
 

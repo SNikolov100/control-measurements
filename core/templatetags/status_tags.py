@@ -13,6 +13,7 @@ STATUS_PRESENTATION = {
     'decommissioned': {'css_class': 'status-inactive', 'icon': '×', 'default_label': translate('Decommissioned')},
     'pending': {'css_class': 'status-pending', 'icon': '◷', 'default_label': translate('Pending')},
     'in_progress': {'css_class': 'status-in-progress', 'icon': '▶', 'default_label': translate('In progress')},
+    'interrupted': {'css_class': 'status-warning', 'icon': 'Ⅱ', 'default_label': translate('Interrupted')},
     'completed': {'css_class': 'status-completed', 'icon': '✓', 'default_label': translate('Completed')},
     'cancelled': {'css_class': 'status-cancelled', 'icon': '×', 'default_label': translate('Cancelled')},
     'passed': {'css_class': 'status-passed', 'icon': '✓', 'default_label': translate('Passed')},
