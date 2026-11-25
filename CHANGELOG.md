@@ -4,6 +4,13 @@
 
 ### Added
 
+- Initial DRF EquipmentType API, JWT/session authentication and Swagger/OpenAPI documentation.
+- Inspection interruption and resumption, with all assigned employees required to be free before starting or resuming.
+- Inspection activity history for registration, assignment changes, start, interruption, resumption, completion and cancellation; actor and employee snapshots are recorded separately.
+- Historical validity dates for successful qualifying inspections and current validity in equipment views.
+- Activity history in the detail page, Interrupted filter/status badge, and sticky main navigation.
+- Explicit interruption permission for Operator and Employee, with object-level access restrictions.
+
 - Introduced `Person` as the shared source of personal information for employees and associated user accounts.
 - Added employee-request review actions to create an employee or link an approved account to an existing employee, with group selection.
 - Added conflict-resolution choices during LINK: reviewers can choose the source for names and phone numbers independently, with explicit identity confirmation for differing names.
@@ -15,6 +22,9 @@
 - Added automated checks for permission changes, direct request authorization, inspection assignments, and employee linking in earlier development work; a complete regression run has not been confirmed for this update.
 
 ### Changed
+
+- Employee availability is based on active (`IN_PROGRESS`) activities; interruption releases the assigned team. Reassignment is permitted for pending or interrupted activities.
+- Inspection validity uses the equipment-specific interval and local completion date; a failed inspection or repair alone does not renew validity.
 
 - Made `Employee.person` required. Exposed `Employee.full_name`, `Employee.phone`, and `Employee.email` as read-only properties backed by `Person`.
 - Updated employee CREATE, EDIT, and LINK workflows to work with the shared `Person` record and to retain relevant personal and employment information.
@@ -31,6 +41,8 @@
 - Hid unauthorized actions and returned users to Home when they could save a change but could not open the usual destination.
 
 ### Removed
+
+- Standalone calibration activity type; calibration is treated as part of an inspection. The development migration converts the existing completed calibration test records to periodic inspections.
 
 - Duplicate stored employee name, phone, and email fields; their values now come from `Person`.
 - Obsolete development migration files superseded by the new baseline. The old database is not intended for migration using the current history.

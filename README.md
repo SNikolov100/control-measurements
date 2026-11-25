@@ -9,7 +9,7 @@ Control Measurements is a Django application for managing customers, equipment, 
 | Customers | Manage customer records, sites, and site contacts. |
 | Equipment | Register equipment by customer site, manage equipment types, and track equipment status. Inspection intervals and expected durations can use defaults from the equipment type. |
 | Employees | Manage employee records, specialties, active status, and optional links to user accounts. Search and filter employees by specialty and active status. An employee can exist without a login. |
-| Activities | Create and assign inspections, calibrations, repairs, and reinspections. Track activities through start, completion, or cancellation. Starting an activity requires active, qualified assignees. |
+| Activities | Create and assign periodic and extraordinary inspections, repairs, and reinspections. Start, interrupt, resume, complete or cancel activities. Starting or resuming requires all assigned employees to be active, qualified and free. Activity history records actions, actors and assignment snapshots. |
 | Settings | Manage company details, system settings, and specialties. Company and system settings can be exposed as read-only where permissions allow. |
 
 ## People, accounts, and access
@@ -33,10 +33,18 @@ When linking, the application checks personal-data conflicts. For different name
 Manage groups and permissions in **Django Admin → Groups**. Authorization is based on assigned permissions, including those inherited from groups; group names are configurable. Navigation, action buttons, and direct requests use consistent permission checks.
 
 - **Superusers** manage permission groups and review registration and employee requests.
-- **Operators** can see all inspections and create, assign, start, or complete them when granted the corresponding permissions. They can record progress for an assigned employee without a login.
-- **Employees** can see assigned inspections when granted viewing access. Starting and completing work require separate permissions.
+- **Operators** can see all inspections and create, assign, start, interrupt, resume, complete or cancel them when granted the corresponding permissions. They can record progress for an assigned employee without a login.
+- **Employees** can see assigned inspections when granted viewing access. Starting/resuming, interrupting and completing assigned work require the corresponding permissions.
 
 To allow visibility across all inspections, grant `inspections.view_all_inspections` alongside `inspections.view_inspection`. Grant each action permission according to the user's responsibilities.
+
+### Inspection validity and history
+
+A successful periodic, extraordinary or repeat inspection after repair establishes a validity date using the equipment-specific interval and the local completion date. A failed inspection or repair alone does not renew validity. The activity details show recorded history, including changes to assigned employees, results and cancellation reasons. Earlier activities may have no recorded event history. Physical laboratory intake and handover are not yet tracked as a separate stay.
+
+### REST API
+
+The initial Django REST Framework implementation includes EquipmentType operations, JWT and session authentication, and Swagger/OpenAPI documentation (`/api/docs/`). The token endpoint is `/api/token/`. Further endpoints and permission coverage are under development.
 
 ## Local setup
 
@@ -94,7 +102,7 @@ Run the test suite when appropriate:
 python -m django test --settings=Control_measurements.settings
 ```
 
-Manual checks carried out during development include employee CREATE/EDIT/LINK, linking with name and phone conflicts, and the employee list's search, filtering, and pagination. `EmployeeHistory` was also inspected after linking to verify that the selected sources were logged. These manual checks do **not** replace a full automated regression run.
+Manual checks carried out during development include employee CREATE/EDIT/LINK, linking with name and phone conflicts, and the employee list's search, filtering, and pagination. `EmployeeHistory` was also inspected after linking to verify that the selected sources were logged. Manual checks also cover interruption/resumption, activity history, assignment changes, validity and direct URL access (403 without permission, 404 for inaccessible inspections). These manual checks do **not** replace a full automated regression run.
 
 For a permission check, use a regular account with only equipment-type viewing access. The list should open with Add, Edit, and Delete hidden. Grant the equipment-type change permission and reload to verify that Edit appears. Remove it and verify that the direct edit URL returns HTTP 403.
 

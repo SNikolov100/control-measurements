@@ -29,7 +29,7 @@ available in [WORKFLOW_GUIDE_EN.md](WORKFLOW_GUIDE_EN.md).
 ## 1. Employees and Specialties
 
 The system contains the employees who may participate in inspection,
-calibration and repair activities.
+inspection and repair activities.
 
 Each employee may be qualified in one or more specialties.
 
@@ -175,7 +175,6 @@ from the same delivery can be processed.
 After the equipment has been received, an appropriate activity is
 created, for example:
 
-- calibration;
 - periodic inspection;
 - extraordinary inspection;
 - repair;
@@ -196,6 +195,16 @@ After assigning, starting, completing or cancelling an activity, the
 operator is returned to the common activities list.
 
 ---
+
+### Interruption, resumption and history
+
+- `Interrupt` releases the assigned team without completing the activity; the status becomes `Interrupted`.
+- Operators may change assignments while `Pending` or `Interrupted`. `Resume` requires all assigned employees to be active, qualified and free; the start timestamp is reset.
+- Employees with the required permissions can act only on their assigned inspections. Operators can act for employees without accounts.
+- `Cancel` requires a reason. Open `Details` → `Activity history` to view events, actors, status transitions, assignment snapshots and results. Older activities may have no recorded history.
+- A successful periodic, extraordinary or repeat inspection after repair sets `Valid until` using the local completion date and equipment-specific interval. A repair or unsuccessful result does not renew validity. Validity does not establish physical handover or current fitness.
+
+**Current scope:** receiving and returning describe the operational workflow; a separate laboratory-stay register is planned, not yet implemented.
 
 ## 6. Completing an Inspection
 
